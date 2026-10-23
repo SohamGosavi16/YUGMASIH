@@ -1,0 +1,473 @@
+<style id="vg-master-styles">
+
+    /* ════ RIGHT-SIDE DOCKED HERITAGE VOICE GUIDE SYSTEM ════ */
+
+    /* ── Floating Microphone Trigger (Icon-Only, Same Bottom-Right Position) ── */
+    .voice-guide-fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 2px solid rgba(251, 191, 36, 0.85);
+      color: #0b0f19;
+      font-size: 1.45rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.45), 0 0 22px rgba(245, 158, 11, 0.3);
+      z-index: 99990;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .voice-guide-fab:hover {
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 12px 38px rgba(245, 158, 11, 0.7), 0 0 30px rgba(245, 158, 11, 0.45);
+      color: #000;
+    }
+    .voice-guide-fab:active { transform: scale(0.94); }
+    .voice-guide-fab span { display: none !important; }
+
+    /* ── NO SUBWINDOW BACKDROP: 3D Scene Remains Fully Visible & Interactive ── */
+    .vg-backdrop {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
+    /* ── Docked on Corner of Right Side in Middle Position ────────────────── */
+    .vg-panel {
+      position: fixed;
+      top: 50%;
+      right: 24px;
+      transform: translateY(-50%) translateX(calc(100% + 40px));
+      width: min(90vw, 420px);
+      max-height: 86vh;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .vg-panel.open {
+      transform: translateY(-50%) translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .vg-panel-inner {
+      background: rgba(8, 12, 26, 0.96);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 22px;
+      padding: 20px 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(245, 158, 11, 0.2);
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      max-height: 86vh;
+    }
+
+    .vg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+    .vg-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .vg-icon-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.15));
+      border: 1px solid rgba(245, 158, 11, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+    .vg-title-group h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #fbbf24;
+      letter-spacing: -0.01em;
+    }
+    .vg-title-group p {
+      margin: 2px 0 0 0;
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+    .vg-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Themed HUD Toggle Button (Royal Gold Pill) ── */
+    .vg-hud-toggle-btn {
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #fbbf24;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .vg-hud-toggle-btn:hover {
+      background: rgba(245, 158, 11, 0.28);
+      border-color: #fbbf24;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+      transform: translateY(-1px);
+    }
+    .vg-hud-toggle-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #fde68a;
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+    }
+
+    /* ── Themed Close Button ── */
+    .vg-close-btn {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 700;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .vg-close-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+      color: #ffffff;
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
+    }
+
+    /* ── Language Row ── */
+    .vg-lang-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      scrollbar-width: thin;
+      flex-shrink: 0;
+    }
+    .vg-lang-row::-webkit-scrollbar { height: 4px; }
+    .vg-lang-row::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 2px; }
+    .vg-lang-pill {
+      flex-shrink: 0;
+      padding: 5px 11px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .vg-lang-pill:hover { background: rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.45); color: #fff; }
+    .vg-lang-pill.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #fbbf24;
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+    }
+
+    /* ── Prominent, Crisp, High-Contrast Script Box ── */
+    .vg-script-box {
+      flex: 1;
+      min-height: 180px;
+      max-height: 290px;
+      overflow-y: auto;
+      background: rgba(4, 7, 18, 0.92);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+      scrollbar-width: thin;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+      user-select: text;
+    }
+    .vg-script-box::-webkit-scrollbar { width: 5px; }
+    .vg-script-box::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 3px; }
+    .vg-word {
+      display: inline;
+      color: #e2e8f0;
+      transition: color 0.12s ease, background-color 0.12s ease;
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 1px 2px;
+    }
+    .vg-word:hover { background: rgba(245, 158, 11, 0.2); }
+    .vg-word.vg-word-active {
+      color: #0b0f19 !important;
+      background: #fbbf24 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.85);
+    }
+    .vg-word.vg-word-spoken { color: #ffd56b; opacity: 0.92; }
+
+    /* ── Controls ── */
+    .vg-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .vg-btn {
+      flex: 1;
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .vg-play {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b0f19;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    }
+    .vg-play:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
+    .vg-play.playing {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+    }
+    .vg-stop {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+    }
+    .vg-stop:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+    .vg-stop:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Progress Bar ── */
+    .vg-progress-wrap {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .vg-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      transition: width 0.15s ease;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+
+    /* ── Distinct Speed Timeline (Audibly Changes English & All Voices) ── */
+    .vg-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .vg-rate-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .vg-rate-row span {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-right: 2px;
+    }
+    .vg-rate-btn {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .vg-rate-btn:hover { color: #fff; border-color: rgba(245, 158, 11, 0.4); }
+    .vg-rate-btn.active {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: #fbbf24;
+      color: #fbbf24;
+      font-weight: 800;
+    }
+    .vg-voice-info {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    /* ── Themed Floating Cinema Subtitle HUD on 3D Viewport ── */
+    .vg-subtitle-hud {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(88vw, 680px);
+      background: rgba(6, 10, 24, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      border-radius: 18px;
+      padding: 12px 18px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(245, 158, 11, 0.25);
+      z-index: 100000;
+      pointer-events: auto;
+      font-family: system-ui, -apple-system, sans-serif;
+      transition: all 0.25s ease;
+    }
+    .vg-hud-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .vg-hud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fbbf24;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .vg-hud-dot {
+      width: 6px;
+      height: 6px;
+      background: #fbbf24;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #fbbf24;
+      animation: vgDotPulse 1.2s infinite alternate;
+    }
+    @keyframes vgDotPulse {
+      0% { opacity: 0.4; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+    .vg-hud-title {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .vg-hud-close {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .vg-hud-close:hover {
+      color: #fff;
+      background: rgba(239, 68, 68, 0.35);
+      border-color: #ef4444;
+      transform: rotate(90deg);
+    }
+    .vg-hud-content {
+      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+      line-height: 1.55;
+      text-align: center;
+      color: #e2e8f0;
+      min-height: 2.6em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .vg-hud-content .vg-hud-word {
+      display: inline;
+      transition: color 0.12s ease, text-shadow 0.12s ease;
+      padding: 0 2px;
+    }
+    .vg-hud-content .vg-hud-word.active {
+      color: #ffd56b;
+      font-weight: 800;
+      text-shadow: 0 0 14px rgba(251, 191, 36, 0.8), 0 0 24px rgba(245, 158, 11, 0.4);
+    }
+    .vg-hud-content .vg-hud-word.spoken { color: #ffffff; opacity: 0.95; }
+    .vg-hud-content .vg-hud-word.pending { color: #64748b; opacity: 0.55; }
+
+    @media (max-width: 640px) {
+      .vg-panel {
+        right: 12px;
+        width: calc(100vw - 24px);
+        max-height: 82vh;
+      }
+      .voice-guide-fab {
+        bottom: 20px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        font-size: 1.25rem;
+      }
+      .vg-subtitle-hud {
+        width: calc(100vw - 28px);
+        bottom: 84px;
+      }
+    }
+
+  </style>

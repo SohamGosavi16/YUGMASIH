@@ -1,0 +1,24 @@
+<script id="vg-engine-script">
+  (function () {
+    "use strict";
+
+    var SITE_NAME = "Lepakshi Veerabhadra Temple";
+    var SUPPORTED_LANGS = [
+      { key: 'en', code: 'en-IN', fallback: 'en-US', label: 'English', flag: '🇬🇧' },
+      { key: 'hi', code: 'hi-IN', fallback: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+      { key: 'ta', code: 'ta-IN', fallback: 'ta', label: 'தமிழ்', flag: '🇮🇳' },
+      { key: 'te', code: 'te-IN', fallback: 'te', label: 'తెలుగు', flag: '🇮🇳' },
+      { key: 'bn', code: 'bn-IN', fallback: 'bn', label: 'বাংলা', flag: '🇮🇳' },
+      { key: 'mr', code: 'mr-IN', fallback: 'mr', label: 'मराठी', flag: '🇮🇳' },
+      { key: 'gu', code: 'gu-IN', fallback: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+      { key: 'kn', code: 'kn-IN', fallback: 'kn', label: 'ಕನ್ನಡ', flag: '🇮🇳' },
+      { key: 'ml', code: 'ml-IN', fallback: 'ml', label: 'മലയാളം', flag: '🇮🇳' },
+      { key: 'pa', code: 'pa-IN', fallback: 'pa', label: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+      { key: 'fr', code: 'fr-FR', fallback: 'fr', label: 'Français', flag: '🇫🇷' },
+      { key: 'es', code: 'es-ES', fallback: 'es', label: 'Español', flag: '🇪🇸' },
+      { key: 'de', code: 'de-DE', fallback: 'de', label: 'Deutsch', flag: '🇩🇪' },
+      { key: 'ja', code: 'ja-JP', fallback: 'ja', label: '日本語', flag: '🇯🇵' },
+      { key: 'zh', code: 'zh-CN', fallback: 'zh', label: '中文', flag: '🇨🇳' }
+    ];
+
+    

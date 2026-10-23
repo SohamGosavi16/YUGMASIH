@@ -1,0 +1,66 @@
+{
+  "stateId": "west_bengal",
+  "stateName": "West Bengal",
+  "stateNameHindi": "पश्चिम बंगाल",
+  "heritage": "Victoria Memorial",
+  "heritageHindi": "ভিক্টোরিয়া মেমোরিয়াল (विक्टोरिया मेमोरियल)",
+  "tradition": "Baul Music",
+  "traditionHindi": "বাউল সঙ্গীত (बाउल संगीत)",
+  "location": "Kolkata (Calcutta), Queen's Way, West Bengal",
+  "era": "1906–1921 CE (Indo-Saracenic Revival / British Imperial Period)",
+  "unescoYear": "National Monument of India",
+  "tagline": "The Grand Marble Edifice of Kolkata's Cultural Renaissance",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "VICTORIA MEMORIAL",
+      "subtitle": "Kolkata's White Marble Jewel: A Symphony of Indo-Saracenic Renaissance",
+      "state": "West Bengal, India",
+      "dynasty": "Conceived by Lord Curzon; Architect Sir William Emerson",
+      "summary": "Set amidst 64 acres of sprawling gardens in the heart of Kolkata, the Victoria Memorial is an iconic marble monument blending British classical, Mughal, Venetian, Egyptian, and Deccani architectural traditions."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "The Imperial Foundation & The City of Joy",
+      "content": "Conceived in 1901 by Lord Curzon, Viceroy of India, following the death of Queen Victoria, the monument was intended as a grand historical museum celebrating art, history, and empire in what was then the imperial capital of British India.\n\nThe Prince of Wales (later King George V) laid the foundation stone on January 4, 1906, and construction was executed under the master contractors Messrs. Martin & Co. of Kolkata, led by Sir Rajendranath Mookerjee.\n\nFormally opened to the public in 1921 by the Prince of Wales, the monument evolved into a premier national museum housing the finest collection of Bengal Renaissance artwork, British-era paintings by Thomas and William Daniell, and rare historical manuscripts."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "Indo-Saracenic Architecture & White Makrana",
+      "content": "Designed by Sir William Emerson, President of the Royal Institute of British Architects (RIBA), the edifice combines classical European Beaux-Arts proportions with Mughal chattris (pavilions), corner domes, and high arched portals.\n\nConstructed using 3,000 tons of pristine white Makrana marble quarried from Jodhpur (the same quarry that supplied the Taj Mahal), the structure measures 103 meters by 69 meters and rises to an imposing central height of 56 meters.\n\nSurmounting the central dome is a 5-meter tall bronze Angel of Victory weighing 3 tonnes, designed as a ball-bearing weather vane that rotates with wind currents."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "Galleries of the Bengal Renaissance",
+      "content": "The Victoria Memorial houses 25 sprawling galleries containing over 28,000 catalogued artifacts, including the world's largest collection of aquatints and oil paintings by Thomas and William Daniell documenting 18th-century Indian topography.\n\nThe National Leaders Gallery features masterworks by Abanindranath Tagore, Jamini Roy, Nandalal Bose, and Gaganendranath Tagore—the foundational pioneers who spearheaded the nationalist Bengal School of Art.\n\nUnder the central rotunda, twelve French fresco panels depict the life and historical episodes of the 19th-century subcontinent."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "The Mystical Chants of Baul Music",
+      "content": "Bengal's deepest spiritual identity breathes through the nomadic Baul tradition—a mystical folk philosophy recognized on the UNESCO Intangible Cultural Heritage list that rejects orthodox religious dogmas to seek the divine within humanity (Moner Manush).\n\nDressed in saffron robes and playing the one-stringed Ektara, the resonant Dotara, and ankle bells (Nupur), Baul singers weave transcendent melodies immortalized by the mystic poet Lalon Shah and Nobel laureate Rabindranath Tagore."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Hidden Secrets & Architectural Curiosities",
+      "content": "• The Rotating Angel: The 3-ton bronze Angel of Victory atop the central dome rotates on an internal mercury-floated ball-bearing pivot, serving as a functional wind direction vane.\n• Indigenous Indian Construction: The entire complex was constructed without British engineering machinery by over 2,000 Indian stone carvers, masons, and engineers under Sir Rajen Mookerjee.\n• Whispering Gallery: The acoustic curvature beneath the central rotunda acts as a whispering gallery where soft murmurs on one side carry clearly across to the opposite perimeter.\n• 64-Acre Eco-Sanctuary: The gardens host over 1,100 species of trees and twin reflecting ponds that mirror the marble facade at twilight."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Historical Timeline & Coordinates",
+      "content": "• 1901 CE: Proposal mooted by Lord Curzon.\n• 1906 CE: Foundation stone laid by Prince of Wales.\n• 1921 CE: Construction completed and opened to public.\n• 1935 CE: Calcutta Gallery established.\n• 2021 CE: Centenary celebration as an Autonomous Cultural Institution.\n\nGeographic Coordinates: 22.5448° N, 88.3426° E\nAltitude: 9 meters above sea level\nLocation: Queens Way, Maidan, Kolkata, West Bengal."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Archival Sources & Museum Records",
+      "content": "• Victoria Memorial Hall Museum Catalogues & Archives (Ministry of Culture, Govt. of India).\n• 'Calcutta: The Living City' edited by Sukanta Chaudhuri.\n• RIBA Architectural Journal on Sir William Emerson's Design (1907).\n• National Archives of India: British Public Works Department Papers."
+    }
+  ]
+}

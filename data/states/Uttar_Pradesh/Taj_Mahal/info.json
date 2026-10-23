@@ -1,0 +1,66 @@
+{
+  "stateId": "uttar_pradesh",
+  "stateName": "Uttar Pradesh",
+  "stateNameHindi": "उत्तर प्रदेश",
+  "heritage": "Taj Mahal",
+  "heritageHindi": "ताज महल",
+  "tradition": "Kathak",
+  "traditionHindi": "कथक",
+  "location": "Agra, Banks of Yamuna River, Uttar Pradesh",
+  "era": "1631–1648 CE (Mughal Emperor Shah Jahan)",
+  "unescoYear": "1983",
+  "tagline": "The Monumental Epitaph of Translucent Marble & Eternal Love",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "TAJ MAHAL",
+      "subtitle": "The Crown of Palaces: An Architectural Masterpiece in White Marble",
+      "state": "Uttar Pradesh, India",
+      "dynasty": "Mughal Empire (Shah Jahan)",
+      "summary": "Standing serenely along the southern bank of the Yamuna River in Agra, the Taj Mahal is a transcendent mausoleum commissioned by Emperor Shah Jahan for his beloved consort Mumtaz Mahal, embodying the ultimate zenith of Indo-Islamic architectural symmetry."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "The Imperial Vision & The 22-Year Labor",
+      "content": "Following the tragic death of Empress Mumtaz Mahal in Burhanpur in 1631 CE, Emperor Shah Jahan envisioned a funerary monument that would mirror the celestial gardens of paradise on earth.\n\nUnder the chief architectural guidance of Ustad Ahmad Lahori, an international guild of over 20,000 artisans, sculptors, calligraphers, and lapidaries from across India, Persia, Central Asia, and the Ottoman Empire gathered in Agra.\n\nThe main mausoleum was completed in 1648 CE, while the surrounding peripheral buildings, minarets, mosque, jawab, and Charbagh gardens were completed in 1653 CE, representing an unprecedented architectural commitment."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "Bilateral Symmetry & Optical Innovations",
+      "content": "Constructed atop a raised square marble plinth, the complex is governed by strict bilateral mirror symmetry around a central north-south axis.\n\nStructural highlights include:\n• The Grand Onion Dome: A double-dome structure rising 73 meters, where the outer dome provides towering exterior grandeur while the inner shell maintains intimate human proportions inside the octagonal burial chamber.\n• Four Outward-Leaning Minarets: Each 40-meter minaret is engineered with a subtle outward lean (1.5 degrees) so that in the event of a catastrophic earthquake, the towers would collapse away from the central tomb.\n• Charbagh Garden: A quadripartite Persian paradise garden divided by four water channels representing the rivers of milk, honey, water, and wine."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "Pietra Dura (Parchin Kari) & Calligraphy",
+      "content": "The pure white Makrana marble from Rajasthan serves as a canvas for the world's most intricate Parchin Kari (stone inlay) art. Semi-precious gemstones—lapis lazuli from Sri Lanka, carnelian from Arabia, jade and crystal from China, turquoise from Tibet, and malachite from Russia—were cut and fitted seamlessly into marble sockets.\n\nA single marble floral petal may contain up to 35 individual micro-cut gemstones polished to an undetectable joint.\n\nThe grand vaulted arched portals (Iwan) are framed by monumental Thuluth script Quranic calligraphy executed by master calligrapher Amanat Khan, scaled with optical correction so letters appear uniformly sized from the ground."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "Kathak: The Living Storytelling Rhythm",
+      "content": "Uttar Pradesh is the cradle of Kathak, one of India's eight classical dance forms, which originated with village bards (Kathakars) chanting epics before evolving into a sophisticated court dance under the patronage of the Nawabs of Awadh in Lucknow.\n\nEchoing the mathematical precision of the Taj Mahal's architecture, Kathak relies on intricate footwork (Tatkar), rapid multi-rotational spins (Chakkars), nuanced facial expressions (Bhava), and resonant brass ankle bells (Ghungroo), fusing devotional Hindu themes with graceful Persian courtly elegance."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Architectural Marvels & Optical Marvels",
+      "content": "• The Color-Shifting Marvel: Because of the translucent crystalline properties of Makrana marble, the Taj Mahal changes hues throughout the day—blushing pink at dawn, brilliant white under noon sunlight, and gleaming silver-blue under full moonlight.\n• Subterranean Well Foundation: The immense weight of the marble complex is supported by an ingenious system of deep sal-wood wells sunk along the Yamuna riverbed, preserved by constant water moisture.\n• Camouflaged in World War II: During WWII and subsequent conflicts, the Indian government constructed deceptive bamboo scaffolding over the dome to camouflage the monument from enemy aerial bombers.\n• UNESCO Inscription: Inscribed in 1983 as 'the jewel of Muslim art in India and one of the universally admired masterpieces of the world's heritage'."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Historical Timeline & Coordinates",
+      "content": "• 1631 CE: Demise of Mumtaz Mahal; construction commences.\n• 1648 CE: Main tomb structure completed.\n• 1653 CE: Entire 42-acre complex and gardens completed.\n• 1983 CE: Inscribed as a UNESCO World Heritage Site.\n• 2007 CE: Declared one of the New 7 Wonders of the World.\n\nGeographic Coordinates: 27.1751° N, 78.0421° E\nAltitude: 171 meters above sea level\nLocation: Yamuna Riverbank, Agra, Uttar Pradesh."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Imperial Texts & Archival Records",
+      "content": "• 'Padshahnama' by Abdul Hamid Lahori: Official court chronicle of Emperor Shah Jahan.\n• Archaeological Survey of India (ASI) Architectural Survey Series on the Taj Mahal.\n• 'The Complete Taj Mahal' by Ebba Koch.\n• UNESCO World Heritage Documentation Catalogue Ref. No. 252."
+    }
+  ]
+}

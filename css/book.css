@@ -1,0 +1,1457 @@
+/* =============================================================
+   HERITAGE DIGITAL MANUSCRIPT & BOOK STYLES (KAGE AESTHETIC)
+   ============================================================= */
+
+.book-modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease), visibility 0.6s;
+}
+
+.book-modal-container.active {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+}
+
+.book-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 7, 10, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.book-modal-window {
+  position: relative;
+  z-index: 10;
+  width: min(1140px, 95vw);
+  height: min(840px, 94vh);
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.98);
+}
+
+.book-modal-header {
+  padding: 16px 28px;
+  background: rgba(8, 12, 16, 0.95);
+  border-bottom: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.book-badge {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.book-header-left h2 {
+  font-size: 20px;
+  margin: 2px 0 0 0;
+  letter-spacing: 0.12em;
+  color: var(--bone);
+}
+
+.book-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* =============================================================
+   BOOKLET CLOSE SYMBOL BUTTONS
+   ============================================================= */
+.book-close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(201, 162, 74, 0.35);
+  color: var(--bone);
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+  margin-left: 6px;
+  padding: 0;
+  outline: none;
+}
+
+.book-close-btn:hover {
+  background: rgba(224, 35, 28, 0.25);
+  border-color: #e0231c;
+  color: #ffffff;
+  transform: rotate(90deg) scale(1.08);
+  box-shadow: 0 0 18px rgba(224, 35, 28, 0.5);
+}
+
+.book-close-btn:active {
+  transform: rotate(90deg) scale(0.95);
+}
+
+.book-close-btn svg {
+  display: block;
+  pointer-events: none;
+}
+
+/* Floating Close Symbol on Booklet Binder */
+.book-binder-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  z-index: 50;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(10, 14, 18, 0.85);
+  border: 1px solid rgba(201, 162, 74, 0.35);
+  color: var(--bone-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  outline: none;
+  padding: 0;
+}
+
+.book-binder-close:hover {
+  background: rgba(224, 35, 28, 0.3);
+  border-color: #e0231c;
+  color: #fff;
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 0 14px rgba(224, 35, 28, 0.5);
+}
+
+.book-binder-close:active {
+  transform: rotate(90deg) scale(0.95);
+}
+
+.book-binder-close svg {
+  display: block;
+  pointer-events: none;
+}
+
+/* =============================================================
+   BOOK STAGE & 3D PAGE-FLIP CONTAINER
+   ============================================================= */
+.book-stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(14px, 2.5vh, 28px);
+  background: radial-gradient(circle at 50% 50%, #161c22 0%, #0a0d10 80%);
+  overflow: hidden;
+}
+
+.book-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(10, 14, 18, 0.85);
+  border: 1px solid var(--line);
+  color: var(--bone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: all 0.35s var(--ease);
+}
+
+.book-nav-arrow:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: var(--ink);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.book-nav-arrow:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.arrow-prev { left: 24px; }
+.arrow-next { right: 24px; }
+
+/* 3D Binder & Paper Folio with Sanskrit Manuscript Margin Lines */
+.book-binder {
+  position: relative;
+  width: min(880px, 90%);
+  height: 100%;
+  max-height: 640px;
+  background: #0d1217;
+  border: 1.5px solid rgba(201, 162, 74, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 24px 70px -10px rgba(0, 0, 0, 0.95), inset 0 0 50px rgba(0, 0, 0, 0.85);
+  display: flex;
+  overflow: hidden;
+  perspective: 1600px;
+}
+
+/* =============================================================
+   AUTHENTIC SANSKRIT MANUSCRIPT POTHI FOLIO (REFERENCE DESIGN)
+   Exact visual implementation of traditional palm-leaf / birch-bark manuscripts:
+   - Aged warm parchment ground with natural texture & vignette
+   - Left margin column: म-६६ & archive classification
+   - Double vertical red ruling lines (left & right margins)
+   - Deep carbon soot ink typography (#1c130b)
+   - Cinnabar red rubric highlights & Vedic accent markings
+   - Authentic turmeric Haritala colophon paste mark (क्तु॒)
+   - Right margin column: Folio number (५) & Devanagari stamp
+   ============================================================= */
+
+.book-page {
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 50% 30%, #fdf6ea 0%, #f5e4c4 55%, #e8d0a0 100%),
+    linear-gradient(180deg, rgba(140, 95, 40, 0.05) 0%, transparent 20%, transparent 80%, rgba(140, 95, 40, 0.1) 100%);
+  background-color: #f2dec1;
+  box-shadow: inset 0 0 70px rgba(115, 75, 25, 0.18), inset 0 0 16px rgba(80, 45, 10, 0.22);
+  padding: 0;
+  overflow: hidden;
+  color: #111111;
+  position: relative;
+  transform-origin: center left;
+  backface-visibility: hidden;
+}
+
+/* Pothi Landscape Manuscript Frame */
+.manuscript-pothi-folio {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: transparent;
+}
+
+/* Margin Columns (Left & Right - Outside the Red Double Lines) */
+.manuscript-margin-col {
+  width: clamp(38px, 4.6vw, 56px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 4px;
+  user-select: none;
+  background: rgba(220, 195, 150, 0.15);
+}
+
+.manuscript-margin-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.manuscript-archive-id {
+  font-family: 'Noto Serif Devanagari', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1c130b;
+  letter-spacing: 0.05em;
+  padding: 2px 4px;
+  border-bottom: 1.5px solid #ab2b20;
+}
+
+.manuscript-archive-sub {
+  font-size: 7.5px;
+  letter-spacing: 0.2em;
+  color: #8a241c;
+  font-weight: 700;
+  margin-top: 6px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.manuscript-vert-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  color: #8a241c;
+  font-family: 'Noto Serif Devanagari', serif;
+  font-weight: 700;
+}
+
+.manuscript-folio-digit {
+  font-family: 'Noto Serif Devanagari', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c130b;
+}
+
+.manuscript-folio-word {
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  color: #8a241c;
+  font-family: 'Noto Serif Devanagari', serif;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+.manuscript-leaf-glyph {
+  font-size: 13px;
+  color: rgba(171, 43, 32, 0.65);
+}
+
+/* Double Vertical Red Ruling Lines (from User Reference Image) */
+.manuscript-double-rule {
+  width: 9px;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 0 1.5px;
+  opacity: 0.92;
+}
+
+.manuscript-double-rule .rule-line {
+  width: 1.5px;
+  height: 100%;
+  background: #ab2b20; /* Authentic Indian cinnabar red pigment */
+  box-shadow: 0 0 2px rgba(171, 43, 32, 0.35);
+}
+
+/* Center Sanctum Body (Between the Double Red Lines) */
+.manuscript-center-body {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  padding: 18px clamp(16px, 2.2vw, 28px) 32px clamp(16px, 2.2vw, 28px);
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(171, 43, 32, 0.4) rgba(220, 195, 150, 0.2);
+}
+
+/* Top Vedic Sanskrit Shloka Banner with Accents */
+.manuscript-vedic-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 6px 14px;
+  margin-bottom: 14px;
+  border-top: 1.5px solid rgba(171, 43, 32, 0.4);
+  border-bottom: 1.5px solid rgba(171, 43, 32, 0.4);
+  background: rgba(255, 255, 255, 0.38);
+  border-radius: 4px;
+  font-family: 'Noto Serif Devanagari', serif;
+}
+
+.vedic-shloka-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #191108;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.vedic-danda {
+  color: #ab2b20;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Manuscript Chapter Header */
+.manuscript-chapter-header {
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(171, 43, 32, 0.22);
+}
+
+.manuscript-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: #ab2b20;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.manuscript-header-meta .manuscript-dot {
+  color: #ab2b20;
+  opacity: 0.5;
+}
+
+.manuscript-title-text {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: clamp(20px, 2.5vw, 26px);
+  color: #181008;
+  margin: 4px 0 2px 0;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.manuscript-sub-text {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: #8f2117;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.manuscript-content-flow {
+  flex: 1;
+}
+
+/* Bottom Authentic Haritala Colophon Mark (from User Reference Image) */
+.manuscript-colophon-seal {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(171, 43, 32, 0.28);
+}
+
+.haritala-paste-circle {
+  background: radial-gradient(circle, #f3cb4d 0%, #ddaa2f 60%, rgba(221, 170, 47, 0) 82%);
+  padding: 8px 26px;
+  border-radius: 50% 45% 55% 48% / 48% 54% 46% 52%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(180, 120, 20, 0.22);
+  transform: rotate(-1.5deg);
+}
+
+.haritala-glyph {
+  font-family: 'Noto Serif Devanagari', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1b120a;
+  text-decoration: underline;
+  text-decoration-color: #a8251b;
+  text-decoration-thickness: 2px;
+}
+
+.haritala-sub {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  color: #6e1d15;
+  font-weight: 600;
+  margin-top: 2px;
+  font-family: 'Noto Serif Devanagari', serif;
+}
+
+/* ── 3D Directional Page-Turn Animations ──────────────────────── */
+.book-page.page-turn-next {
+  animation: pageTurnNext3D 0.58s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.book-page.page-turn-prev {
+  animation: pageTurnPrev3D 0.58s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageTurnNext3D {
+  0% {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(-28deg) scale(0.96);
+    box-shadow: -35px 0 50px rgba(0, 0, 0, 0.95);
+    filter: blur(2px);
+  }
+  50% {
+    opacity: 0.85;
+    transform: perspective(1400px) rotateY(-8deg) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes pageTurnPrev3D {
+  0% {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(28deg) scale(0.96);
+    box-shadow: 35px 0 50px rgba(0, 0, 0, 0.95);
+    filter: blur(2px);
+  }
+  50% {
+    opacity: 0.85;
+    transform: perspective(1400px) rotateY(8deg) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    filter: blur(0px);
+  }
+}
+
+/* =============================================================
+   EDITORIAL CARD & GRID LAYOUT SYSTEM (ALL 16 PAGES)
+   Illuminated manuscript card design with cinnabar red rubric borders
+   ============================================================= */
+.book-editorial-card {
+  background: rgba(255, 252, 246, 0.72);
+  border: 1px solid rgba(171, 43, 32, 0.32);
+  border-top: 2.5px solid #ab2b20;
+  border-radius: 6px;
+  padding: 14px 16px;
+  transition: all 0.28s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(130, 85, 30, 0.08);
+}
+
+.book-editorial-card:hover {
+  border-color: #ab2b20;
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(130, 85, 30, 0.15), 0 0 16px rgba(171, 43, 32, 0.15);
+}
+
+.book-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(171, 43, 32, 0.18);
+  padding-bottom: 6px;
+}
+
+.book-card-title {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: #181008;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.book-card-badge {
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ab2b20;
+  background: rgba(171, 43, 32, 0.08);
+  border: 1px solid rgba(171, 43, 32, 0.28);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.book-card-body {
+  font-size: 12.5px;
+  line-height: 1.68;
+  color: #111111;
+  margin: 0;
+  font-weight: 450;
+}
+
+.book-card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(171, 43, 32, 0.15);
+}
+
+.book-meta-chip {
+  font-size: 9.5px;
+  color: #7a1d15;
+  background: rgba(171, 43, 32, 0.06);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(171, 43, 32, 0.22);
+}
+
+.book-meta-chip b {
+  color: #181008;
+}
+
+/* Grid Layouts */
+.book-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.book-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.book-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+/* Timeline Layout (Page 02) */
+.timeline-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  padding-left: 20px;
+  border-left: 2px solid #ab2b20;
+  margin-left: 8px;
+}
+
+.timeline-node {
+  position: relative;
+}
+
+.timeline-node::before {
+  content: '';
+  position: absolute;
+  left: -27px;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #ab2b20;
+  border: 2px solid #f3cb4d;
+  box-shadow: 0 0 8px rgba(171, 43, 32, 0.4);
+}
+
+.timeline-year {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 11.5px;
+  letter-spacing: 0.15em;
+  color: #ab2b20;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.timeline-era {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #181008;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+/* Visual Symbols Grid (Page 13) */
+.symbols-grid-10 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.symbol-card {
+  background: rgba(255, 252, 246, 0.75);
+  border: 1px solid rgba(171, 43, 32, 0.28);
+  border-top: 2.5px solid #ab2b20;
+  border-radius: 6px;
+  padding: 12px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 10px rgba(130, 85, 30, 0.06);
+}
+
+.symbol-card:hover {
+  border-color: #ab2b20;
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(171, 43, 32, 0.15);
+}
+
+.symbol-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.symbol-category {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ab2b20;
+  font-weight: 700;
+}
+
+.symbol-title {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 11.5px;
+  color: #181008;
+  font-weight: 700;
+  margin: 0;
+}
+
+.symbol-detail {
+  font-size: 9.5px;
+  color: #111111;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+/* Fact Cards (Page 14) */
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.fact-item-card {
+  background: rgba(255, 252, 246, 0.75);
+  border: 1px solid rgba(171, 43, 32, 0.28);
+  border-left: 3.5px solid #ab2b20;
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(130, 85, 30, 0.06);
+}
+
+.fact-num {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  color: #ab2b20;
+  font-weight: 700;
+}
+
+.fact-text {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #0a0a0a;
+  font-weight: 500;
+}
+
+/* YUGMA Immersive Trio (Page 15) */
+.yugma-trio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 10px 0 16px;
+}
+
+.yugma-trio-card {
+  background: rgba(255, 252, 246, 0.8);
+  border: 1px solid rgba(171, 43, 32, 0.32);
+  border-top: 3.5px solid #ab2b20;
+  border-radius: 8px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(130, 85, 30, 0.08);
+}
+
+.yugma-trio-icon {
+  font-size: 24px;
+}
+
+.yugma-trio-title {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: #181008;
+  font-weight: 700;
+}
+
+.yugma-trio-desc {
+  font-size: 12px;
+  color: #111111;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.yugma-action-banner {
+  background: linear-gradient(135deg, rgba(171, 43, 32, 0.12) 0%, rgba(243, 203, 77, 0.18) 100%);
+  border: 1.5px solid rgba(171, 43, 32, 0.45);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: #7a1d15;
+  text-transform: uppercase;
+}
+
+/* Manifesto Callout (Page 16) */
+.manifesto-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.manifesto-box {
+  background: rgba(255, 252, 246, 0.88);
+  border: 2px solid rgba(171, 43, 32, 0.45);
+  border-radius: 10px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(130, 85, 30, 0.1);
+}
+
+.manifesto-title {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 18px;
+  color: #ab2b20;
+  letter-spacing: 0.08em;
+  margin: 0;
+  font-weight: 700;
+}
+
+.manifesto-text {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: #0a0a0a;
+  margin: 0;
+  font-weight: 500;
+}
+
+.manifesto-signature {
+  text-align: center;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  color: #7a1d15;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1.5px solid rgba(171, 43, 32, 0.3);
+}
+
+/* =============================================================
+   DARK CATALOG THEME ADAPTATION (WHEN TOGGLED)
+   ============================================================= */
+.theme-dark .book-page {
+  background: 
+    radial-gradient(ellipse at 85% 15%, rgba(201, 162, 74, 0.04) 0%, transparent 60%),
+    linear-gradient(135deg, #10151c 0%, #090c10 100%);
+  color: #c9d4cd;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.85);
+}
+
+.theme-dark .manuscript-margin-col {
+  background: rgba(8, 12, 16, 0.6);
+}
+
+.theme-dark .manuscript-archive-id,
+.theme-dark .manuscript-folio-digit {
+  color: var(--gold);
+}
+
+.theme-dark .manuscript-archive-sub,
+.theme-dark .manuscript-vert-label,
+.theme-dark .manuscript-folio-word {
+  color: rgba(201, 162, 74, 0.7);
+}
+
+.theme-dark .manuscript-double-rule .rule-line {
+  background: var(--gold);
+}
+
+.theme-dark .manuscript-vedic-banner {
+  background: rgba(201, 162, 74, 0.08);
+  border-color: rgba(201, 162, 74, 0.3);
+}
+
+.theme-dark .vedic-shloka-text {
+  color: var(--gold);
+}
+
+.theme-dark .vedic-danda {
+  color: var(--vermilion);
+}
+
+.theme-dark .manuscript-title-text {
+  color: #fff;
+}
+
+.theme-dark .manuscript-sub-text {
+  color: var(--gold);
+}
+
+.theme-dark .book-editorial-card {
+  background: rgba(13, 18, 26, 0.75);
+  border-color: rgba(201, 162, 74, 0.22);
+  border-top-color: var(--gold);
+  color: rgba(216, 226, 220, 0.85);
+}
+
+.theme-dark .book-card-title {
+  color: #fff;
+}
+
+.theme-dark .book-card-body {
+  color: rgba(216, 226, 220, 0.85);
+}
+
+.theme-dark .symbol-card {
+  background: rgba(14, 19, 28, 0.75);
+  border-color: rgba(201, 162, 74, 0.25);
+  border-top-color: var(--gold);
+}
+
+.theme-dark .symbol-title {
+  color: #fff;
+}
+
+.theme-dark .symbol-detail {
+  color: rgba(201, 212, 206, 0.75);
+}
+
+.theme-dark .fact-item-card {
+  background: rgba(14, 19, 28, 0.75);
+  border-color: rgba(201, 162, 74, 0.25);
+  border-left-color: var(--gold);
+}
+
+.theme-dark .fact-num {
+  color: var(--gold);
+}
+
+.theme-dark .fact-text {
+  color: rgba(216, 226, 220, 0.85);
+}
+
+.theme-dark .yugma-trio-card {
+  background: rgba(13, 18, 26, 0.8);
+  border-color: rgba(201, 162, 74, 0.25);
+  border-top-color: var(--gold);
+}
+
+.theme-dark .yugma-trio-title {
+  color: #fff;
+}
+
+.theme-dark .yugma-trio-desc {
+  color: rgba(216, 226, 220, 0.85);
+}
+
+.theme-dark .manifesto-box {
+  background: rgba(13, 18, 26, 0.85);
+  border-color: rgba(201, 162, 74, 0.35);
+}
+
+.theme-dark .manifesto-title {
+  color: var(--gold);
+}
+
+.theme-dark .manifesto-text {
+  color: rgba(216, 226, 220, 0.88);
+}
+
+.theme-dark .manifesto-signature {
+  color: #ffd27a;
+}
+
+/* Section Numbering & Header Details */
+.book-sec-num {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 32px;
+  color: #8a1f16;
+  font-weight: 700;
+  line-height: 1;
+  margin-right: 14px;
+}
+
+.book-page-header-row {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.page-chapter-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a1f16;
+  margin-bottom: 3px;
+}
+
+.content-page-title {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: clamp(20px, 2.4vw, 26px);
+  color: #0a0a0a;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.ornamental-line {
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg, #ab2b20 0%, rgba(171, 43, 32, 0.3) 70%, transparent 100%);
+  margin: 4px 0 14px 0;
+}
+
+.book-intro-desc {
+  font-size: 13px;
+  line-height: 1.68;
+  color: #111111;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.book-intro-callout {
+  background: rgba(255, 255, 255, 0.72);
+  border-left: 4px solid #ab2b20;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 18px;
+  font-size: 13.5px;
+  line-height: 1.68;
+  color: #0a0a0a;
+  margin-bottom: 14px;
+  font-style: italic;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(130, 85, 30, 0.06);
+}
+
+.book-card-highlight {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #111111;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.book-card-highlight b {
+  color: #8a1f16;
+  font-weight: 700;
+}
+
+.book-inst-chip {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(171, 43, 32, 0.28);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+.book-inst-name {
+  color: #8a1f16;
+  font-weight: 700;
+}
+
+.book-inst-type {
+  color: #111111;
+  font-weight: 500;
+}
+
+/* Dark Theme Overrides for New Elements */
+.theme-dark .book-sec-num {
+  color: rgba(201, 162, 74, 0.5);
+}
+.theme-dark .content-page-title {
+  color: #ffffff;
+}
+.theme-dark .page-chapter-tag {
+  color: var(--gold);
+}
+.theme-dark .book-intro-desc {
+  color: rgba(216, 226, 220, 0.9);
+}
+.theme-dark .book-intro-callout {
+  background: rgba(201, 162, 74, 0.08);
+  border-left-color: #c9a24a;
+  color: #d6e2db;
+}
+.theme-dark .book-card-highlight {
+  color: rgba(216, 226, 220, 0.88);
+}
+.theme-dark .book-card-highlight b {
+  color: var(--gold);
+}
+.theme-dark .book-inst-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(201, 162, 74, 0.3);
+}
+.theme-dark .book-inst-name {
+  color: #ffd27a;
+}
+.theme-dark .book-inst-type {
+  color: #cbd5e1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 840px) {
+  .book-grid-2, .fact-grid { grid-template-columns: 1fr; }
+  .book-grid-3 { grid-template-columns: 1fr; }
+  .symbols-grid-10 { grid-template-columns: repeat(2, 1fr); }
+  .yugma-trio-grid { grid-template-columns: 1fr; }
+  .manuscript-ruling { padding-left: 8px; padding-right: 6px; margin-left: 0; border-left-width: 1px; }
+}
+
+/* =============================================================
+   BOOK FOOTER SCRUBBER
+   ============================================================= */
+.book-footer {
+  padding: 12px 28px;
+  background: rgba(8, 12, 16, 0.95);
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.book-progress-bar {
+  width: 100%;
+  height: 2px;
+  background: rgba(223, 231, 224, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.book-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--vermilion));
+  width: 12.5%;
+  transition: width 0.4s var(--ease);
+}
+
+.book-page-indicator {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.book-page-indicator b {
+  color: var(--gold);
+}
+
+/* =============================================================
+   TABLE OF CONTENTS SLIDE DRAWER
+   ============================================================= */
+.book-toc-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(380px, 84vw);
+  background: rgba(8, 12, 16, 0.98);
+  border-left: 1px solid var(--line);
+  z-index: 100;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.45s var(--ease-out);
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.8);
+}
+
+.book-toc-drawer.active {
+  transform: translateX(0);
+}
+
+.toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: 12px;
+}
+
+.toc-header h3 {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  margin: 0;
+  color: var(--gold);
+}
+
+.btn-close-toc {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-soft);
+  color: var(--bone-dim);
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  outline: none;
+}
+
+.btn-close-toc:hover {
+  background: rgba(224, 35, 28, 0.25);
+  border-color: #e0231c;
+  color: #fff;
+  transform: rotate(90deg);
+  box-shadow: 0 0 12px rgba(224, 35, 28, 0.4);
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.toc-item {
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.3s;
+}
+
+.toc-item:hover, .toc-item.active {
+  border-color: var(--gold);
+  background: rgba(201, 162, 74, 0.12);
+}
+
+.toc-num {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+
+.toc-title {
+  font-size: 13px;
+  color: var(--bone);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOLIO 17: TRADITION SHOWCASE ARCHIVE
+   ═══════════════════════════════════════════════════════════ */
+.tradition-photo-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(138, 31, 22, 0.2);
+}
+
+.theme-dark .tradition-photo-filter-bar {
+  border-bottom-color: rgba(201, 162, 74, 0.2);
+}
+
+.photo-filter-chip {
+  padding: 6px 14px;
+  font-family: var(--font-body, sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 20px;
+  border: 1px solid rgba(138, 31, 22, 0.3);
+  background: rgba(138, 31, 22, 0.06);
+  color: #8a1f16;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.photo-filter-chip:hover,
+.photo-filter-chip.active {
+  background: #8a1f16;
+  color: #fff;
+  border-color: #8a1f16;
+  box-shadow: 0 2px 8px rgba(138, 31, 22, 0.25);
+}
+
+.theme-dark .photo-filter-chip {
+  border-color: rgba(201, 162, 74, 0.35);
+  background: rgba(201, 162, 74, 0.08);
+  color: #ffd27a;
+}
+
+.theme-dark .photo-filter-chip:hover,
+.theme-dark .photo-filter-chip.active {
+  background: #c9a24a;
+  color: #0b0f17;
+  border-color: #ffd27a;
+  box-shadow: 0 2px 10px rgba(201, 162, 74, 0.35);
+}
+
+.tradition-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.tradition-photos-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.tradition-photos-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+}
+.tradition-photos-grid::-webkit-scrollbar-thumb {
+  background: rgba(138, 31, 22, 0.3);
+  border-radius: 4px;
+}
+
+.theme-dark .tradition-photos-grid::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 74, 0.3);
+}
+
+.tradition-photo-card {
+  border: 1px solid rgba(138, 31, 22, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fffdfa;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.theme-dark .tradition-photo-card {
+  background: rgba(13, 18, 26, 0.85);
+  border-color: rgba(201, 162, 74, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.tradition-photo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: #8a1f16;
+}
+
+.theme-dark .tradition-photo-card:hover {
+  border-color: #ffd27a;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.8), 0 0 15px rgba(201, 162, 74, 0.15);
+}
+
+.tradition-photo-frame {
+  position: relative;
+  width: 100%;
+  height: 155px;
+  overflow: hidden;
+  background: #000;
+}
+
+.tradition-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+  display: block;
+}
+
+.tradition-photo-card:hover .tradition-photo-frame img {
+  transform: scale(1.06);
+}
+
+.tradition-photo-category-pill {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 8px;
+  background: rgba(138, 31, 22, 0.88);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.theme-dark .tradition-photo-category-pill {
+  background: rgba(11, 15, 23, 0.85);
+  border: 1px solid rgba(201, 162, 74, 0.6);
+  color: #ffd27a;
+}
+
+.tradition-photo-meta {
+  padding: 10px 12px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.tradition-photo-name {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1510;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.theme-dark .tradition-photo-name {
+  color: #f7eed8;
+}
+
+.tradition-photo-state-badge {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: #8a1f16;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.theme-dark .tradition-photo-state-badge {
+  color: #ffd27a;
+}
+
+.tradition-photo-desc {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #4a3e35;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.theme-dark .tradition-photo-desc {
+  color: rgba(216, 226, 220, 0.85);
+}
+

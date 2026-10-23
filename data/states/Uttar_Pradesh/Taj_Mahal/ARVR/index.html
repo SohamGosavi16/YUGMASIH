@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>YUGMA | Taj Mahal — AR/VR Immersive Experience</title>
+  <link rel="stylesheet" href="../../../../../css/kage-theme.css">
+  <link rel="stylesheet" href="../../../../../css/arvr.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body class="arvr-standalone" data-state="uttar_pradesh" data-heritage="Taj Mahal">
+  <div id="vignette"></div>
+  <div id="grain"></div>
+  
+  <header class="arvr-header">
+    <div class="arvr-brand">
+      <span class="arvr-badge">AR / VR IMMERSIVE PORTAL</span>
+      <h1 class="arvr-title">TAJ MAHAL <span>// UTTAR PRADESH</span></h1>
+    </div>
+    <div class="arvr-controls-top">
+      <a href="../../../../../taj_mahal_3d.html" class="kage-btn" style="background: linear-gradient(135deg, rgba(223, 167, 83, 0.4), rgba(56, 189, 248, 0.4)); border-color: #dfa753; color: #ffd56b; font-weight: 700; text-decoration: none;" title="Open Realistic 3D Model">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span>REALISTIC 3D MODEL</span>
+      </a>
+      <button id="btn-mode-vr" class="kage-btn" title="Enter WebXR VR Mode">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4l-3-2-3 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/></svg>
+        <span>VR HEADSET</span>
+      </button>
+      <button id="btn-mode-ar" class="kage-btn" title="Toggle Camera AR Pass-through">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>AR CAMERA</span>
+      </button>
+      <button id="btn-gyro" class="kage-btn" title="Toggle Mobile Gyroscope">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
+        <span>GYRO</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="arvr-canvas-container">
+    <canvas id="arvr-canvas"></canvas>
+    <video id="ar-video" autoplay playsinline muted style="display:none;"></video>
+  </div>
+
+  <div class="arvr-hud">
+    <div class="hud-card info-card">
+      <div class="eyebrow">CENTRAL ROTUNDA // CENOTAPH CHAMBER</div>
+      <h3>The Translucent Marble Mausoleum</h3>
+      <p>Explore the octagonal jali chamber and gemstone Pietra Dura inlays of the world's most admired monument.</p>
+      <div class="lighting-presets">
+        <span class="preset-label">ATMOSPHERIC LIGHTING:</span>
+        <button class="light-btn active" data-light="daylight">DAWN BLUSH</button>
+        <button class="light-btn" data-light="torch">SUNSET GOLD</button>
+        <button class="light-btn" data-light="mystic">FULL MOONLIGHT</button>
+      </div>
+    </div>
+
+    <div class="developer-integration-point">
+      <div class="integration-tag">⚡ AR/VR CUSTOM CODE INTEGRATION POINT</div>
+      <p>Place your custom photogrammetry point-clouds, Taj Mahal 3D scans, or WebXR scenes in: <code>data/states/Uttar_Pradesh/Taj_Mahal/ARVR/</code></p>
+    </div>
+  </div>
+
+  <div class="audio-guide-pill" id="arvr-audio-guide">
+    <button id="btn-audio-guide" class="audio-play-btn">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>AUDIO GUIDE: SYMMETRY & ETERNAL LOVE</span>
+    </button>
+  </div>
+
+  <script src="../../../../../js/arvrViewer.js"></script>
+</body>
+</html>

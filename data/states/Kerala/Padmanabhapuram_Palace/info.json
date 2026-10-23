@@ -1,0 +1,66 @@
+{
+  "stateId": "kerala",
+  "stateName": "Kerala",
+  "stateNameHindi": "केरल",
+  "heritage": "Padmanabhapuram Palace",
+  "heritageHindi": "पद्मनाभपुरम महल",
+  "tradition": "Kathakali",
+  "traditionHindi": "कथकली",
+  "location": "Padmanabhapuram, Veli Hills, Historic Travancore Kingdom",
+  "era": "1601–1750 CE (Iravi Varma Kulasekhara & Anizham Thirunal Marthanda Varma)",
+  "unescoYear": "Tentative List (2014)",
+  "tagline": "Asia's Largest Monolithic Teak & Rosewood Palace",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "PADMANABHAPURAM PALACE",
+      "subtitle": "The Wooden Marvel: Indigenous Kerala Architecture & Sacred Murals",
+      "state": "Kerala (Travancore Heritage), India",
+      "dynasty": "Venad / Travancore Kingdom (Marthanda Varma)",
+      "summary": "Nestled at the foothills of the Veli hills, Padmanabhapuram Palace is the world's finest surviving example of traditional Kerala wooden architecture (Thachu Shastra), featuring hand-carved teakwood gables, black mirror floors, and 18th-century temple frescoes."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "The Seat of the Kulasekhara Kings",
+      "content": "Originally founded around 1601 CE by Iravi Varma Kulasekhara Perumal as a fortified mud palace (Kalkulam), the complex was completely reconstructed in seasoned teakwood and rosewood by the visionary Maharaja Anizham Thirunal Marthanda Varma around 1750 CE.\n\nIn 1750 CE, Maharaja Marthanda Varma performed the historic 'Thrippadidanam'—surrendering his entire kingdom, wealth, and sovereignty to the patron deity Lord Padmanabha, ruling thereafter as 'Padmanabha Dasa' (servant of the Lord).\n\nThe palace served as the royal capital of Travancore until the capital was shifted north to Thiruvananthapuram in 1795 CE."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "Thachu Shastra & Indigenous Carpentry",
+      "content": "Constructed without modern metal fasteners using mortise-and-tenon wooden joinery, the palace complex spans 6 acres across multiple courtyard pavilions (Nalukettu).\n\nKey architectural features include:\n• Mantrasala (King's Council Chamber): Features louvered wooden windows fitted with translucent mica flakes that filter tropical glare, with an ornate ceiling carved with 90 distinct botanical motifs.\n• Oottupura (Dining Hall): A colossal two-storied wooden dining pavilion engineered to serve 2,000 Brahmins and travelers simultaneously with natural air ventilation.\n• The 300-Year-Old Mirror Floor: An indigenous Ayurvedic floor finish polished to a jet-black mirror sheen made from burnt coconut shells, egg whites, lime, and extracts of 64 herbal juices."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "Upparika Malika & Sacred Frescoes",
+      "content": "The uppermost chamber of the four-storied Upparika Malika (King's private meditation tower) houses 41 exquisite 18th-century mural paintings executed in the traditional Kerala fresco style using mineral and vegetable pigments.\n\nDepicting themes from the Puranas and the Ramayana, notable frescoes include the Ananthasayanam (Vishnu reclining on the cosmic serpent), Ardhanarishwara, and Goddess Durga riding a lion.\n\nThe King's bedroom contains an ornamental medicinal bed crafted from 64 distinct herbal woods (including Strychnine tree root), gifted by Dutch merchants in 1741 CE to purify the royal sleeper."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "Kathakali: Dance-Drama of the Gods",
+      "content": "Kerala's sacred theatrical heritage is epitomized by Kathakali—a classical dance-drama renowned for its monumental green makeup (Paccha), towering carved wooden headdresses (Kiritam), expressive eye movements (Nayanam), and 24 hand mudras (Hasta Lakshana Deepika).\n\nPerforming against the flickering illumination of a solitary brass oil lamp (Aattavilakku) and accompanied by the primal rhythms of Chenda and Maddale drums, Kathakali transforms actors into celestial gods, demon kings, and heroic warriors."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Ingenious Secrets & Herbal Engineering",
+      "content": "• The Secret 1-Kilometer Escape Tunnel: A hidden subterranean passage connects the king's private chamber to Charode Palace one kilometer away, equipped with acoustic trapdoors.\n• Clock Tower of 1832: The palace courtyard features a functional wooden mechanical clock driven by hanging stone weights that has chimed accurately every hour for nearly two centuries.\n• Unreproducible Floor Formula: Despite modern chemical analysis, the exact proportional recipe of the black herbal mirror floor has never been successfully replicated by modern engineers."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Historical Timeline & Coordinates",
+      "content": "• 1601 CE: Initial construction by King Iravi Varma.\n• 1750 CE: Grand expansion by Maharaja Marthanda Varma; Thrippadidanam ceremony.\n• 1795 CE: Capital shifted to Thiruvananthapuram.\n• 2014 CE: Included in India's UNESCO Tentative World Heritage List.\n\nGeographic Coordinates: 8.2508° N, 77.3275° E\nAltitude: 45 meters above sea level\nLocation: Veli Hills, Historic Travancore."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Royal Archives & Archival Records",
+      "content": "• Travancore State Manual by V. Nagam Aiya (1906).\n• Department of Archaeology, Government of Kerala: 'Padmanabhapuram Palace Monograph'.\n• 'Traditional Architecture of Kerala' by V. R. Prabodhachandran Nayar.\n• UNESCO Tentative List Submission Dossier Ref. No. 5897."
+    }
+  ]
+}

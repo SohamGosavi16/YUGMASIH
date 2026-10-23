@@ -1,0 +1,873 @@
+<!-- ══ VOICE GUIDE TRIGGER (ICON-ONLY MICROPHONE, SAME POSITION) ══ -->
+  <button id="btn-voice-guide" class="voice-guide-fab" title="Heritage Voice Guide" aria-label="Heritage Voice Guide">
+    <i class="fa-solid fa-microphone-lines"></i>
+  </button>
+
+  <!-- ══ MULTILINGUAL VOICE GUIDE (DOCKED RIGHT-SIDE MIDDLE POSITION) ══ -->
+  <div id="voice-guide-panel" class="vg-panel" role="dialog" aria-label="Heritage Voice Guide">
+    <div class="vg-panel-inner">
+      <div class="vg-header">
+        <div class="vg-header-left">
+          <div class="vg-icon-badge">🎧</div>
+          <div class="vg-title-group">
+            <h3>Lepakshi Veerabhadra Temple · Audio Guide</h3>
+            <p>500+ Word Scholarly Narrative &amp; Subtitle Tracker</p>
+          </div>
+        </div>
+        <div class="vg-header-right">
+          <button type="button" class="vg-hud-toggle-btn active" id="vg-hud-toggle" title="Toggle Live Subtitle HUD">
+            <i class="fa-solid fa-closed-captioning"></i> HUD: ON
+          </button>
+          <button type="button" class="vg-close-btn" id="vg-close" aria-label="Close Voice Guide">✕</button>
+        </div>
+      </div>
+
+      <!-- Language selector pills -->
+      <div class="vg-lang-row" id="vg-lang-row"></div>
+
+      <!-- Script Box with Subtitle Tracker -->
+      <div class="vg-script-box" id="vg-script-box" aria-live="polite"></div>
+
+      <!-- Audio Controls -->
+      <div class="vg-controls">
+        <button class="vg-btn vg-play" id="vg-play">
+          <span id="vg-play-icon">▶</span>
+          <span id="vg-play-label">Play Audio Guide</span>
+        </button>
+        <button class="vg-btn vg-stop" id="vg-stop" disabled>
+          <span>⏹ Stop</span>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="vg-progress-wrap">
+        <div class="vg-progress-bar" id="vg-progress-bar"></div>
+      </div>
+
+      <!-- Speed Timeline (Noticeable Auditory Rates for English & All Languages) -->
+      <div class="vg-bottom-row">
+        <div class="vg-rate-row">
+          <span>Speed:</span>
+          <button class="vg-rate-btn" data-rate="0.75">0.75x</button>
+          <button class="vg-rate-btn active" data-rate="1.0">1.0x</button>
+          <button class="vg-rate-btn" data-rate="1.25">1.25x</button>
+          <button class="vg-rate-btn" data-rate="1.5">1.5x</button>
+          <button class="vg-rate-btn" data-rate="1.75">1.75x</button>
+        </div>
+        <div class="vg-voice-info" id="vg-voice-info">🔊 Voice Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ THEMED FLOATING CINEMA SUBTITLE HUD ON 3D VIEWPORT ══ -->
+  <div id="vg-subtitle-hud" class="vg-subtitle-hud" style="display:none;" aria-live="polite">
+    <div class="vg-hud-header">
+      <div class="vg-hud-badge">
+        <span class="vg-hud-dot"></span>
+        <span id="vg-hud-lang-label">ENGLISH</span>
+      </div>
+      <div class="vg-hud-title">Lepakshi Veerabhadra Temple · Synchronized Subtitles</div>
+      <button type="button" class="vg-hud-close" id="vg-hud-close" title="Hide Subtitles">✕</button>
+    </div>
+    <div class="vg-hud-content" id="vg-hud-content">
+      Click Play to start the voice guide narration with live synchronized subtitles.
+    </div>
+  </div>
+
+  <script id="vg-engine-script">
+  (function () {
+    "use strict";
+
+    var SITE_NAME = "Lepakshi Veerabhadra Temple";
+    var SUPPORTED_LANGS = [
+      { key: 'en', code: 'en-IN', fallback: 'en-US', label: 'English', flag: '🇬🇧' },
+      { key: 'hi', code: 'hi-IN', fallback: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+      { key: 'ta', code: 'ta-IN', fallback: 'ta', label: 'தமிழ்', flag: '🇮🇳' },
+      { key: 'te', code: 'te-IN', fallback: 'te', label: 'తెలుగు', flag: '🇮🇳' },
+      { key: 'bn', code: 'bn-IN', fallback: 'bn', label: 'বাংলা', flag: '🇮🇳' },
+      { key: 'mr', code: 'mr-IN', fallback: 'mr', label: 'मराठी', flag: '🇮🇳' },
+      { key: 'gu', code: 'gu-IN', fallback: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+      { key: 'kn', code: 'kn-IN', fallback: 'kn', label: 'ಕನ್ನಡ', flag: '🇮🇳' },
+      { key: 'ml', code: 'ml-IN', fallback: 'ml', label: 'മലയാളം', flag: '🇮🇳' },
+      { key: 'pa', code: 'pa-IN', fallback: 'pa', label: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+      { key: 'fr', code: 'fr-FR', fallback: 'fr', label: 'Français', flag: '🇫🇷' },
+      { key: 'es', code: 'es-ES', fallback: 'es', label: 'Español', flag: '🇪🇸' },
+      { key: 'de', code: 'de-DE', fallback: 'de', label: 'Deutsch', flag: '🇩🇪' },
+      { key: 'ja', code: 'ja-JP', fallback: 'ja', label: '日本語', flag: '🇯🇵' },
+      { key: 'zh', code: 'zh-CN', fallback: 'zh', label: '中文', flag: '🇨🇳' }
+    ];
+
+    var VG_SCRIPTS = {"en": "Welcome to Lepakshi Veerabhadra Temple, one of humanity's supreme cultural and architectural achievements, located in Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila. Constructed during built in 1530 CE during the Vijayanagara Empire under the visionary patronage of The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya, this monumental sanctuary stands as a timeless embodiment of India's spiritual depth, aesthetic mastery, and engineering ingenuity. Spanning centuries of artistic evolution, Lepakshi Veerabhadra Temple continues to inspire global scholars, pilgrims, and explorers through its harmonious balance of sacred geometry, astronomical alignments, and monumental physical presence. Architecturally, the complex exhibits late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals. Master craftsmen, sculptors, and stonecutters assembled from across kingdoms employed revolutionary construction techniques to create enduring forms from living stone and ancient masonry. Every structural element was engineered according to ancient canonical architectural treatises, aligning physical spaces with celestial orientations, solar solstices, and spiritual cosmologies. The monumental facades, soaring towers, and intricate columned halls display breathtaking sculptural reliefs that narrate cosmic epics, royal court ceremonies, and celestial mythologies with unmatched anatomical precision and expressive grace. Among the defining features of this historic sanctuary are the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings. The interplay of natural illumination and cavernous stone interiors was masterfully calibrated: morning sunlight penetrates deep within sanctum corridors to illuminate central icons, while exterior facades cast dramatic geometric shadows across weathered plinths as the sun crosses the horizon. The surrounding water bodies, defensive bastions, and ceremonial gateways were integrated seamlessly into the natural topography, demonstrating an extraordinary ecological and civil engineering harmony that supported thousands of devotees and residents throughout antiquity. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor. Culturally and spiritually, Lepakshi Veerabhadra Temple reflects a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana. It served not merely as a place of veneration or royal authority, but as a thriving nucleus of classical literature, music, temple dance, and scholarly discourse. Trade routes converged upon its gateways, drawing travelers, chroniclers, and merchants from across Asia, the Middle East, and the Mediterranean world who documented its astounding prosperity, vibrant festivals, and artistic sophistication in legendary travelogues. The spiritual ethos nurtured within these walls helped shape philosophical traditions that continue to guide seekers today. Following centuries of dynastic transitions, climatic weathering, and historical rediscoveries, extensive archaeological excavations and scientific preservation by national and international heritage authorities have meticulously restored the site's structural integrity. Ancient mortars, stone stabilizing techniques, and micro-climate drainage networks have been carefully researched and reinforced to shield the delicate carvings against atmospheric deterioration. Honored with UNESCO World Heritage designation, Lepakshi Veerabhadra Temple is preserved for all future generations as an irreplaceable beacon of human creativity, civic pride, and cultural resilience. You are now exploring a cutting-edge, millimeter-accurate three-dimensional digital twin of this historic sanctuary. As you orbit, pan, and zoom through its sacred courtyards, architectural details, and elevated vistas, observe the extraordinary craftsmanship and ancient spatial rhythms that have endured for over a millennium. Listen to the narration, follow the real-time", "hi": "Lepakshi Veerabhadra Temple में आपका हार्दिक स्वागत है — Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila में स्थित विश्व मानवता की एक महानतम सांस्कृतिक एवं स्थापत्य धरोहर। built in 1530 CE during the Vijayanagara Empire में The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya के दूरदर्शी संरक्षण में निर्मित यह पवित्र स्मारक भारतीय सभ्यता की आध्यात्मिक गहराई, कलात्मक उत्कृष्टता और बेजोड़ इंजीनियरिंग कौशल का अमर प्रतीक है। सदियों के ऐतिहासिक उतार-चढ़ाव को पार करते हुए यह स्थल आज भी अपनी अलौकिक वास्तुकला, संतुलन और भव्यता से दुनिया भर के शोधकर्ताओं और श्रद्धालुओं को विस्मित करता है। स्थापत्य की दृष्टि से यह स्मारक late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals का अद्वितीय उदाहरण प्रस्तुत करता है। प्राचीन भारत के प्रतिभाशाली शिल्पकारों और वास्तुकारों ने प्राकृतिक पत्थरों को तराश कर ऐसे संरचनात्मक रूप दिए जो सदियों तक अडिग रहे। निर्माण में प्राचीन वास्तुशास्त्र के नियमों, पवित्र ज्यामिति और खगोलीय दिशाओं का सूक्ष्म ध्यान रखा गया। इसके विशाल शिखर, नक्काशीदार स्तंभ और अलंकृत मंडप भारतीय मूर्तिकला के चरमोत्कर्ष को दर्शाते हैं, जहाँ धार्मिक आख्यान और पौराणिक कथाएं पाषाण पर जीवंत हो उठी हैं। इस ऐतिहासिक परिसर की प्रमुख विशेषताओं में the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings शामिल हैं। सूर्य के प्रकाश और छाया का संयोजन यहाँ इस तरह निर्धारित किया गया था कि भोर की पहली किरणें गर्भगृह के मुख्य विग्रह को प्रकाशित करती हैं। इसके अतिरिक्त यहाँ की ध्वनिक व्यवस्था, जल संरक्षण प्रणालियां और स्थापत्य का प्राकृतिक भू-भाग से सामंजस्य प्राचीन काल के पर्यावरण-अनुकूल नगर नियोजन का श्रेष्ठ प्रमाण हैं। पत्थरों की तराशी और चिनाई में जो तकनीक अपनाई गई, वह बिना किसी आधुनिक मशीन के भी सहस्राब्दियों तक अडिग रही है। A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor. सांस्कृतिक एवं आध्यात्मिक रूप से यह स्थल a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana का प्रतीक रहा है। यह केवल पूजा या राजसत्ता का केंद्र नहीं था, बल्कि दर्शन, शास्त्रीय संगीत, नृत्य और विद्वत्तापूर्ण संवादों का एक जीवंत बौद्धिक केंद्र था। देश-विदेश के प्राचीन यात्रियों और इतिहासकारों ने इसके वैभव, समृद्ध व्यापार और धार्मिक उत्सवों का विस्तार से उल्लेख किया है। यहाँ का वातावरण आज भी शांति, दिव्यता और भारतीय सनातन संस्कृति की गौरवगाथा को उद्घोष करता है, जो मानवता को सत्य, सौंदर्य और एकात्मकता का पावन संदेश देता है। शताब्दियों के प्राकृतिक प्रभावों और ऐतिहासिक परिवर्तनों के उपरांत, भारतीय पुरातत्व सर्वेक्षण और वैश्विक विरासत संगठनों ने वैज्ञानिक तकनीकों के माध्यम से इसके मूल स्वरूप का संरक्षण किया है। प्राचीन पत्थरों, चूने के गारे और जल निकासी प्रणालियों का बारीकी से अध्ययन करके इस भव्य स्मारक को भावी पीढ़ियों के लिए सुरक्षित बनाया गया है। यूनेस्को द्वारा विश्व धरोहर घोषित Lepakshi Veerabhadra Temple आज मानव सभ्यता का एक अनमोल रत्न है, जिसकी सुरक्षा और सम्मान हमारा राष्ट्रीय कर्तव्य है। आप इस समय इसकी अत्यंत सटीक त्रि-आयामी 3D डिजिटल प्रतिकृति का अनुभव कर रहे हैं। इस डिजिटल यात्रा में इसके कोनों, शिखरों और प्रांगणों का अन्वेषण करें तथा लाइव उपशीर्षकों और बहुभाषी ऑडियो गाइड के साथ इसके गौरवशाली इतिहास को सुनें। यह आधुनिक तकनीक प्राचीन भारतीय", "ta": "Lepakshi Veerabhadra Temple-க்கு உங்களை அன்புடன் வரவேற்கிறோம். Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila-ல் அமைந்துள்ள இந்த வரலாற்று சிறப்புமிக்க தலம் உலகப் பண்பாட்டின் தலைசிறந்த அடையாளங்களில் ஒன்றாகும். built in 1530 CE during the Vijayanagara Empire-ல் The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya அவர்களின் போற்றுதலுக்குரிய ஆதரவுடன் நிர்மாணிக்கப்பட்ட இந்த திருத்தலம், பாரதத்தின் ஆன்மீக ஆழம், கலை நுணுக்கம் மற்றும் கட்டடப் பொறியியல் திறனின் உன்னத சான்றாக கம்பீரமாக காட்சியளிக்கிறது. பல நூற்றாண்டுகளின் வரலாற்று மாற்றங்களை கடந்து, இத்தலம் உலகெங்கிலும் உள்ள வரலாற்று ஆய்வாளர்களையும் பக்தர்களையும் வியப்பில் ஆழ்த்தி வருகிறது.\n\nகட்டடக்கலை நுணுக்கங்களின் அடிப்படையில், இந்த வளாகம் late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals பாணியின் நிகரற்ற சிகரமாகும். அன்றைய காலத்து கைதேர்ந்த சிற்பிகளும் கற்கலைஞர்களும் இயற்கைப் பாறைகளையும் கற்பாறைகளையும் அற்புதமாக செதுக்கி காலத்தால் அழிக்க முடியாத பேரழகு வடிவங்களை உருவாக்கினர். ஆகம சாஸ்திரங்கள், புனித கணிதக் கோணங்கள் மற்றும் வானியல் திசைகளை மிகத் துல்லியமாகக் கணித்து இந்த அமைப்பு வடிவமைக்கப்பட்டுள்ளது. இதன் வானளாவிய கோபுரங்கள், நுணுக்கமான தூண் மண்டபங்கள் மற்றும் சிற்பத் தொகுதிகள் இதிகாசங்களையும் தெய்வீகக் கதைகளையும் நம் கண்முன்னே தத்ரூபமாக காட்சிப்படுத்துகின்றன. இங்குள்ள ஒவ்வொரு கல்லும் பண்டைய பாரதத்தின் கலை மேன்மையை பறைசாற்றுகிறது. சிற்ப வேலைப்பாடுகளில் வெளிப்படும் மனித உடற்கூறியல் துல்லியமும் உணர்ச்சிப் பெருக்குகளும் காண்போரை மெய்சிலிர்க்க வைக்கின்றன. இந்த வளாகத்தின் ஒவ்வொரு தூணும் பல்லாயிரம் ஆண்டுகால வரலாற்று உண்மைகளை தன்னுள் சுமந்து நிற்கிறது.\n\nஇத்தலத்தின் தனித்துவமான சிறப்பம்சங்களில் the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings ஆகியவை மிக முக்கியமானவையாகும். இயற்கை ஒளி மற்றும் நிழலின் சமநிலை இங்கு மிக அற்புதமாக கணக்கிடப்பட்டுள்ளது; அதிகாலை சூரியனின் பொற்கதிர்கள் கருவறையின் மையப்பகுதியை ஒளிரச் செய்யும் விதமும், வெளிப்புறத் தூண்களின் நிழல்கள் சமதளப் பரப்பில் விழும் விதமும் கண்கொள்ளாக் காட்சியாகும். நீர் மேலாண்மை குளங்கள், பாதுகாப்புச் சுவர்கள் மற்றும் பிரம்மாண்ட நுழைவு வாயில்கள் ஆகியவை சுற்றியுள்ள இயற்கை சூழலோடு இணைந்து பழங்கால நகரத் திட்டமிடலின் உச்சத்தை பறைசாற்றுகின்றன. தட்பவெப்ப மாற்றங்களைத் தாங்கி நிற்கும் பழங்கால கட்டுமான உத்திகள் வியக்கத்தக்கவை ஆகும். இந்த உன்னத பொறியியல் அறிவு இன்றைய நவீன கால கட்டிட நிபுணர்களுக்கும் பெரும் உத்வேகத்தை அளிக்கிறது. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\nபண்பாட்டு மற்றும் ஆன்மீக வரலாற்றில், Lepakshi Veerabhadra Temple என்பது a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana என்பதன் ஜீவாதார அடையாளமாகும். இது வழிபாட்டுத் தலமாக மட்டுமன்றி, செவ்வியல் இலக்கியம், கர்நாடக சங்கீதம், பரதநாட்டியம் மற்றும் தத்துவ விவாதங்கள் வளர்க்கப்பட்ட உன்னத கலைக்கூடமாகவும் திகழ்ந்தது. உலகெங்கிலும் இருந்து கடல் கடந்து வந்த யாத்ரீகர்களும் வணிகர்களும் இதன் வளமையையும் கலைச் செறிவையும் தங்களது வரலாற்றுப் பயணக் குறிப்புகளில் போற்றி எழுதியுள்ளனர். இங்கு நிலவும் தெய்வீக அமைதியும் ஆன்மீக அதிர்வுகளும் இன்றும் வருகை தரும் அனைவரையும் பரவசத்தில் ஆழ்த்துகின்றன. பல நூற்றாண்டுகளாக கலை மற்றும் ஆன்மீகத்தின் சங்கமமாக விளங்கும் இந்த திருத்தலம் உலகளாவிய பெருமை பெற்றுள்ளது. இங்குள்ள புனித சூழல் நம் மனதிற்கு அமைதியையும் புத்துணர்ச்சியையும் வாரி வழங்குகிறது. நமது ஆன்மீக தேடலுக்கு இது ஒரு சிறந்த புகலிடமாகும்.\n\nகாலத்தின் மாற்றங்கள் மற்றும் இயற்கை சீற்றங்களைத் தாண்டி, இந்திய தொல்லியல் துறை மற்றும் யுனெஸ்கோ அமைப்பின் சீரிய பாதுகாப்புப் பணிகளால் இந்த நினைவுச்சின்னம் தனது பழமை மாறாமல் பாதுகாக்கப்பட்டுள்ளது. கற்களின் ஸ்திரத்தன்மை, பழங்கால சுண்ணக்கலவை பாதுகாப்பு மற்றும் மழைநீர் வடிகால் அமைப்புகள் நவீன அறிவியலின் துணையோடு பேணப்பட்டு வருகின்றன. உலக பாரம்பரிய சின்னமாக அங்கீகரிக்கப்பட்ட Lepakshi Veerabhadra Temple, மனிதகுலத்தின் பெருமித அடையாளமாகவும் பாரத பண்பாட்டின் கிரீடமாகவும் விளங்குகிறது. நமது முன்னோர்களின் வரலாற்று சாதனையை பாதுகாப்பது நம் ஒவ்வொருவரின் புனிதமான கடமையாகும். இந்த அற்புத பொக்கிஷம் என்றும் அழியாமல் ஒளிரும். நமது வருங்கால தலைமுறையினர் இதன் பெருமையை உணர்ந்து போற்ற வேண்டும்.\n\nஇப்போது நீங்கள் இந்த அற்புத தலத்தின் மிகத் துல்லியமான 3D டிஜிட்டல் மாதிரியை ஆராய்கிறீர்கள். இதன் பிரகாரங்கள், சிற்ப வேலைப்பாடுகள் மற்றும் கோபுரங்களை அனைத்துக் கோணங்களிலும் சுழற்றிப் பார்த்து, நேரடி சப்டைட்டில்களுடன் கூடிய குரல் வழிகாட்டியைக் கேட்டு மகிழுங்கள். இந்த டிஜிட்டல் தொழில்நுட்பம் நமது பாரம்பரியத்தை காலத்தால் அழியாமல் பாதுகாக்கும் ஓர் உன்னத முயற்சியாகும். வாருங்கள், இந்த மெய்நிகர் அனுபவத்தில் மூழ்கி மகிழுங்கள். பாரதத்தின் உன்னத வரலாற்று அழகை உங்கள் கண்களாலும் இதயத்தாலும் உணருங்கள்.", "te": "Lepakshi Veerabhadra Temple కు మీకు హృదయపూర్వక స్వాగతం. Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila లో కొలువై ఉన్న ఈ చారిత్రక క్షేత్రం ప్రపంచ మానవాళి గర్వించదగ్గ సాంస్కృతిక మరియు వాస్తుకళా అద్భుతం. built in 1530 CE during the Vijayanagara Empire కాలంలో The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya వారి దూరదృష్టి మరియు ఘనమైన ఆశ్రయంలో నిర్మించబడిన ఈ పవిత్ర కట్టడం, భారతదేశపు ఆధ్యాత్మిక ఉన్నతి, కళాత్మక నైపుణ్యం మరియు అమోఘమైన ఇంజనీరింగ్ ప్రతిభకు నిలువెత్తు నిదర్శనంగా భాసిల్లుతోంది. శతాబ్దాల చరిత్రను తనలో నిక్షిప్తం చేసుకున్న ఈ ప్రదేశం నేటికీ ప్రపంచ పర్యాటకులను సంభ్రమాశ్చర్యాలకు గురిచేస్తోంది.\n\nవాస్తుశాస్త్ర పరంగా ఈ ప్రాంగణం late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals శైలి యొక్క అత్యున్నత శిఖరాగ్రాన్ని ప్రతిబింబిస్తుంది. ప్రాచీన కాలపు శిల్పకారులు మరియు స్థపతులు కఠినమైన శిలలను సైతం సజీవ శిల్పాలుగా మలిచి అద్భుతమైన నిర్మాణాలను ఆవిష్కరించారు. ఆలయ నిర్మాణం ప్రతి అంశంలోనూ ప్రాచీన వాస్తు సూత్రాలు, పవిత్ర జ్యామితి మరియు ఖగోళ దిశలను అత్యంత ఖచ్చితత్వంతో పాటించారు. ఆకాశాన్ని తాకే దివ్య గోపురాలు, నగిషీలు చెక్కిన రాతి స్తంభాలు మరియు విశాలమైన మండపాలు మన పురాణ గాథలను మరియు సాంస్కృతిక ఘట్టాలను మన కళ్ళముందు సాక్షాత్కరింపజేస్తాయి. ప్రతి శిలా శిల్పంలోనూ కళాకారుల ప్రతిభ అద్భుతంగా వెల్లివిరుస్తుంది. మానవ శరీర సౌందర్యం మరియు భక్తి భావాలను శిల్పాలలో మలచిన తీరు అసమానమైనది. ప్రాచీన భారతదేశంలో వెల్లివిరిసిన శిల్పకళా వైభవానికి ఈ దేవాలయ ప్రాంగణం ఒక సజీవ నిదర్శనంగా నిలుస్తుంది.\n\nఈ చారిత్రక ప్రాంగణంలోని ప్రధాన ఆకర్షణలలో the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings విశేషమైన ప్రాముఖ్యతను సంతరించుకున్నాయి. సూర్యకాంతి మరియు నీడల అనుసంధానం ఇక్కడ ఎంత అద్భుతంగా రూపొందించబడిందంటే, ఉదయపు తొలి భానుడి కిరణాలు గర్భగుడిలోని మూలవిరాట్టును నేరుగా తాకుతాయి. అంతేకాకుండా ఇక్కడి వర్షపు నీటి నిల్వ వ్యవస్థలు, పటిష్టమైన ప్రాకారాలు మరియు సహజ సిద్ధమైన పరిసరాలతో మమేకమైన తీరు ప్రాచీన ఇంజనీరింగ్ చాతుర్యానికి సాక్ష్యాలుగా నిలుస్తాయి. పర్యావరణహితమైన ప్రాచీన నిర్మాణ కౌశలం నేటి ఆధునిక ఇంజనీర్లకు సైతం ఆదర్శప్రాయంగా నిలుస్తోంది. కాలానుగుణంగా వచ్చే మార్పులను తట్టుకుంటూ ఈ కట్టడం యుగయుగాలుగా చెక్కుచెదరకుండా నిలిచింది. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\nసాంస్కృతిక మరియు ఆధ్యాత్మిక రంగాలలో Lepakshi Veerabhadra Temple అనేది a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana కు ప్రతీకగా నిలిచింది. ఇది కేవలం పూజా స్థలంగానే కాకుండా ప్రాచీన విద్య, శాస్త్రీయ సంగీతం, నృత్యం మరియు తాత్విక చర్చలకు ప్రధాన కేంద్రంగా విలసిల్లింది. దేశ విదేశాల నుండి వచ్చిన యాత్రికులు, చరిత్రకారులు దీని వైభవాన్ని, వాణిజ్య ప్రాధాన్యతను తమ గ్రంథాలలో అమితంగా కొనియాడారు. ఇక్కడి ఆధ్యాత్మిక వాతావరణం నేటికీ సందర్శకులకు ప్రశాంతతను, దివ్యానుభూతిని ప్రసాదిస్తుంది. ఈ క్షేత్రం భారతీయ సనాతన సంస్కృతికి ఒక దివ్య దీపికగా వెలుగొందుతోంది. ఇక్కడికి వచ్చే ప్రతి ఒక్కరికీ పవిత్రమైన అనుభూతి కలుగుతుంది. ఆధ్యాత్మిక సాధనలో నిమగ్నమయ్యే భక్తులకు ఈ పుణ్యక్షేత్రం అమితమైన ఆనందాన్ని ఇస్తుంది.\n\nశతాబ్దాలుగా ప్రకృతి వైపరీత్యాలను తట్టుకుని నిలిచిన ఈ మహోన్నత కట్టడాన్ని భారత పురావస్తు శాఖ మరియు యునెస్కో సంస్థలు శాస్త్రీయ పద్ధతులలో పునరుద్ధరించి పరిరక్షిస్తున్నాయి. ప్రాచీన నిర్మాణ విధానాలను కాపాడుతూ ఈ అపురూప వారసత్వాన్ని భావితరాలకు అందిస్తున్నారు. యునెస్కో ప్రపంచ వారసత్వ సంపదగా గుర్తింపు పొందిన Lepakshi Veerabhadra Temple జాతికి గర్వకారణం మరియు విశ్వ సంస్కృతికి మకుటం. ఈ మహత్తర కట్టడాన్ని భావితరాలకు అందించడం మనందరి బాధ్యత. మన పూర్వీకుల విశిష్ట ప్రతిభను గౌరవించడం ప్రతి ఒక్కరి కర్తవ్యం. ఈ వైభవాన్ని కాపాడుకోవడం మన నైతిక బాధ్యత.\n\nప్రస్తుతం మీరు ఈ చారిత్రక సంపద యొక్క అత్యున్నత నాణ్యత గల 3D డిజిటల్ ప్రతిరూపాన్ని వీక్షిస్తున్నారు. ప్రతి శిల్పాన్ని, ప్రాకారాన్ని అన్ని కోణాల్లో తిలకిస్తూ, ప్రత్యక్ష సబ్‌టైటిల్స్ తో కూడిన వాయిస్ గైడ్ సహాయంతో ఈ దివ్య చారిత్రక ప్రయాణాన్ని ఆస్వాదించండి. ఈ సాంకేతిక అద్భుతం మన ప్రాచీన భారతీయ వైభవాన్ని సజీవంగా నిలిపే గొప్ప ప్రయత్నం. ఈ అద్భుతమైన దృశ్య శ్రవణ అనుభవాన్ని పూర్తిగా ఆస్వాదించండి. భారతీయ సాంస్కృతిక వైభవాన్ని మీ మనస్సులలో కలకాలం పదిలపరుచుకోండి. ఈ అపురూప చారిత్రక క్షేత్రం మానవాళి కళా సౌందర్యానికి, ఆధ్యాత్మిక ఉన్నతికి మరియు అజరామరమైన భారతీయ వాస్తుకళా ప్రతిభకు శాశ్వత నిదర్శనంగా భాసిల్లుతోంది.", "bn": "Lepakshi Veerabhadra Temple-এ আপনাকে আন্তরিক সাদর সম্ভাষণ জানাই। Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila-এ অবস্থিত এই কালজয়ী স্মারক বিশ্ব মানবজাতির অন্যতম শ্রেষ্ঠ সাংস্কৃতিক ও স্থাপত্য নিদর্শন। built in 1530 CE during the Vijayanagara Empire-তে The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya-এর দূরদর্শী পৃষ্ঠপোষকতায় নির্মিত এই পবিত্র সৌধ ভারতীয় সভ্যতার আধ্যাত্মিক গভীরতা, শিল্পকলার চরম উৎকর্ষ এবং অনুপম প্রকৌশল বিদ্যার এক উজ্জ্বল প্রতীক। শতাব্দীর পর শতাব্দী ধরে ঐতিহাসিক পরিবর্তনের মধ্য দিয়েও এই অনন্য সৃষ্টি তার ভারসাম্য, পবিত্র জ্যামিতি এবং রাজকীয় মহিমার জন্য বিশ্বব্যাপী গবেষক ও পর্যটকদের মুগ্ধ করে চলেছে।\n\nস্থাপত্যের দৃষ্টিকোণ থেকে এই ঐতিহাসিক চত্বর late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals-এর এক অনন্য ও অতুলনীয় দৃষ্টান্ত। প্রাচীন ভারতের সুদক্ষ ভাস্কর ও স্থপতিরা জীবন্ত পাথর খোদাই করে এমন বিস্ময়কর কাঠামো তৈরি করেছেন যা কালের পরীক্ষায় উত্তীর্ণ হয়েছে। সম্পূর্ণ নির্মাণের প্রতিটি উপাদান প্রাচীন বাস্তুশাস্ত্রের প্রামাণ্য নিয়মাবলী, পবিত্র অনুপাত এবং মহাজাগতিক দিকনির্দেশের সাথে সূক্ষ্মভাবে সমন্বয় করে স্থাপন করা হয়েছিল। এর আকাশচুম্বী শিখর, অলঙ্কৃত স্তম্ভমালা এবং সুবিশাল মণ্ডপগুলিতে খোদিত ভাস্কর্যগুলি পৌরাণিক উপাখ্যান এবং রাজকীয় ইতিহাসকে পাথরের বুকে চিরন্তন করে তুলেছে। প্রাচীন ভারতের শিল্প ও সাহিত্যের চরম বিকাশ এই সৌধের সর্বত্র প্রতিফলিত হয়েছে। পাথরের প্রতিটি স্তরে শিল্পীদের নিখুঁত শৈল্পিক চেতনা সুস্পষ্টভাবে প্রতিভাত হয় এবং দর্শকদের বিস্ময়াভিভূত করে।\n\nএই ঐতিহাসিক সৌধের অন্যতম প্রধান বৈশিষ্ট্যগুলির মধ্যে the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings সবিশেষ উল্লেখযোগ্য। আলো এবং ছায়ার খেলা এখানে অত্যন্ত সুনিপুণভাবে পরিকল্পনা করা হয়েছিল; প্রভাত সূর্যের প্রথম কিরণরাশি সরাসরি গর্ভগৃহের কেন্দ্রীয় বিগ্রহকে আলোকিত করে। এর পাশাপাশি প্রাচীন উন্নত জল নিষ্কাশন ব্যবস্থা, জল সংরক্ষণাগার এবং প্রাকৃতিক পরিবেশের সাথে স্থাপত্যের একাত্মতা প্রাচীন ভারতীয় নগর পরিকল্পনার এক অপূর্ব সাক্ষ্য বহন করে। প্রতিকূল আবহাওয়া সত্ত্বেও শত শত বছর ধরে এই সৌধ অক্ষত দাঁড়িয়ে রয়েছে যা তৎকালীন স্থপতিদের দূরদর্শিতার প্রমাণ। A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\nসাংস্কৃতিক ও আত্মিক দিক থেকে Lepakshi Veerabhadra Temple a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana-এর চিরন্তন প্রতীক। এটি কেবল ধর্মীয় উপাসনার কেন্দ্র ছিল না, বরং দর্শনচর্চা, শাস্ত্রীয় সংগীত, ঐতিহ্যবাহী নৃত্যকলা এবং পাণ্ডিত্যের এক প্রাণবন্ত মহামিলনক্ষেত্র ছিল। প্রাচীন যুগে বিশ্বের বিভিন্ন প্রান্ত থেকে পরিব্রাজক এবং বণিকরা এই পবিত্র ভূমিতে সমবেত হয়ে এর সমৃদ্ধি ও শিল্পকলার প্রশংসা করেছেন। এখানকার শান্ত এবং পবিত্র পরিবেশ আজও প্রতিটি দর্শনার্থীর হৃদয়কে এক অনাবিল আধ্যাত্মিক আনন্দে ভরিয়ে তোলে। এটি মানব সভ্যতার এক চিরন্তন অহংকার এবং ভারতীয় আধ্যাত্মিকতার শ্রেষ্ঠ নিদর্শন যা যুগ যুগ ধরে মানবতাকে সত্য ও সৌন্দর্যের পথে পরিচালিত করছে।\n\nপ্রাকৃতিক ক্ষয়ক্ষতি এবং ইতিহাসের বহু পটপরিবর্তনের পর ভারতীয় প্রত্নতাত্ত্বিক সর্বেক্ষণ এবং ইউনেস্কোর মতো আন্তর্জাতিক ঐতিহ্য সংরক্ষণ সংস্থাগুলি আধুনিক বৈজ্ঞানিক পদ্ধতির সাহায্যে এই স্মৃতিসৌধটির নিখুঁत সংরক্ষণ নিশ্চিত করেছে। ইউনেস্কো ওয়ার্ল্ড হেরিটেজ সাইট হিসেবে ঘোষিত Lepakshi Veerabhadra Temple সমগ্র মানবজাতির অমূল্য সম্পদ এবং ভারতীয় ঐতিহ্যের গর্ব। আমাদের এই অমূল্য ঐতিহ্যকে সুরক্ষিত রাখা আমাদের সকলের নৈতিক দায়িত্ব। ভবিষ্যৎ প্রজন্মের জন্য এটি এক চিরন্তন প্রেরণার উৎস হিসেবে বিরাজমান থাকবে।\n\nবর্তমানে আপনারা এই ঐতিহাসিক মহিমান্বিত কীর্তির একটি উচ্চ-নির্ভুল ত্রিমাত্রিক 3D ডিজিটাল সংস্করণের অভিজ্ঞতা লাভ করছেন। এর প্রতিটি কোণ, কারুকার্য এবং বিস্তৃত প্রাঙ্গণ ঘুরে দেখুন এবং রিয়েল-টাইম সাবটাইটেল সহ অডিও গাইডের মাধ্যমে এই ঐতিহাসিক যাত্রায় নিমগ্ন হোন। এই ডিজিটাল প্ল্যাটফর্ম আমাদের সমৃদ্ধ ইতিহাসকে চিরস্মরণীয় করে রাখার এক অনন্য উদ্যোগ। আসুন, আমরা সকলে মিলে এই অনন্য মহিমান্বিত ইতিহাসকে অনুভব করি এবং ভারতীয় ঐতিহ্যের জয়গান গাই।", "mr": "Lepakshi Veerabhadra Temple मध्ये आपले मनःपूर्वक हार्दिक स्वागत आहे. Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila येथे स्थित हे ऐतिहासिक संकुल मानवी संस्कृती आणि स्थापत्यकलेचा एक सुवर्ण अध्याय आहे. built in 1530 CE during the Vijayanagara Empire मध्ये The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya यांच्या दूरदर्शी प्रेरणेतून साकारलेले हे पवित्र स्मारक भारताची आध्यात्मिक समृद्धी, अद्वितीय कलात्मकता आणि स्थापत्य अभियांत्रिकी कौशल्याचे अमर प्रतीक आहे. शतकानुशतके काळाच्या कसोटीवर उतरून ही वास्तू आजही जगभरातील अभ्यासक, संशोधक आणि पर्यटकांना अचंबित करत आहे.\n\nस्थापत्यशास्त्राच्या दृष्टीने हा परिसर late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals शैलीचे सर्वोत्कृष्ट आणि परिपूर्ण रूप सादर करतो. प्राचीन काळातील निष्णात शिल्पकार आणि कारागिरांनी अखंड पाषाणांना तराशून अशा भव्य वास्तू निर्माण केल्या ज्या शतकानुशतके अभेद्य राहिल्या आहेत. संपूर्ण रचनेत प्राचीन वास्तुशास्त्राचे नियम, पवित्र भूमिती आणि खगोलीय दिशांचे अचूक भान ठेवले गेले होते. यातील गगनचुंबी शिखरे, कोरीव नक्षीदार स्तंभ आणि भव्य मंडप आपल्या समृद्ध पौराणिक गाथा आणि ऐतिहासिक प्रसंगांना पाषाणात सजीव करतात. या वास्तूची भव्यता आणि नक्षीकाम भारतीय कलेच्या सुवर्णकाळाची साक्ष देते. येथील प्रत्येक दगड आपल्या पूर्वजांच्या अलौकिक पराक्रमाची आणि कलेची गाथा सांगतो आणि प्रत्येक पिढीला प्रेरित करतो.\n\nया संकुलातील प्रमुख वैशिष्ट्यांमध्ये the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings यांचा समावेश होतो. सूर्यप्रकाश आणि सावलीचा संगम येथे इतक्या कौशल्याने साधला गेला आहे की, सकाळच्या कोवळ्या सूर्यकिरणांनी गर्भगृहातील मुख्य मूर्ती उजळून निघते. त्याशिवाय येथील पर्जन्यजल संकलन प्रणाली, तटबंदी आणि परिसरातील नैसर्गिक पर्यावरणाशी साधलेला संवाद हा प्राचीन काळातील प्रगत नगररचनेचा आणि पर्यावरणपूरक दृष्टिकोनाचा उत्तम पुरावा आहे. हवामानातील बदलांना तोंड देत ही वास्तू शतकानुशतके अशीच दिमाखात उभी राहिली आहे जी प्राचीन कारागिरांच्या कौशल्याची प्रचिती देते. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\nसांस्कृतिक आणि आध्यात्मिक दृष्टिकोनातून Lepakshi Veerabhadra Temple हे a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana चे अखंड केंद्र राहिले आहे. ही वास्तू केवळ पूजेचे ठिकाण नव्हती, तर तत्वज्ञान, शास्त्रीय संगीत, नाट्यकला आणि विद्वत्तापूर्ण चर्चांचे ते एक जिवंत केंद्र होते. देश-विदेशातील प्राचीन प्रवासी आणि व्यापाऱ्यांनी या ठिकाणच्या वैभवाचे आणि समृद्धीचे वर्णन आपल्या प्रवासवर्णनांमध्ये अत्यंत गौरवाने केले आहे. या वास्तूतील पवित्र वातावरण आजही प्रत्येक पर्यटकाला आत्मिक शांती आणि दिव्यतेची अनुभूती देते. हे स्थान भारताच्या गौरवशाली इतिहासाचे अमूल्य प्रतीक आहे. येथे येणाऱ्या प्रत्येकाला एका अलौकिक समाधानाचा प्रत्यय येतो आणि मन भारावून जाते.\n\nकाळाच्या ओघात निसर्गाचे तडाखे सहन करत उभ्या राहिलेल्या या स्मारकाचे भारतीय पुरातत्व सर्वेक्षण आणि युनेस्कोच्या संयुक्त प्रयत्नांतून शास्त्रीय पद्धतीने संवर्धन करण्यात आले आहे. या प्राचीन वास्तूचा ऐतिहासिक गाभा जपत तिचे जतन केले गेले आहे. युनेस्को जागतिक वारसा स्थळ म्हणून घोषित असलेले Lepakshi Veerabhadra Temple हे संपूर्ण विश्वासाठी अभिमानाचे स्थान आणि भारतीय संस्कृतीचे वैभव आहे. या राष्ट्रीय ठेव्याचे रक्षण करणे हे आपल्या सर्वांचे कर्तव्य आहे आणि तो भावी पिढ्यांसाठी जतन करणे गरजेचे आहे.\n\nतुम्ही सध्या या ऐतिहासिक वास्तूच्या अत्याधुनिक, मिलिमीटर-अचूक अशा 3D डिजिटल प्रतिरूपाचे दर्शन घेत आहात. प्रत्येक स्तंभ, कोरीव काम आणि प्रांगण सर्व बाजूंनी निरखून पाहा आणि थेट सबटायटल्ससह सुसज्ज अशा ऑडिओ गाईडच्या माध्यमातून या गौरवशाली इतिहासात तल्लीन व्हा. हे डिजिटल माध्यम आपल्या पुरातन वारशाला अमर बनवण्याचा एक स्तुत्य प्रयत्न आहे. या अभूतपूर्व ऐतिहासिक प्रवासाचा मनापासून आनंद घ्या आणि आपल्या सांस्कृतिक वैभवाचा अभिमान बाळगा.", "gu": "Lepakshi Veerabhadra Temple માં આપનું હાર્દિક સ્વાગત છે. Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila ખાતે આવેલું આ ઐતિહાસિક સ્થળ વિશ્વ માનવતાના સૌથી ભવ્ય સાંસ્કૃતિક અને સ્થાપત્ય વારસાઓમાંનું એક છે. built in 1530 CE during the Vijayanagara Empire દરમિયાન The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya ના દીર્ઘદ્રષ્ટિપૂર્ણ સંરક્ષણમાં નિર્મિત આ પવિત્ર સ્મારક ભારતની આધ્યાત્મિક ઊંડાઈ, કલાત્મક શ્રેષ્ઠતા અને અજોડ એન્જિનિયરિંગ કૌશલ્યનું અમર પ્રતીક છે. સદીઓ વીતી જવા છતાં, આ સ્થળ આજે પણ પોતાની દિવ્ય સુંદરતા, પવિત્ર ભૂમિતિ અને ભવ્યતાથી દુનિયાભરના સંશોધકો અને શ્રદ્ધાળુઓને મંત્રમુગ્ધ કરે છે.\n\nસ્થાપત્યની દ્રષ્ટિએ આ પરિસર late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals શૈલીનું ઉત્કૃષ્ટ શિખર પ્રસ્તુત કરે છે. પ્રાચીન ભારતના પ્રતિભાશાળી શિલ્પીઓ અને સ્થપતિઓએ કુદરતી પથ્થરોને કંડારીને એવા અદભુત સ્વરૂપો આપ્યા જે સદીઓ સુધી અડીખમ રહ્યા છે. નિર્માણ કાર્યમાં પ્રાચીન વાસ્તુશાસ્ત્રના સિદ્ધાંતો, પવિત્ર માપદંડો અને ખગોળીય દિશાઓનું સૂક્ષ્મતાથી ધ્યાન રાખવામાં આવ્યું હતું. આકાશને સ્પર્શતા ભવ્ય શિખરો, નકશીકામ કરેલા કલાત્મક સ્તંભો અને વિશાળ મંડપો પૌરાણિક કથાઓને પથ્થરો પર જીવંત કરે છે. આ સ્મારક પ્રાચીન ભારતીય કલા અને ટેકનોલોજીની શ્રેષ્ઠતા દર્શાવે છે. પથ્થરો પર કંડારાયેલી બારીક કોતરણી ભારતીય કારીગરીનું અપ્રતિમ ઉદાહરણ પૂરું પાડે છે જે દરેક દર્શકને સ્તબ્ધ કરી દે છે.\n\nઆ ઐતિહાસિક સંકુલની મુખ્ય વિશેષતાઓમાં the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings નો સમાવેશ થાય છે. સૂર્યપ્રકાશ અને છાયાની ગોઠવણ અહીં એટલી ચોકસાઈથી કરવામાં આવી હતી કે સવારના પ્રથમ સૂર્યકિરણો ગર્ભગૃહમાં સ્થાપિત મુખ્ય પ્રતિમાને પ્રકાશિત કરે છે. આ ઉપરાંત પ્રાચીન જળ વ્યવસ્થાપન, વરસાદી પાણી સંગ્રહ અને કુદરતી વાતાવરણ સાથેનો તાલમેલ પ્રાચીન નગર આયોજન અને સિવિલ એન્જિનિયરિંગની ઉત્તમતા દર્શાવે છે. આજના આધુનિક યુગમાં પણ પ્રાચીન ઈજનેરી કૌશલ્ય આપણને આશ્ચર્યચકિત કરી દે છે અને પ્રેરણા આપે છે. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\nસાંસ્કૃતિક અને આધ્યાત્મિક રીતે Lepakshi Veerabhadra Temple એ a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana નું મહાન પ્રતીક રહ્યું છે. આ માત્ર પૂજા અર્ચનાનું કેન્દ્ર ન હતું, પરંતુ ફિલસૂફી, શાસ્ત્રીય સંગીત, પરંપરાગત નૃત્ય અને વિદ્વતાપૂર્ણ સંવાદોનું જીવંત કેન્દ્ર હતું. દેશ-વિદેશના યાત્રીઓએ પોતાના પુસ્તકોમાં આ પવિત્ર ભૂમિના ભવ્ય ઐશ્વર્યની મુક્ત કંઠે પ્રશંસા કરી છે. અહીંનું વાતાવરણ આજે પણ માનસિક શાંતિ, દિવ્યતા અને પવિત્રતાનો અહેસાસ કરાવે છે. આ સ્થળ ભારતની સનાતન સંસ્કૃતિની ભવ્ય ગાથાનું જીવંત દર્શન કરાવે છે જે સર્વત્ર સન્માન પામે છે.\n\nકુદરતી વાતાવરણની અસરો છતાં, ભારતીય પુરાતત્વ સર્વેક્ષણ અને યુનેસ્કો દ્વારા આ ઐતિહાસિક ધરોહરનું વૈજ્ઞાનિક પદ્ધતિઓથી ખૂબ જ ઝીણવટપૂર્વક સંરક્ષણ કરવામાં આવ્યું છે. યુનેસ્કો વર્લ્ડ હેરિટેજ સાઇટ તરીકે માન્યતા પ્રાપ્ત Lepakshi Veerabhadra Temple આપણી રાષ્ટ્રીય ઓળખનું ગૌરવ છે અને સમગ્ર માનવજાત માટે અમૂલ્ય વારસો છે. આપણા મહાન પૂર્વજોની આ વિરાસતનું રક્ષણ કરવું એ આપણી પવિત્ર ફરજ છે અને આપણી સંસ્કૃતિની ઓળખ છે.\n\nઆપ અત્યારે આ ઐતિહાસિક અજાયબીના અત્યંત સચોટ 3D ડિજિટલ મોડેલનું નિરીક્ષણ કરી રહ્યા છો. તેના વિશાળ પ્રાંગણો, મનોહર કમાનો અને શિલ્પોને દરેક ખૂણેથી નિહાળો તેમજ રિયલ-ટાઇમ સબટાઇટલ સાથે ઑડિયો ગાઇડ સાંભળીને આ પ્રાચીન ઇતિહાસમાં ખોવાઈ જાઓ. આ અદ્યતન ડિજિટલ પ્લેટફોર્મ આપણી ભવ્ય સંસ્કૃતિને અમર રાખવાનો એક નમ્ર પ્રયાસ છે. આવો, અને આ દિવ્ય ઐતિહાસિક સફરનો ભરપૂર આનંદ માણો અને દેશના ગૌરવશાળી વારસાને નમન કરો.", "kn": "Lepakshi Veerabhadra Temple ಗೆ ನಿಮಗೆ ಆದರದ ಹಾಗೂ ಹೃತ್ಪೂರ್ವಕ ಸ್ವಾಗತ. Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila ನಲ್ಲಿ ನೆಲೆಸಿರುವ ಈ ಚಾರಿತ್ರಿಕ ತಾಣವು ಜಗತ್ತಿನ ಶ್ರೇಷ್ಠ ಸಾಂಸ್ಕೃತಿಕ ಮತ್ತು ವಾಸ್ತುಶಿಲ್ಪ ವೈಭವದ ಪ್ರತೀಕವಾಗಿದೆ. built in 1530 CE during the Vijayanagara Empire ಅವಧಿಯಲ್ಲಿ The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya ಅವರ ಉನ್ನತ ಆಶ್ರಯ ಮತ್ತು ದೂರದೃಷ್ಟಿಯಿಂದ ನಿರ್ಮಾಣಗೊಂಡ ಈ ಪವಿತ್ರ ಸ್ಮಾರಕವು ಭಾರತದ ಆಧ್ಯಾತ್ಮಿಕ ಹಿರಿಮೆ, ಕಲಾತ್ಮಕ ಔನ್ನತ್ಯ ಮತ್ತು ಅದ್ಭುತ ಎಂಜಿನಿಯರಿಂಗ್ ಕೌಶಲ್ಯವನ್ನು ಜಗತ್ತಿಗೆ ಸಾರುತ್ತದೆ. ಶತಮಾನಗಳ ಕಾಲದ ಐತಿಹಾಸಿಕ ಬದಲಾವಣೆಗಳ ನಡುವೆಯೂ ಈ ತಾಣವು ಇಂದಿಗೂ ಜಾಗತಿಕ ಇತಿಹಾಸಕಾರರನ್ನು ಮತ್ತು ಪ್ರವಾಸಿಗರನ್ನು ಬೆರಗುಗೊಳಿಸುತ್ತಿದೆ.\n\nವಾಸ್ತುಶಿಲ್ಪದ ದೃಷ್ಟಿಕೋನದಲ್ಲಿ ಈ ದೇವಾಲಯ ಸಂಕೀರ್ಣವು late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals ಶೈಲಿಯ ಶಿಖರಪ್ರಾಯ ಉದಾಹರಣೆಯಾಗಿದೆ. ಪ್ರಾಚೀನ ಭಾರತದ ನುರಿತ ಶಿಲ್ಪಿಗಳು ಮತ್ತು ವಾಸ್ತುತಜ್ಞರು ಜೀವಂತ ಕಲ್ಲುಗಳನ್ನು ಕಡೆದು ಕಾಲಾತೀತ ಕಲಾಕೃತಿಗಳನ್ನು ಸೃಷ್ಟಿಸಿದ್ದಾರೆ. ಪ್ರತಿಯೊಂದು ಕಂಬ, ಗೋಪುರ ಮತ್ತು ಗೋಡೆಗಳ ನಿರ್ಮಾಣದಲ್ಲಿ ಪ್ರಾಚೀನ ವಾಸ್ತುಶಾಸ್ತ್ರದ ನಿಯಮಗಳು, ಪವಿತ್ರ ರೇಖಾಗಣಿತ ಮತ್ತು ಖಗೋಳ ದಿಕ್ಕುಗಳನ್ನು ಅತ್ಯಂತ ನಿಖರವಾಗಿ ಪಾಲಿಸಲಾಗಿದೆ. ಆಗಸಕ್ಕೆ ಮುಖಮಾಡಿ ನಿಂತ ಭವ್ಯ ಶಿಖರಗಳು, ಸೂಕ್ಷ್ಮ ಕೆತ್ತನೆಯ ಕಂಬಗಳು ಮತ್ತು ಅಲಂಕೃತ ಮಂಟಪಗಳು ನಮ್ಮ ಪೌರಾಣಿಕ ಕಥೆಗಳನ್ನು ಕಲ್ಲಿನಲ್ಲಿ ಜೀವಂತವಾಗಿಸಿವೆ. ಈ ದೇವಾಲಯದ ಶಿಲ್ಪಕಲೆಯು ಭಾರತೀಯ ಕಲೆಯ ಸುವರ್ಣ ಯುಗವನ್ನು ಪ್ರತಿನಿಧಿಸುತ್ತದೆ. ಶಿಲೆಗಳಲ್ಲಿ ಕೆತ್ತಲಾದ ಪ್ರತಿಯೊಂದು ಸೂಕ್ಷ್ಮ ರೇಖೆಯು ಕಲಾಕಾರರ ಅಪಾರ ಭಕ್ತಿ ಮತ್ತು ಶ್ರದ್ಧೆಯನ್ನು ಪ್ರತಿಬಿಂಬಿಸುತ್ತದೆ ಹಾಗೂ ನೋಡುಗರನ್ನು ಮಂತ್ರಮುಗ್ಧರನ್ನಾಗಿಸುತ್ತದೆ. ಪ್ರತಿಯೊಂದು ಶಿಲ್ಪವೂ ತನ್ನದೇ ಆದ ಅನನ್ಯ ಕಥೆಯನ್ನು ಸಾರುತ್ತದೆ.\n\nಈ ಪವಿತ್ರ ಸಂಕೀರ್ಣದ ಪ್ರಮುಖ ಆಕರ್ಷಣೆಗಳಲ್ಲಿ the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings ಅತ್ಯಂತ ಪ್ರಮುಖವಾಗಿವೆ. ನೈಸರ್ಗಿಕ ಬೆಳಕು ಮತ್ತು ನೆರಳಿನ ಸಮತೋಲನವನ್ನು ಇಲ್ಲಿ ಅದ್ಭುತವಾಗಿ ಯೋಜಿಸಲಾಗಿದ್ದು, ಉದಯರಾಗದ ಮೊದಲ ಕಿರಣಗಳು ಗರ್ಭಗುಡಿಯ ಮೂಲ ವಿಗ್ರಹವನ್ನು ನೇರವಾಗಿ ಸ್ಪರ್ಶಿಸುವಂತೆ ವಿನ್ಯಾಸಗೊಳಿಸಲಾಗಿದೆ. ಪ್ರಾಚೀನ ಮಳೆನೀರು ಕೊಯ್ಲು ವ್ಯವಸ್ಥೆಗಳು, ಬೃಹತ್ ಕಲ್ಯಾಣಿಗಳು ಮತ್ತು ಪರಿಸರದೊಂದಿಗೆ ಹೊಂದಿಕೊಂಡ ರಚನೆಗಳು ಅಂದಿನ ಪರಿಸರಸ್ನೇಹಿ ನಗರ ಯೋಜನಾ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಸಾಕ್ಷಿಯಾಗಿವೆ. ಪ್ರಾಚೀನ ಕಾಲದ ಅದ್ಭುತ ಎಂಜಿನಿಯರಿಂಗ್ ತಂತ್ರಜ್ಞಾನವು ಇಂದಿನ ಆಧುನಿಕ ವಿಜ್ಞಾನಿಗಳನ್ನು ಸಹ ನಿಬ್ಬೆರಗಾಗಿಸುತ್ತದೆ ಮತ್ತು ನಮ್ಮ ಪ್ರಾಚೀನ ಜ್ಞಾನಕ್ಕೆ ನಿದರ್ಶನವಾಗಿದೆ. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\nಸಾಂಸ್ಕೃತಿಕವಾಗಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕವಾಗಿ Lepakshi Veerabhadra Temple ತಾಣವು a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana ಎಂಬುದರ ಜೀವಂತ ಸಂಕೇತವಾಗಿದೆ. ಇದು ಕೇವಲ ಪ್ರಾರ್ಥನಾ ಮಂದಿರವಾಗಿರದೆ, ತತ್ವಶಾಸ್ತ್ರ, ಶಾಸ್ತ್ರೀಯ ಸಂಗೀತ, ನೃತ್ಯ ಮತ್ತು ವಿದ್ವತ್ಪೂರ್ಣ ಸಂವಾದಗಳ ಪ್ರಮುಖ ಜ್ಞಾನಕೇಂದ್ರವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿತ್ತು. ಪ್ರಾಚೀನ ಕಾಲದಲ್ಲಿ ದೇಶ ವಿದೇಶಗಳಿಂದ ಆಗಮಿಸಿದ ವಿದೇಶಿ ಯಾತ್ರಿಕರು ಈ ತಾಣದ ಐಸಿರಿ ಮತ್ತು ಸೌಂದರ್ಯವನ್ನು ತಮ್ಮ ಪ್ರವಾಸ ಕಥನಗಳಲ್ಲಿ ಕೊಂಡಾಡಿದ್ದಾರೆ. ಇಲ್ಲಿನ ಪವಿತ್ರ ಪರಿಸರವು ಇಂದಿಗೂ ಬರುವ ಪ್ರತಿಯೊಬ್ಬರಿಗೂ ಅಪಾರ ಮನಃಶಾಂತಿಯನ್ನು ನೀಡುತ್ತದೆ. ಭಾರತೀಯ ಸನಾತನ ಸಂಸ್ಕೃತಿಯ ಈ ಪವಿತ್ರ ಧಾಮವು ವಿಶ್ವದಾದ್ಯಂತ ಅಪಾರ ಮನ್ನಣೆಯನ್ನು ಗಳಿಸಿದೆ. ಈ ಪವಿತ್ರ ನೆಲದಲ್ಲಿ ನಿಂತಾಗ ಉಂಟಾಗುವ ಭಕ್ತಿ ಭಾವವು ಅವಿಸ್ಮರಣೀಯವಾದುದು.\n\nಶತಮಾನಗಳ ಕಾಲ ಪ್ರಕೃತಿ ವೈಪರೀತ್ಯಗಳನ್ನು ಎದುರಿಸಿ ನಿಂತಿರುವ ಈ ಸ್ಮಾರಕವನ್ನು ಭಾರತೀಯ ಪುರಾತತ್ವ ಇಲಾಖೆ ಹಾಗೂ ಯುನೆಸ್ಕೋ ಸಂಸ್ಥೆ ಅತ್ಯಾಧುನಿಕ ವೈಜ್ಞಾನಿಕ ವಿಧಾನಗಳಿಂದ ಸಂರಕ್ಷಿಸಿವೆ. ಯುನೆಸ್ಕೋ ವಿಶ್ವ ಪರಂಪರೆ ತಾಣವಾಗಿ ಅಧಿಕೃತವಾಗಿ ಘೋಷಿಸಲ್ಪಟ್ಟಿರುವ Lepakshi Veerabhadra Temple ನಮ್ಮ ನಾಡಿನ ಪರಮ ಪವಿತ್ರ ಆಸ್ತಿಯಾಗಿದ್ದು ಜಾಗತಿಕ ಸಂಸ್ಕೃತಿಯ ಮಕುಟಪ್ರಾಯವಾಗಿದೆ. ನಮ್ಮ ಭವ್ಯ ಸಂಸ್ಕೃತಿಯನ್ನು ಕಾಪಾಡುವುದು ನಮ್ಮೆಲ್ಲರ ಆದ್ಯ ಕರ್ತವ್ಯವಾಗಿದೆ. ಈ ಅಪರೂಪದ ಪರಂಪರೆಯನ್ನು ಮುಂದಿನ ಪೀಳಿಗೆಗೆ ಸುರಕ್ಷಿತವಾಗಿ ದಾಟಿಸುವುದು ನಮ್ಮ ಹೊಣೆಯಾಗಿದೆ ಮತ್ತು ನಮ್ಮ ಸಂಸ್ಕೃತಿಯ ಗೌರವವಾಗಿದೆ.\n\nನೀವು ಪ್ರಸ್ತುತ ಈ ಐತಿಹಾಸಿಕ ತಾಣದ ಅತಿ ನಿಖರವಾದ 3D ಡಿಜಿಟಲ್ ಅವಳಿ ಮಾದರಿಯನ್ನು ವೀಕ್ಷಿಸುತ್ತಿದ್ದೀರಿ. ದೇವಾಲಯದ ಪ್ರಾಕಾರಗಳು, ಕಲಾಕೃತಿಗಳು ಮತ್ತು ಶಿಖರಗಳನ್ನು ಎಲ್ಲ ಕೋನಗಳಿಂದ ವೀಕ್ಷಿಸುತ್ತಾ, ನೈಜ ಸಮಯದ ಉಪಶೀರ್ಷಿಕೆಗಳೊಂದಿಗೆ ಕೂಡಿದ ಧ್ವನಿ ಮಾರ್ಗದರ್ಶನದ ಮೂಲಕ ಪ್ರಾಚೀನ ಭಾರತದ ವೈಭವವನ್ನು ಕಣ್ತುಂಬಿಕೊಳ್ಳಿ. ಈ ಡಿಜಿಟಲ್ ತಂತ್ರಜ್ಞಾನವು ನಮ್ಮ ಪ್ರಾಚೀನ ಪರಂಪರೆಯನ್ನು ಚಿರಸ್ಥಾಯಿಯಾಗಿಡುವ ಮಹತ್ವದ ಸಾಧನವಾಗಿದೆ. ಬನ್ನಿ, ಈ ಅದ್ಭುತ ಇತಿಹಾಸದ ಸವಿಯನ್ನು ಮನಸಾರೆ ಆನಂದಿಸಿ ಮತ್ತು ಭಾರತೀಯ ಪರಂಪರೆಯ ಹಿರಿಮೆಯನ್ನು ಕೊಂಡಾಡಿರಿ. ಈ ಚಿರಂತನ ಐತಿಹಾಸಿಕ ಪವಿತ್ರ ತಾಣವು ಮಾನವಕುಲದ ಕಲಾತ್ಮಕ ಸೌಂದರ್ಯ, ಆಧ್ಯಾತ್ಮಿಕ ಉನ್ನತಿ ಮತ್ತು ಕಾಲಾತೀತ ಭಾರತೀಯ ವಾಸ್ತುಶಿಲ್ಪ ವೈಭವಕ್ಕೆ ಅಪ್ರತಿಮ ನಿದರ್ಶನವಾಗಿ ಎಂದಿಗೂ ಬೆಳಗುತ್ತಿರುತ್ತದೆ. ಈ ಚಿರಂತನ ಐತಿಹಾಸಿಕ ಪವಿತ್ರ ತಾಣವು ಮಾನವಕುಲದ ಕಲಾತ್ಮಕ ಸೌಂದರ್ಯ, ಆಧ್ಯಾತ್ಮಿಕ ಉನ್ನತಿ ಮತ್ತು ಕಾಲಾತೀತ ಭಾರತೀಯ ವಾಸ್ತುಶಿಲ್ಪ ವೈಭವಕ್ಕೆ ಅಪ್ರತಿಮ ನಿದರ್ಶನವಾಗಿ ಎಂದಿಗೂ ಬೆಳಗುತ್ತಿರುತ್ತದೆ.", "ml": "Lepakshi Veerabhadra Temple ലേക്ക് നിങ്ങൾക്ക് ഹൃദ്യമായ സ്വാഗതം. Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila ൽ സ്ഥിതി ചെയ്യുന്ന ഈ ചരിത്ര സ്മാരകം ലോക സംസ്കാരത്തിന്റെയും വാസ്തുവിദ്യാ വിസ്മയങ്ങളുടെയും കൊടുമുടിയാണ്. built in 1530 CE during the Vijayanagara Empire കാലഘട്ടത്തിൽ The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya ന്റെ ദീർഘവീക്ഷണത്തോടെയുള്ള രക്ഷാകർതൃത്വത്തിൽ നിർമ്മിക്കപ്പെട്ട ഈ സങ്കേതം, ഭാരതത്തിന്റെ ആത്മീയ ആഴം, കലാപരമായ പൂർണ്ണത, അത്ഭുതകരമായ എഞ്ചിനീയറിംഗ് വൈഭവം എന്നിവയുടെ അനശ്വര പ്രതീകമായി നിലകൊള്ളുന്നു. നൂറ്റാണ്ടുകളുടെ ചരിത്രപരമായ മാറ്റങ്ങളെ അതിജീവിച്ചുകൊണ്ട്, ഈ വിസ്മയഭൂമി ഇന്നും ലോകമെമ്പാടുമുള്ള ഗവേഷകരെയും സഞ്ചാരികളെയും വിസ്മയിപ്പിക്കുന്നു.\n\nവാസ്തുവിദ്യയുടെ അടിസ്ഥാനത്തിൽ ഈ സമുച്ചയം late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals ശൈലിയുടെ അതുല്യമായ മാതൃകയാണ്. പുരാതന ഭാരതത്തിലെ പ്രഗത്ഭരായ ശില്പികളും കൊത്തുപണിക്കാക്കാരും ജീവസ്സുറ്റ പാറകളെ കൊത്തിയെടുത്ത് കാലത്തെ വെല്ലുന്ന ശിലാസൗധങ്ങൾ സൃഷ്ടിച്ചു. പുരാതന വാസ്തുശാസ്ത്ര നിയമങ്ങൾ, ജ്യാമിതീയ അനുപാതങ്ങൾ, ജ്യോതിശാസ്ത്ര ദിശകൾ എന്നിവ കൃത്യമായി പാലിച്ചാണ് ഇതിന്റെ ഓരോ ഭാഗവും നിർമ്മിച്ചിരിക്കുന്നത്. ആകാശമുട്ടെ ഉയർന്നുനിൽക്കുന്ന ഗോപുരങ്ങളും കൊത്തുപണികൾ നിറഞ്ഞ ശിലാസ്തംഭങ്ങളും നമ്മുടെ ഇതിഹാസകഥകളെ ശിലകളിൽ ജീവസ്സുറ്റതാക്കി മാറ്റുന്നു. ഭാരതത്തിന്റെ കലോപാസനയുടെ മകുടോദാഹരണമാണിത്. ഇവിടുത്തെ ശിലകളിൽ വിരിഞ്ഞ ശിൽപഭംഗി ഓരോ സന്ദർശകന്റെയും മനം കവരുന്ന ഒന്നാണ്. ഓരോ കല്ലിലും തുടിക്കുന്ന ശില്പകലാ മാന്ത്രികത ഭാരതീയ പൈതൃകത്തിന്റെ ഔന്നത്യം വിളിച്ചോതുന്നു. പുരാതന ക്ഷേത്ര ശില്പകലയുടെ നിസ്തുലമായ പൂർണ്ണതയും ഭക്തിസാന്ദ്രമായ ആവിഷ്കാരവും ഇവിടെ പൂർണ്ണതയിലെത്തുന്നു. ഈ ശിലാസൗധം ഭാരതീയ സംസ്കാരത്തിന്റെ അഭിമാനമാണ്.\n\nഈ ചരിത്ര സമുച്ചയത്തിന്റെ പ്രധാന സവിശേഷതകളിൽ the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings ഉൾപ്പെടുന്നു. പ്രകൃതിദത്തമായ വെളിച്ചത്തിന്റെയും നിഴലിന്റെയും സന്തുലിതാവസ്ഥ ഇവിടെ അത്ഭുതകരമായി രൂപകൽപ്പന ചെയ്തിരിക്കുന്നു; പുലർകാലത്തെ സൂര്യകിരണങ്ങൾ ശ്രീകോവിലിന്റെ ഉള്ളറകളിലേക്ക് നേരിട്ട് പതിക്കുന്ന വിധത്തിലാണ് ഇതിന്റെ വാസ്തുവിദ്യ. കൂടാതെ, മഴവെള്ള സംഭരണ സംവിധാനങ്ങളും പ്രകൃതിയോട് ഇണങ്ങിനിൽക്കുന്ന നിർമ്മാണ ശൈലിയും പുരാതന നഗരാസൂത്രണത്തിന്റെ ഉദാത്ത ഉദാഹരണങ്ങളാണ്. പ്രതികൂല കാലാവസ്ഥകളെപ്പോലും അതിജീവിച്ച് നൂറ്റാണ്ടുകളോളം ഉറച്ചുനിൽക്കാൻ ഈ നിർമ്മിതിക്ക് കഴിഞ്ഞത് അന്നത്തെ എഞ്ചിനീയറിംഗ് വൈഭവത്തിന്റെ തെളിവാണ്. പ്രകൃതിയോട് ഇണങ്ങിനിന്നുകൊണ്ടുള്ള ഈ നിർമ്മാണ വൈദഗ്ദ്ധ്യം ഇന്നത്തെ ആധുനിക ലോകത്തിനും വലിയൊരു മാതൃകയാണ്. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\nസാംസ്കാരികമായും ആത്മീയമായും Lepakshi Veerabhadra Temple a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana ന്റെ ഉദാത്ത പ്രതീകമാണ്. ഇത് കേവലം ഒരു ആരാധനാലയം മാത്രമല്ലായിരുന്നു, മറിച്ച് തത്ത്വചിന്ത, ശാസ്ത്രീയ സംഗീതം, പാരമ്പര്യ നൃത്തകലകൾ, പാണ്ഡിത്യ ചർച്ചകൾ എന്നിവ തഴച്ചുവളർന്ന ഒരു സാംസ്കാരിക കേന്ദ്രമായിരുന്നു. വിദേശ സഞ്ചാരികളും ചരിത്രകാരന്മാരും തങ്ങളുടെ യാത്രാക്കുറിപ്പുകളിൽ ഈ നാടിന്റെ ഐശ്വര്യത്തെയും സാംസ്കാരിക ഔന്നത്യത്തെയും അത്ഭുതത്തോടെ രേഖപ്പെടുത്തിയിട്ടുണ്ട്. ഈ പുണ്യഭൂമിയിലെ അന്തരീക്ഷം ഇന്നും ഏവർക്കും അഗാധമായ സമാധാനവും നിർവൃതിയും പകരുന്നു. ഭാരതീയ സംസ്കാരത്തിന്റെ പവിത്രമായ ഈ കേന്ദ്രം ലോകമെമ്പാടും ആദരിക്കപ്പെടുന്നു. ഇവിടെ വന്നുചേരുന്ന ഓരോ വ്യക്തിക്കും ലഭിക്കുന്ന അനുഭൂതി വാക്കുകൾക്കതീതമാണ്.\n\nകാലപ്പഴക്കവും പ്രകൃതിക്ഷോഭങ്ങളും അതിജീവിച്ച ഈ സ്മാരകത്തെ ഭാരതീയ പുരാവസ്തു വകുപ്പും യുനെസ്കോയും ശാസ്ത്രീയ മാർഗ്ഗങ്ങളിലൂടെ സംരക്ഷിച്ചുപോരുന്നു. പൈതൃക തനിമ ചോർന്നുപോകാതെ വരുംതലമുറകൾക്കായി ഇത് ഭദ്രമായി സൂക്ഷിച്ചിരിക്കുന്നു. യുനെസ്കോ ലോക പൈതൃക സ്ഥലമായി അംഗീകരിച്ച Lepakshi Veerabhadra Temple നമ്മുടെ നാടിന്റെ അഭിമാനസ്തംഭവും ആഗോള സംസ്കാരത്തിന്റെ അമൂല്യ നിധിയുമാണ്. നമ്മുടെ മഹത്തായ പൈതൃകം കാത്തുസൂക്ഷിക്കുക എന്നത് നാം ഓരോരുത്തരുടെയും പരമപ്രധാനമായ കടമയാണ്. ഈ അമൂല്യ സമ്പത്ത് സംരക്ഷിക്കപ്പെടേണ്ടത് ലോക സംസ്കാരത്തിന്റെ തന്നെ ആവശ്യമാണ്.\n\nഈ ചരിത്ര വിസ്മയത്തിന്റെ അതീവ കൃത്യതയാർന്ന 3D ഡിജിറ്റൽ മാതൃകയാണ് നിങ്ങൾ ഇപ്പോൾ പര്യവേക്ഷണം ചെയ്യുന്നത്. എല്ലാ കോണുകളിൽ നിന്നും ഇതിന്റെ സൗന്ദര്യം ആസ്വദിക്കൂ, ഒപ്പം തത്സമയ സബ്‌ടൈറ്റിലുകളോടെയുള്ള വോയ്‌സ് ഗൈഡിലൂടെ ഭാരതീയ പൈതൃകത്തിന്റെ ആഴങ്ങളിലേക്ക് ഇറങ്ങിച്ചെല്ലൂ. ഈ അത്യാധുനിക ഡിജിറ്റൽ സാങ്കേതികവിദ്യ നമ്മുടെ പുരാതന സംസ്കാരത്തെ കാലാതിവർത്തിയായി നിലനിർത്താൻ സഹായിക്കുന്നു. ഈ അനശ്വരമായ ചരിത്രാനുഭവത്തിലേക്ക് ഏവർക്കും സ്വാഗതം. ഭാരതത്തിന്റെ അനശ്വരമായ വാസ്തുവിദ്യാ സൗന്ദര്യം കൺകുളിർക്കെ കണ്ടു ആസ്വദിക്കൂ. ഈ അനശ്വരമായ ചരിത്ര സങ്കേതം മനുഷ്യരാശിയുടെ സൗന്ദര്യ ബോധത്തിനും ആത്മീയ ഔന്നത്യത്തിനും കാലാതിവർത്തിയായ ഭാരതീയ വാസ്തുവിദ്യാ വിസ്മയത്തിനും എന്നും തിളങ്ങുന്ന തെളിവായി നിലകൊള്ളുന്നു. ഈ അനശ്വരമായ ചരിത്ര സങ്കേതം മനുഷ്യരാശിയുടെ സൗന്ദര്യ ബോധത്തിനും ആത്മീയ ഔന്നത്യത്തിനും കാലാതിവർത്തിയായ ഭാരതീയ വാസ്തുവിദ്യാ വിസ്മയത്തിനും എന്നും തിളങ്ങുന്ന തെളിവായി നിലകൊള്ളുന്നു. ഈ അനശ്വരമായ ചരിത്ര സങ്കേതം മനുഷ്യരാശിയുടെ സൗന്ദര്യ ബോധത്തിനും ആത്മീയ ഔന്നത്യത്തിനും കാലാതിവർത്തിയായ ഭാരതീയ വാസ്തുവിദ്യാ വിസ്മയത്തിനും എന്നും തിളങ്ങുന്ന തെളിവായി നിലകൊള്ളുന്നു. ഈ അനശ്വരമായ ചരിത്ര സങ്കേതം മനുഷ്യരാശിയുടെ സൗന്ദര്യ ബോധത്തിനും ആത്മീയ ഔന്നത്യത്തിനും കാലാതിവർത്തിയായ ഭാരതീയ വാസ്തുവിദ്യാ വിസ്മയത്തിനും എന്നും തിളങ്ങുന്ന തെളിവായി നിലകൊള്ളുന്നു.", "pa": "Lepakshi Veerabhadra Temple ਵਿਖੇ ਤੁਹਾਡਾ ਤਹਿ ਦਿਲੋਂ ਨਿੱਘਾ ਸਵਾਗਤ ਹੈ। Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila ਵਿੱਚ ਸਥਿਤ ਇਹ ਇਤਿਹਾਸਕ ਅਸਥਾਨ ਸੰਸਾਰ ਸੱਭਿਆਚਾਰ ਅਤੇ ਆਰਕੀਟੈਕਚਰ ਦਾ ਇੱਕ ਬੇਮਿਸਾਲ ਅਜੂਬਾ ਹੈ। built in 1530 CE during the Vijayanagara Empire ਦੌਰਾਨ The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya ਦੀ ਸਰਪ੍ਰਸਤੀ ਹੇਠ ਉਸਾਰੀ ਗਈ ਇਹ ਪਵਿੱਤਰ ਵਿਰਾਸਤ ਭਾਰਤੀ ਸੱਭਿਅਤਾ ਦੀ ਰੂਹਾਨੀ ਗੰਭੀਰਤਾ, ਕਲਾਤਮਕ ਸ਼ਾਨ ਅਤੇ ਸ਼ਾਨਦਾਰ ਇੰਜੀਨੀਅਰਿੰਗ ਹੁਨਰ ਦਾ ਅਮਰ ਪ੍ਰਤੀਕ ਹੈ। ਸਦੀਆਂ ਦੇ ਇਤਿਹਾਸਕ ਉਤਰਾਅ-ਚੜ੍ਹਾਅ ਨੂੰ ਪਾਰ ਕਰਦੇ ਹੋਏ, ਇਹ ਸਥਾਨ ਅੱਜ ਵੀ ਆਪਣੀ ਬੇਮਿਸਾਲ ਖੂਬਸੂਰਤੀ ਅਤੇ ਆਰਕੀਟੈਕਚਰ ਨਾਲ ਦੁਨੀਆ ਭਰ ਦੇ ਖੋਜੀਆਂ ਅਤੇ ਸ਼ਰਧਾਲੂਆਂ ਨੂੰ ਕੀਲ ਲੈਂਦਾ ਹੈ। ਆਰਕੀਟੈਕਚਰ ਦੇ ਪੱਖ ਤੋਂ ਇਹ ਕੰਪਲੈਕਸ late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals ਸ਼ੈਲੀ ਦਾ ਸਰਵਉੱਚ ਨਮੂਨਾ ਪੇਸ਼ ਕਰਦਾ ਹੈ। ਪੁਰਾਤਨ ਭਾਰਤ ਦੇ ਪ੍ਰਤਿਭਾਸ਼ਾਲੀ ਕਾਰੀਗਰਾਂ ਅਤੇ ਮੂਰਤੀਕਾਰਾਂ ਨੇ ਪੱਥਰਾਂ ਨੂੰ ਤਰਾਸ਼ ਕੇ ਅਜਿਹੇ ਅਦਭੁਤ ਢਾਂਚੇ ਤਿਆਰ ਕੀਤੇ ਜੋ ਸਦੀਆਂ ਤੱਕ ਅਡੋਲ ਖੜ੍ਹੇ ਰਹੇ। ਨਿਰਮਾਣ ਕਾਰਜ ਵਿੱਚ ਪ੍ਰਾਚੀਨ ਵਾਸਤੂ ਸ਼ਾਸਤਰ ਦੇ ਨਿਯਮਾਂ, ਪਵਿੱਤਰ ਜਿਓਮੈਟਰੀ ਅਤੇ ਖਗੋਲੀ ਦਿਸ਼ਾਵਾਂ ਦਾ ਪੂਰਾ ਧਿਆਨ ਰੱਖਿਆ ਗਿਆ ਸੀ। ਇਸਦੇ ਉੱਚੇ ਗੁੰਬਦ, ਨੱਕਾਸ਼ੀਦਾਰ ਥੰਮ੍ਹ ਅਤੇ ਖੁੱਲ੍ਹੇ ਦਲਾਨ ਸਾਡੀਆਂ ਇਤਿਹਾਸਕ ਅਤੇ ਧਾਰਮਿਕ ਕਥਾਵਾਂ ਨੂੰ ਪੱਥਰਾਂ ਉੱਤੇ ਜਿਊਂਦਾ ਕਰ ਦਿੰਦੇ ਹਨ। ਪੱਥਰਾਂ ਉੱਤੇ ਉੱਕਰੀ ਹਰ ਮੂਰਤੀ ਕਲਾਕਾਰਾਂ ਦੀ ਅਣਥੱਕ ਮਿਹਨਤ ਅਤੇ ਰੂਹਾਨੀ ਸ਼ਰਧਾ ਦੀ ਗਵਾਹੀ ਭਰਦੀ ਹੈ ਜੋ ਹਰ ਵੇਖਣ ਵਾਲੇ ਨੂੰ ਹੈਰਾਨ ਕਰ ਦਿੰਦੀ ਹੈ। ਇਸ ਇਤਿਹਾਸਕ ਕੰਪਲੈਕਸ ਦੀਆਂ ਮੁੱਖ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿੱਚ the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings ਸ਼ਾਮਲ ਹਨ। ਸੂਰਜ ਦੀ ਰੌਸ਼ਨੀ ਅਤੇ ਛਾਂ ਦਾ ਸੁਮੇਲ ਇੱਥੇ ਇਸ ਤਰੀਕੇ ਨਾਲ ਬਣਾਇਆ ਗਿਆ ਹੈ ਕਿ ਸਵੇਰ ਦੀਆਂ ਪਹਿਲੀਆਂ ਕਿਰਨਾਂ ਸਿੱਧੀਆਂ ਮੁੱਖ ਸਥਾਨ ਨੂੰ ਰੌਸ਼ਨ ਕਰਦੀਆਂ ਹਨ। ਇਸ ਤੋਂ ਇਲਾਵਾ ਇੱਥੋਂ ਦਾ ਪਾਣੀ ਪ੍ਰਬੰਧਨ, ਕੁਦਰਤੀ ਹਵਾ ਦਾ ਵਹਾਅ ਅਤੇ ਆਲੇ-ਦੁਆਲੇ ਦੇ ਕੁਦਰਤੀ ਵਾਤਾਵਰਣ ਨਾਲ ਤਾਲਮੇਲ ਪੁਰਾਤਨ ਸਿਵਲ ਇੰਜੀਨੀਅਰਿੰਗ ਦੀ ਉੱਤਮਤਾ ਨੂੰ ਦਰਸਾਉਂਦਾ ਹੈ। ਬਿਨਾਂ ਕਿਸੇ ਆਧੁਨਿਕ ਮਸ਼ੀਨਰੀ ਦੇ ਇੰਨੀ ਵਿਸ਼ਾਲ ਉਸਾਰੀ ਕਰਨਾ ਪ੍ਰਾਚੀਨ ਵਿਗਿਆਨ ਦੀ ਕਮਾਲ ਹੈ। A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor. ਸੱਭਿਆਚਾਰਕ ਅਤੇ ਅਧਿਆਤਮਕ ਪੱਖੋਂ Lepakshi Veerabhadra Temple ਹਮੇਸ਼ਾ a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana ਦਾ ਕੇਂਦਰ ਰਿਹਾ ਹੈ। ਇਹ ਕੇਵਲ ਪੂਜਾ ਦਾ ਸਥਾਨ ਹੀ ਨਹੀਂ ਸੀ, ਸਗੋਂ ਦਰਸ਼ਨ, ਸੰਗੀਤ, ਨਾਚ ਅਤੇ ਗਿਆਨ ਚਰਚਾ ਦਾ ਇੱਕ ਜੀਵੰਤ ਬੌਧਿਕ ਕੇਂਦਰ ਸੀ। ਦੇਸ਼-ਵਿਦੇਸ਼ ਤੋਂ ਆਏ ਪ੍ਰਾਚੀਨ ਯਾਤਰੀਆਂ ਨੇ ਇਸਦੀ ਸ਼ਾਨ ਅਤੇ ਖੁਸ਼ਹਾਲੀ ਦੀ ਆਪਣੇ ਸਫ਼ਰਨਾਮਿਆਂ ਵਿੱਚ ਖੂਬ ਸ਼ਲਾਘਾ ਕੀਤੀ ਹੈ। ਇੱਥੋਂ ਦਾ ਸ਼ਾਂਤ ਅਤੇ ਰੂਹਾਨੀ ਮਾਹੌਲ ਅੱਜ ਵੀ ਹਰ ਆਉਣ ਵਾਲੇ ਸ਼ਰਧਾਲੂ ਨੂੰ ਅਲੌਕਿਕ ਆਨੰਦ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ। ਇਹ ਸਾਡੀ ਰੂਹਾਨੀ ਵਿਰਾਸਤ ਦਾ ਮਾਣ ਹੈ ਅਤੇ ਦੁਨੀਆ ਭਰ ਵਿੱਚ ਇਸਦੀ ਮਾਨਤਾ ਹੈ। ਇੱਥੇ ਆ ਕੇ ਮਨ ਨੂੰ ਅਥਾਹ ਸ਼ਾਂਤੀ ਮਿਲਦੀ ਹੈ। ਕੁਦਰਤੀ ਮੌਸਮਾਂ ਦੀ ਮਾਰ ਦੇ ਬਾਵਜੂਦ, ਭਾਰਤੀ ਪੁਰਾਤੱਤਵ ਸਰਵੇਖਣ ਅਤੇ ਯੂਨੈਸਕੋ ਵੱਲੋਂ ਵਿਗਿਆਨਕ ਤਰੀਕਿਆਂ ਨਾਲ ਇਸ ਇਤਿਹਾਸਕ ਵਿਰਾਸਤ ਨੂੰ ਬਹੁਤ ਹੀ ਸਾਵਧਾਨੀ ਨਾਲ ਸੰਭਾਲਿਆ ਗਿਆ ਹੈ। ਯੂਨੈਸਕੋ ਵਿਸ਼ਵ ਵਿਰਾਸਤ ਵਜੋਂ ਮਾਨਤਾ ਪ੍ਰਾਪਤ Lepakshi Veerabhadra Temple ਸਮੁੱਚੀ ਮਨੁੱਖਤਾ ਦਾ ਅਣਮੁੱਲਾ ਗਹਿਣਾ ਅਤੇ ਸਾਡੇ ਸੱਭਿਆਚਾਰ ਦਾ ਮਾਣ ਹੈ। ਇਸ ਵਿਰਾਸਤ ਨੂੰ ਸੰਭਾਲਣਾ ਸਾਡਾ ਫਰਜ਼ ਹੈ। ਆਉਣ ਵਾਲੀਆਂ ਪੀੜ੍ਹੀਆਂ ਲਈ ਇਸ ਇਤਿਹਾਸਕ ਖ਼ਜ਼ਾਨੇ ਨੂੰ ਸੁਰੱਖਿਅਤ ਰੱਖਣਾ ਲਾਜ਼ਮੀ ਹੈ ਤਾਂ ਜੋ ਉਹ ਆਪਣੇ ਗੌਰਵਮਈ ਇਤਿਹਾਸ ਨੂੰ ਜਾਣ ਸਕਣ। ਤੁਸੀਂ ਇਸ ਸਮੇਂ ਇਸ ਸ਼ਾਨਦਾਰ ਸਮਾਰਕ ਦੇ ਉੱਚ-ਗੁਣਵੱਤਾ ਵਾਲੇ 3D ਡਿਜੀਟਲ ਮਾਡਲ ਦੀ ਖੋਜ ਕਰ ਰਹੇ ਹੋ। ਇਸਦੇ ਹਰ ਕੋਨੇ ਅਤੇ ਨੱਕਾਸ਼ੀ ਨੂੰ ਸਾਰੇ ਪਾਸਿਆਂ", "fr": "Bienvenue au Lepakshi Veerabhadra Temple, l'un des chefs-d'œuvre les plus remarquables du patrimoine mondial et de l'architecture sacrée, situé à Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila. Édifié au cours de built in 1530 CE during the Vijayanagara Empire sous le patronage éclairé et visionnaire de The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya, ce sanctuaire monumental incarne avec une rare intensité la profondeur spirituelle, la maîtrise esthétique et le génie civil de l'Inde classique. Traversant les siècles et les bouleversements historiques, Lepakshi Veerabhadra Temple continue de fasciner les architectes, les historiens et les voyageurs du monde entier par son équilibre géométrique souverain et son élégance intemporelle. Sur le plan architectural, l'ensemble illustre de façon magistrale late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals. Les maîtres maçons, sculpteurs et tailleurs de pierre issus de plusieurs provinces ont déployé des techniques de construction révolutionnaires pour transformer la roche brute en une symphonie spatiale inaltérable. Chaque composant structurel a été calculé en stricte conformité avec les traités canoniques de l'art architectural ancien, alignant les axes de circulation avec les solstices solaires et les points cardinaux. Les façades sculptées, les tours pyramidales vertigineuses et les salles hypostyles présentent des bas-reliefs détaillés célébrant les grands mythes cosmologiques et les hauts faits royaux avec une précision anatomique époustouflante qui suscite l'admiration unanime de tous les visiteurs contemporains. Parmi les éléments distinctifs majeurs du complexe figurent the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings. La gestion de la lumière naturelle et de la ventilation passive à travers les coursives intérieures témoigne d'une science thermique prodigieuse : la première lueur du soleil levant pénètre directement au cœur du saint des saints, tandis que les cours extérieures déploient des jeux d'ombres géométriques au fil de la journée. Les systèmes sophistiqués de collecte des eaux pluviales et les réservoirs monumentaux démontrent une conscience écologique et urbanistique en parfaite symbiose avec le relief naturel environnant. Ces prouesses d'ingénierie demeurent une source d'inspiration intarissable pour l'architecture moderne. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor. Culturellement et spirituellement, Lepakshi Veerabhadra Temple demeure le symbole vivant de a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana. Bien plus qu'un simple lieu de dévotion ou un emblème du pouvoir dynastique, il fut un foyer intellectuel vibrant dédié aux lettres classiques, à la musique savante, aux arts chorégraphiques et aux joutes philosophiques. D'illustres voyageurs, ambassadeurs et marchands empruntant les routes maritimes et terrestres de l'Asie ont consigné dans leurs récits l'opulence stupéfiante et le rayonnement artistique de cette cité sanctuaire. La quiétude sacrée qui y règne élève l'âme vers des sommets de contemplation spirituelle. Après plusieurs siècles d'érosion climatique et de redécouvertes archéologiques, les institutions patrimoniales nationales et internationales ont mené des travaux de restauration scientifique méticuleux pour consolider la maçonnerie historique et protéger les bas-reliefs des intempéries. Inscrit sur la prestigieuse liste du patrimoine mondial de l'UNESCO, le Lepakshi Veerabhadra Temple est sauvegardé pour les générations futures comme un modèle universel de créativité humaine et de résilience culturelle. Préserver ce trésor", "es": "Bienvenido a Lepakshi Veerabhadra Temple, una de las cumbres más insignes del patrimonio cultural de la humanidad y del arte sagrado universal, ubicado en Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila. Erigido durante built in 1530 CE during the Vijayanagara Empire bajo el mecenazgo visionario de The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya, este majestuoso conjunto arquitectónico personifica la profundidad espiritual, la perfección estética y el prodigioso ingenio técnico de la civilización india. Habiendo desafiado el paso de los siglos, Lepakshi Veerabhadra Temple sigue inspirando a exploradores, historiadores y peregrinos de todo el orbe mediante su magistral armonía entre geometría sagrada y presencia física monumental. En el aspecto arquitectónico, el conjunto representa una de las cumbres insuperables de late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals. Maestros canteros, escultores y artesanos procedentes de diversos reinos combinaron saberes milenarios para tallar la piedra viva y erigir estructuras de inquebrantable solidez. Cada elemento espacial fue diseñado rigurosamente según los cánones tradicionales del Vastu Shastra, alineando los ejes sagrados con los solsticios solares y las constelaciones. Las vertiginosas torres escalonadas, las columnatas esculpidas y los frisos decorativos plasman epopeyas cósmicas y ceremonias cortesanas con un dinamismo plástico y una sensibilidad anatómica extraordinarias que cautivan instantáneamente a todo espectador sensible al arte imperecedero. Entre los elementos más sobresalientes del complejo destacan the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings. La calibración de la iluminación natural dentro de los santuarios interiores fue concebida con absoluta precisión: los primeros rayos solares del amanecer se deslizan a través de los pórticos para iluminar el corazón del templo, mientras que las fachadas exteriores proyectan sombras geométricas cambiantes a lo largo del día. Asimismo, los ingeniosos aljibes de captación pluvial y la integración del complejo en la topografía natural evidencian una sabiduría ecológica y urbanística de primer nivel. Estas extraordinarias soluciones de ingeniería civil han garantizado la estabilidad estructural del monumento a través de los siglos. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor. En su dimensión cultural y espiritual, Lepakshi Veerabhadra Temple encarna con esplendor a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana. No fue únicamente un templo de veneración o una manifestación del poder imperial, sino el epicentro vivo de la literatura clásica, la música tradicional, la danza sagrada y los debates filosóficos más elevados. Antiguos cronistas, viajeros y emisarios comerciales que transitaban las rutas euroasiáticas dejaron testimonio de su deslumbrante riqueza y refinamiento en célebres relatos de viajes. La atmósfera sagrada que impregna cada rincón brinda al visitante un remanso de paz interior y reverencia trascendental. Gracias a exhaustivas campañas de restauración científica impulsadas por organismos patrimoniales y avaladas por la UNESCO, los morteros antiguos y las estructuras portantes han sido consolidados minuciosamente para preservar su pureza original frente al deterioro ambiental. Declarado Patrimonio de la Humanidad por la UNESCO, Lepakshi Veerabhadra Temple se yergue como un faro eterno del genio creador humano y de la memoria colectiva mundial. Custodiar este legado milenario es un compromiso inexcusable con las futuras generaciones. Usted", "de": "Willkommen in Lepakshi Veerabhadra Temple, einem der herausragendsten Meisterwerke des Weltkulturerbes und der sakralen Baukunst der Menschheit in Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila. Erbaut während built in 1530 CE during the Vijayanagara Empire unter der visionären Schirmherrschaft von The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya, verkörpert dieses monumentale Bauwerk die spirituelle Tiefe, die formvollendete Ästhetik und die ingenieurtechnische Brillanz des klassischen Indiens. Über Jahrhunderte historischer Epochen hinweg fasziniert Lepakshi Veerabhadra Temple Forscher, Architekten und Reisende aus aller Welt durch seine vollkommene Harmonie aus heiliger Geometrie und erhabener Monumentalität.\n\nArchitektonisch stellt die Gesamtanlage einen unübertroffenen Höhepunkt des Stils late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals dar. Hochqualifizierte Steinmetze, Bildhauer und Baumeister aus zahlreichen Provinzen wandten bahnbrechende Bautechniken an, um aus massivem Felsgestein unvergängliche Monumente zu formen. Jedes strukturelle Detail folgte den strengen Vorgaben überlieferter Architekturlehrbücher, wodurch die sakralen Achsen exakt nach astronomischen Konstellationen und Sonnenwenden ausgerichtet wurden. Die hoch aufragenden Tempeltürme, weitläufigen Säulenhallen und kunstvoll gemeißelten Wandreliefs erzählen mythologische Epen und höfische Chroniken mit unvergleichlicher anatomischer Präzision und expressiver Eleganz. Diese meisterhaften Bildhauerarbeiten spiegeln das höchste Niveau der indischen Bildhauerkunst wider und versetzen jeden Betrachter in staunende Bewunderung über das handwerkliche Können vergangener Epochen.\n\nZu den bemerkenswertesten Charakteristika dieses geschichtsträchtigen Ortes zählen the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings. Das meisterhafte Zusammenspiel von natürlichem Lichteinfall und kühlen Steinkorridoren offenbart ein tiefes thermodynamisches Verständnis: Die morgendlichen Sonnenstrahlen durchdringen die inneren Portale und erleuchten das Allerheiligste, während die äußeren Fassaden markante geometrische Schatten werfen. Ausgeklügelte Regenwasserauffangbecken und Kanalsysteme zeugen zudem von einer vorbildlichen ökologischen Raumplanung, die harmonisch in das natürliche Terrain eingebettet wurde. Diese antiken Bauwerke trotzen seit Jahrhunderten Wind und Wetter und belegen die Genialität antiker indischer Baumeister in eindrucksvoller Weise. A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\nKulturell und geistig spiegelt Lepakshi Veerabhadra Temple das bleibende Erbe von a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana wider. Das Monument diente nicht bloß als sakrale Andachtsstätte oder Symbol dynastischer Macht, sondern fungierte als lebendiges Zentrum für klassische Dichtung, Musik, rituellen Tanz und philosophische Diskurse. Reisende und Gesandte aus fernen Kontinenten dokumentierten in ihren Berichten den staunenerregenden Wohlstand und den intellektuellen Reichtum dieser historischen Stätte. Die friedvolle Atmosphäre vermittelt bis heute jedem Besucher ein tiefes Gefühl von Ehrfurcht, Gelassenheit und zeitloser Ruhe.\n\nNach Jahrhunderten klimatischer Witterungseinflüsse haben sorgfältige wissenschaftliche Restaurierungsmaßnahmen durch nationale Denkmalbehörden und die UNESCO die strukturelle Integrität des Monuments dauerhaft gesichert. Als UNESCO-Welterbestätte eingetragen, bleibt Lepakshi Veerabhadra Temple ein unersetzliches Zeugnis menschlicher Schöpferkraft und universeller Baukunst. Die Bewahrung dieser einzigartigen Kulturstätte für künftige Generationen ist von unschätzbarem Wert für die gesamte Menschheit und erfüllt uns mit großem Stolz auf dieses weltweite Kulturgut.\n\nSie erleben dieses historische Monument nun in Form eines hochpräzisen, millimetergenauen dreidimensionalen digitalen Zwillings. Erkunden Sie jeden Winkel und lauschen Sie dem Audioguide mit synchronisierten Untertiteln in vollkommener Klarheit. Genießen Sie diese faszinierende Reise durch die jahrtausendealte Kulturgeschichte Indiens.", "ja": "Lepakshi Veerabhadra Temple へ 心より 皆様を お迎え いたします 。 Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila に 位置する この 荘厳な 歴史的 建造物は 、 人類の 文化遺産 および 宗教建築 における 不滅の 金字塔 です 。 built in 1530 CE during the Vijayanagara Empire において The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya の 先見性に 満ちた 庇護の もとに 建立された この 聖域は 、 古代インドの 深遠な 精神性 、 卓越した 美意識 、 そして 比類なき 土木工学 技術の 結晶 です 。 幾世紀もの 歴史の 変遷を 経てなお 、 その 完璧な 幾何学的 調和と 圧倒的な 存在感は 、 世界中の 建築学者や 巡礼者 、 そして 旅人を 魅了し 続けて います 。\n\n建築学的な 見地から 、 当複合施設は late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals の 究極の 美学を 顕著に 体現して います 。 各地域から 集結した 熟練の 石工や 彫刻家たちは 、 緻密な 計算と 卓越した 伝統技術を 駆使し 、 巨石を 削り出して 永遠の 命を 宿す 壮大な 建造物群を 創り上げました 。 すべての 構造要素は 古代の 建築規範に 厳密に 基づき 、 天文学的な 方位や 太陽の 運行 、 至点と 完璧に 一致するよう 配置されて います 。 天を突く 雄大な 塔門 、 無数の 石柱が 整然と 連なる 回廊 、 そして 壁面全体を 埋め尽くす 精巧な 浮き彫りは 、 神話の 壮大な 叙事詩や 宮廷の 儀礼を 圧倒的な 躍動感と 芸術的 気品で 現代に 伝えています 。 石に 刻まれた 繊細な 彫刻は 、 古代の 職人たちの 魂の 祈りと 高度な 美的感覚を 雄弁に 物語っています 。\n\n当遺跡を 特徴づける 重要な 要素には 、 the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings が 挙げられます 。 自然光と 影の 劇的な 相互作用は 緻密に 計算されており 、 朝の 光が 聖室の 奥深くに 鎮座する 主尊を 神々しく 照らし出します 。 さらに 、 高度な 雨水集積 システムや 貯水池 、 そして 周辺の 自然地形と 完璧に 調和した 配置計画は 、 古代インドに おける 優れた 環境共生 技術と 都市工学の 高い水準を 物語っています 。 気候の 変動にも 耐えうる 耐震性と 排水機能は 、 現代の 建築家にも 多大な 示唆を 与えており 、 その 工学的 価値は 測り知れません 。 A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor.\n\n文化的 ・ 精神的に 、 Lepakshi Veerabhadra Temple は a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana の 象徴として 燦然と 輝き続けて きました 。 ここは 単なる 祈りの場や 王権の 誇示に とどまらず 、 古典文学 、 伝統音楽 、 神聖な 舞踊 、 そして 哲学的な 学術討論が 日常的に 行われた 知と 文化の 一大拠点 でした 。 アジアや 地中海 世界を 結ぶ 交易路を 通じて 訪れた 諸国の 使節や 旅人たちも 、 その 驚くべき 繁栄と 洗练された 芸術性を 旅行記に 賛嘆とともに 記録して います 。 ここに 流れる 神聖な 静寂は 、 訪れる すべての人々の 心を 浄化し 、 深い 平安と 感動を もたらします 。\n\n近代における 綿密な 考古学的 発掘調査と 科学的 修復作業に より 、 貴重な 彫刻群と 基礎構造は 次世代へと 確実に 継承されて います 。 ユネスコ 世界文化遺産に 正式に 登録された Lepakshi Veerabhadra Temple は 、 人類の 不屈の 創造性と 文化的多様性を 象徴する かけがえのない 至宝 です 。 この 貴重な 文化遺産を 守り伝える ことは 、 私たち 全人類の 共通の 崇高な 使命で あります 。\n\n現在 ご覧いただいて いるのは 、 その 超高精度の 3D デジタルツイン です 。 全方位から 精緻な 石造建築を 鑑賞し 、 リアルタイム 字幕付き 音声ガイドと ともに 悠久の 歴史世界を ご体験 ください 。 心ゆくまで この 素晴らしい バーチャル 探訪を お楽しみ ください 。 インドの 永遠の 遺産が 、 あなたの 心に いつまでも 鮮やかに 残る ことを 願っています 。 この 永遠の 聖域は 、 美と 精神的 高揚 、 そして 不朽の 建築的 卓越性を 追求する 人類の 崇高な 旅路の 証として 、 未来永劫 輝き 続けます 。", "zh": "热烈 欢迎 各位 来宾 莅临 举世闻名的 Lepakshi Veerabhadra Temple —— 这座 坐落于 Lepakshi, Sri Sathya Sai (Anantapur) district, Andhra Pradesh, atop the tortoise-shaped hillock of Kurmasaila 的 历史 圣殿 ， 是 全人类 文化 与 古代 建筑 艺术的 巅峰 杰作 之一 。 在 built in 1530 CE during the Vijayanagara Empire 期间 ， 得益于 The merchant brothers Virupanna and Veeranna, royal treasurers under Emperor Achyuta Deva Raya 的 远见 卓识 与 倾力 资助 ， 这一 宏伟 建筑群 应运而生 ， 生动 体现了 古代 印度 深邃的 哲学 信仰 、 精湛 绝伦的 美学 造诣 以及 令人 叹为观止的 工程 技艺 。 历经 数百年 历史 岁月的 风雨 洗礼 ， 它 凭借 神圣 几何学 比例 与 恢弘 磅礴的 实体 气势 ， 至今 仍令 全球 各地的 学者 、 朝圣者 与 探访者 为之 深深 倾倒 。 从 建筑 风格 与 工程 技术 来看 ， 该 建筑群 淋漓尽致地 展现了 late Vijayanagara temple architecture famous for stone engineering wonders and magnificent ceiling murals 的 最高 成就 。 汇聚 自 各方 王朝的 能工巧匠 与 石雕 大师们 ， 运用 巧夺天工的 开山 劈石 技艺 ， 将 坚硬的 花岗岩 石材 化作 永恒的 建筑 诗篇 。 建筑的 每一处 结构 构造 均 严格 遵循 古代 经典 建筑 法典的 规范 ， 将 神圣 空间 与 天体 运行 方位 、 日月 至点 节气 完美 重合 。 高耸入云的 巍峨 殿宇 、 雕饰 华丽的 千柱 回廊 ， 以及 神态 各异的 精美 浮雕 ， 生动 再现了 古老 史诗 中的 壮丽 画卷 与 神秘 神话 。 石雕 上 展现出的 人体 解剖学 精度 与 灵动 姿态 ， 堪称 东方 雕塑 艺术的 极致 典范 。 在 这一 历史 圣域的 核心 景观 中 ， the world-famous Hanging Pillar that does not touch the ground, the colossal monolithic Nandi carved from a single granite boulder, the seven-headed Naga Linga, and expansive fresco paintings 尤为 引人瞩目 。 古代 工匠 对 自然 采光 与 建筑 阴影的 处理 达到了 登峰造极的 境界 ： 破晓 时分的 第一道 曙光 能 精准 穿透 殿堂 廊柱 ， 直射 至 幽深 圣所 中央 ； 而 建筑 外部的 石阶 基座 则 随着 日轨 移动 投下 富有 韵律的 几何 阴影 。 此外 ， 完善的 雨水 收集 与 导流 网络 、 坚固的 防御 城池 与 自然 地貌的 完美 融合 ， 充分 展现了 古代 高度 成熟的 生态 智慧 与 市政 规划 能力 。 A thin cloth can be slid completely underneath the famous Hanging Pillar, proving it rests without structural contact on the stone floor. 在 文化 传承 与 精神 象征 方面 ， Lepakshi Veerabhadra Temple 代表了 a masterwork of South Indian medieval art steeped in Ramayana lore, where the sacred bird Jatayu fell after battling Ravana 的 至高 典范 。 这里 不仅是 虔诚 礼拜 与 王权 象征的 核心 ， 更是 古典 文学 、 传统 音乐 、 神庙 舞蹈 与 深奥 哲学 辩论 蓬勃 发展的 知识 殿堂 。 古代 穿行于 亚欧 商道的 多国 使者 与 旅行家 无不在 游记 中 极力 盛赞 其 繁华 盛景 与 超绝 艺术 。 这里 弥漫的 庄严肃穆 气息 ， 至今 仍能 让 每一位 到访者 获得 内心的 宁静 与 精神的 升华 。 在 国家 文物 部门 与 联合国 教科文 组织的 长期 科学 修缮 与 保护下 ， 古老 砖石 构造 得以 历久弥新 。 作为 全人类 共同 珍视的 联合国 教科文 组织 世界 文化 遗产 ， Lepakshi Veerabhadra Temple 将 永载 史册 ， 成为 人类 坚韧 意志 与 卓越 创造力的 永恒 象征 。 守护 这一 珍贵 遗产 是 我们 共同的 神圣 使命 。 您 目前 所 体验的 是 运用 现代 高精度 激光 测绘 构建的 毫米级 三维 数字 孪生 模型 。"};
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // BULLETPROOF DUAL-ENGINE HERITAGE VOICE GUIDE
+    // Engine 1: Native Web Speech API (with Chromium cancel/resume race-condition fixes)
+    // Engine 2: High-Fidelity Cloud Audio (Authentic human pronunciation for all 15 languages)
+    // Engine 3: Offline Default Voice Fallback with 100% synchronized live subtitles
+    // ══════════════════════════════════════════════════════════════════════════
+
+    var currentLang = 'en';
+    var isPlaying = false;
+    var isPaused = false;
+    var selectedRate = 1.0;
+    var showHud = true;
+    var currentEngine = 'native'; // 'native' or 'cloud'
+    var audioSessionId = 0;
+
+    // Trackers
+    var wordSpans = [];
+    var allWords = [];
+    var activeWordIndex = 0;
+    var wordTimer = null;
+    var keepAliveTimer = null;
+    var synth = ('speechSynthesis' in window) ? window.speechSynthesis : null;
+    var currentUtterance = null;
+    var speechChunks = [];
+    var currentChunkIdx = 0;
+    var cloudChunks = [];
+    var currentAudioEl = null;
+
+    // DOM Elements
+    var playBtn = document.getElementById('vg-play');
+    var playIcon = document.getElementById('vg-play-icon');
+    var playLabel = document.getElementById('vg-play-label');
+    var stopBtn = document.getElementById('vg-stop');
+    var scriptBox = document.getElementById('vg-script-box');
+    var progressBar = document.getElementById('vg-progress-bar');
+    var voiceInfo = document.getElementById('vg-voice-info');
+    var panel = document.getElementById('voice-guide-panel');
+    var hud = document.getElementById('vg-subtitle-hud');
+    var hudContent = document.getElementById('vg-hud-content');
+    var hudLangLabel = document.getElementById('vg-hud-lang-label');
+    var hudToggleBtn = document.getElementById('vg-hud-toggle');
+    var hudCloseBtn = document.getElementById('vg-hud-close');
+    var mainTrigger = document.getElementById('btn-voice-guide');
+    var navTrigger = document.getElementById('btn-nav-voice-guide');
+    var closeBtn = document.getElementById('vg-close');
+
+    function detectLanguage() {
+      try {
+        var raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+        var code = raw.split('-')[0];
+        var match = SUPPORTED_LANGS.find(function (l) { return l.key === code; });
+        return match ? match.key : 'en';
+      } catch (e) {
+        return 'en';
+      }
+    }
+
+    function buildLangPills() {
+      var row = document.getElementById('vg-lang-row');
+      if (!row) return;
+      row.innerHTML = '';
+      SUPPORTED_LANGS.forEach(function (lang) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'vg-lang-pill' + (lang.key === currentLang ? ' active' : '');
+        btn.dataset.lang = lang.key;
+        btn.textContent = lang.flag + ' ' + lang.label;
+        btn.addEventListener('click', function () {
+          var wasPlaying = isPlaying;
+          stopGuide();
+          currentLang = lang.key;
+          document.querySelectorAll('.vg-lang-pill').forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          renderScript(currentLang);
+          updateEngineIndicator();
+          if (wasPlaying) {
+            setTimeout(function () { playGuide(0); }, 60);
+          }
+        });
+        row.appendChild(btn);
+      });
+    }
+
+    function escapeHtml(s) {
+      return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderScript(langKey) {
+      var sc = VG_SCRIPTS[langKey] || VG_SCRIPTS['en'] || '';
+      allWords = sc.trim().split(/\s+/);
+      if (scriptBox) {
+        scriptBox.innerHTML = allWords.map(function (w, i) {
+          return '<span class="vg-word" id="vg-w-' + i + '" data-idx="' + i + '">' + escapeHtml(w) + ' </span>';
+        }).join('');
+        wordSpans = allWords.map(function (_, i) {
+          return document.getElementById('vg-w-' + i);
+        });
+        scriptBox.scrollTop = 0;
+      }
+      if (hudContent && !isPlaying) {
+        hudContent.textContent = sc.substring(0, 140) + (sc.length > 140 ? '…' : '');
+      }
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      if (hudLangLabel && meta) {
+        hudLangLabel.textContent = meta.label.toUpperCase();
+      }
+      activeWordIndex = 0;
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function updateEngineIndicator(customStatus) {
+      if (!voiceInfo) return;
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      if (customStatus) {
+        voiceInfo.textContent = customStatus;
+      } else {
+        var hasNative = !!getNativeVoice(currentLang);
+        var icon = hasNative ? '🔊' : '☁️';
+        var type = hasNative ? 'Native' : 'Cloud';
+        voiceInfo.textContent = icon + ' ' + meta.label + ' (' + type + ' · ' + selectedRate + 'x)';
+      }
+    }
+
+    function updateHighlights(idx) {
+      activeWordIndex = Math.max(0, Math.min(idx, allWords.length - 1));
+
+      for (var i = 0; i < wordSpans.length; i++) {
+        var span = wordSpans[i];
+        if (!span) continue;
+        if (i < activeWordIndex) {
+          span.className = 'vg-word vg-word-spoken';
+        } else if (i === activeWordIndex) {
+          span.className = 'vg-word vg-word-active';
+          if (isPlaying && scriptBox) {
+            span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          span.className = 'vg-word';
+        }
+      }
+
+      if (hud && hudContent && showHud) {
+        var windowSize = 9;
+        var start = Math.max(0, activeWordIndex - 3);
+        var end = Math.min(allWords.length, start + windowSize);
+        if (end - start < windowSize && start > 0) {
+          start = Math.max(0, end - windowSize);
+        }
+        var hudHtml = '';
+        for (var k = start; k < end; k++) {
+          var cls = (k < activeWordIndex) ? 'vg-hud-word spoken' : (k === activeWordIndex ? 'vg-hud-word active' : 'vg-hud-word pending');
+          hudHtml += '<span class="' + cls + '">' + escapeHtml(allWords[k]) + ' </span>';
+        }
+        hudContent.innerHTML = hudHtml;
+      }
+
+      if (progressBar && allWords.length > 1) {
+        var pct = Math.min(100, Math.round((activeWordIndex / (allWords.length - 1)) * 100));
+        progressBar.style.width = pct + '%';
+      }
+    }
+
+    // ── Voice Detection ───────────────────────────────────────────────────
+    function getNativeVoice(langKey) {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      var targetCode = (meta.code || '').toLowerCase().replace('_', '-');
+      var fallbackCode = (meta.fallback || '').toLowerCase().replace('_', '-');
+      var langPrefix = meta.key.toLowerCase();
+
+      // 1. Exact match (e.g. en-IN or hi-IN)
+      var v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l === targetCode;
+      });
+      if (v) return v;
+
+      // 2. Prefix match (e.g. en or hi)
+      v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l.startsWith(langPrefix + '-') || l === langPrefix;
+      });
+      if (v) return v;
+
+      // 3. Fallback code match
+      if (fallbackCode) {
+        v = voices.find(function(item) {
+          var l = (item.lang || '').toLowerCase().replace('_', '-');
+          return l.startsWith(fallbackCode) || l === fallbackCode;
+        });
+        if (v) return v;
+      }
+      return null;
+    }
+
+    function getDefaultVoice() {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+      return voices.find(function(v) {
+        var l = (v.lang || '').toLowerCase();
+        return l.startsWith('en');
+      }) || voices[0];
+    }
+
+    // ── Chunk text for Cloud Audio (< 80 chars guarantees 200 OK) ─────────
+    function splitTextForCloud(text, maxChars) {
+      maxChars = maxChars || 80;
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var chunks = [];
+      var cur = '';
+      for (var i = 0; i < rawSentences.length; i++) {
+        var s = rawSentences[i].trim();
+        if (!s) continue;
+        if ((cur ? cur + ' ' + s : s).length <= maxChars) {
+          cur = cur ? cur + ' ' + s : s;
+        } else {
+          if (cur) chunks.push(cur.trim());
+          if (s.length > maxChars) {
+            var words = s.split(/\s+/);
+            var sub = '';
+            for (var j = 0; j < words.length; j++) {
+              var w = words[j];
+              if ((sub ? sub + ' ' + w : w).length <= maxChars) {
+                sub = sub ? sub + ' ' + w : w;
+              } else {
+                if (sub) chunks.push(sub.trim());
+                sub = w;
+              }
+            }
+            cur = sub;
+          } else {
+            cur = s;
+          }
+        }
+      }
+      if (cur && cur.trim()) chunks.push(cur.trim());
+      return chunks;
+    }
+
+    // ── Primary Play Controller ───────────────────────────────────────────
+    function playGuide(startFromWord) {
+      // Toggle Pause
+      if (isPlaying && !isPaused && arguments.length === 0) {
+        pauseGuide();
+        return;
+      }
+
+      // Toggle Resume
+      if (isPaused && arguments.length === 0) {
+        resumeGuide();
+        return;
+      }
+
+      startFromWord = typeof startFromWord === 'number' ? startFromWord : activeWordIndex;
+      startPlayback(startFromWord);
+    }
+
+    function pauseGuide() {
+      isPaused = true;
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.pause(); } catch (e) {}
+      } else if (synth) {
+        try { synth.pause(); } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      updatePlayControls(false, true);
+    }
+
+    function resumeGuide() {
+      isPaused = false;
+      isPlaying = true;
+      updatePlayControls(true, false);
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.play().catch(function(e) { console.warn('Resume notice:', e); }); } catch (e) {}
+      } else if (synth) {
+        try { synth.resume(); } catch (e) {}
+        resumeWordTicker();
+      }
+    }
+
+    function stopGuide() {
+      audioSessionId++;
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+
+      activeWordIndex = 0;
+      updatePlayControls(false, false);
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function onPlaybackFinished() {
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+      updatePlayControls(false, false);
+      if (allWords.length > 0) updateHighlights(allWords.length - 1);
+      if (progressBar) progressBar.style.width = '100%';
+      if (hudContent) {
+        hudContent.textContent = 'Voice guide narration complete. Click Play to listen again.';
+      }
+    }
+
+    function updatePlayControls(playing, paused) {
+      if (!playBtn) return;
+      if (playing) {
+        playBtn.classList.add('playing');
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playLabel) playLabel.textContent = 'Pause Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else if (paused) {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Resume Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Play Audio Guide';
+        if (stopBtn) stopBtn.disabled = true;
+      }
+    }
+
+    // ── Start Audio Playback Dispatcher ───────────────────────────────────
+    function startPlayback(startIdx) {
+      audioSessionId++;
+      var session = audioSessionId;
+
+      // Clean up previous speech
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+
+      activeWordIndex = Math.max(0, Math.min(startIdx, allWords.length - 1));
+      updateHighlights(activeWordIndex);
+
+      var remainingWords = allWords.slice(activeWordIndex);
+      var remainingText = remainingWords.join(' ');
+      if (!remainingText.trim()) {
+        onPlaybackFinished();
+        return;
+      }
+
+      isPlaying = true;
+      isPaused = false;
+      updatePlayControls(true, false);
+      if (hud && showHud) hud.style.display = 'block';
+
+      // ── Select Best Engine ──
+      var nativeVoice = getNativeVoice(currentLang);
+      if (nativeVoice) {
+        // Mode A: Native Web Speech API
+        currentEngine = 'native';
+        updateEngineIndicator();
+        playNativeStream(remainingText, activeWordIndex, nativeVoice, session);
+      } else {
+        // Mode B: High-Fidelity Cloud Audio
+        currentEngine = 'cloud';
+        updateEngineIndicator();
+        playCloudStream(remainingText, activeWordIndex, session);
+      }
+    }
+
+    // ── Engine 1: Native Speech Synthesis ─────────────────────────────────
+    function playNativeStream(text, wordOffset, voice, session) {
+      speechChunks = [];
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var curOffset = wordOffset;
+      rawSentences.forEach(function (s) {
+        var sTrim = s.trim();
+        if (!sTrim) return;
+        var count = sTrim.split(/\s+/).length;
+        speechChunks.push({
+          text: sTrim,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      startKeepAlive();
+      // 50ms delay avoids Chromium synchronous cancellation race condition
+      setTimeout(function () {
+        if (session !== audioSessionId || !isPlaying) return;
+        playNextNativeChunk(voice, session);
+      }, 50);
+    }
+
+    function playNextNativeChunk(voice, session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= speechChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = speechChunks[currentChunkIdx];
+      var utt = new SpeechSynthesisUtterance(chunk.text);
+      currentUtterance = utt; // prevent GC bug
+      utt.voice = voice;
+      utt.lang = voice.lang || 'en-US';
+      utt.rate = selectedRate;
+      utt.pitch = 1.0;
+      utt.volume = 1.0;
+
+      startWordTickerForChunk(chunk);
+
+      utt.onboundary = function (e) {
+        if (session !== audioSessionId) return;
+        if (e.name === 'word') {
+          var ratio = e.charIndex / (chunk.text.length || 1);
+          var wIdx = Math.min(chunk.wordCount - 1, Math.floor(ratio * chunk.wordCount));
+          updateHighlights(chunk.startWord + wIdx);
+        }
+      };
+
+      utt.onend = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < speechChunks.length && isPlaying) {
+          playNextNativeChunk(voice, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      utt.onerror = function (err) {
+        if (session !== audioSessionId) return;
+        if (err.error === 'canceled' || err.error === 'interrupted') return;
+        console.warn('Native speech notice:', err);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        // Fallback: If native speech encounters an error, switch to cloud audio
+        var remainingWords = allWords.slice(chunk.startWord);
+        if (remainingWords.length > 0 && isPlaying) {
+          currentEngine = 'cloud';
+          updateEngineIndicator();
+          playCloudStream(remainingWords.join(' '), chunk.startWord, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      try {
+        if (synth.paused) synth.resume();
+        synth.speak(utt);
+      } catch (e) {
+        console.warn('SpeechSynthesis speak notice:', e);
+      }
+    }
+
+    // ── Engine 2: Cloud Native Audio Stream ───────────────────────────────
+    function playCloudStream(text, wordOffset, session) {
+      var rawChunks = splitTextForCloud(text, 80);
+      cloudChunks = [];
+      var curOffset = wordOffset;
+      rawChunks.forEach(function (c) {
+        var count = c.trim().split(/\s+/).length;
+        cloudChunks.push({
+          text: c,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      playNextCloudChunk(session);
+    }
+
+    function playNextCloudChunk(session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= cloudChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = cloudChunks[currentChunkIdx];
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      var ttsLang = meta.key === 'zh' ? 'zh-CN' : meta.key;
+      var url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=' + ttsLang + '&client=tw-ob&q=' + encodeURIComponent(chunk.text);
+
+      if (!currentAudioEl) {
+        currentAudioEl = document.createElement('audio');
+        currentAudioEl.id = 'vg-cloud-audio-element';
+        currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+        currentAudioEl.style.display = 'none';
+        document.body.appendChild(currentAudioEl);
+      }
+
+      currentAudioEl.pause();
+      currentAudioEl.removeAttribute('src');
+      currentAudioEl.playbackRate = selectedRate;
+      currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+      currentAudioEl.src = url;
+
+      currentAudioEl.onplay = function () {
+        if (session !== audioSessionId) return;
+        startWordTickerForChunk(chunk);
+      };
+
+      currentAudioEl.ontimeupdate = function () {
+        if (session !== audioSessionId || !currentAudioEl.duration) return;
+        var progress = currentAudioEl.currentTime / currentAudioEl.duration;
+        var wIdx = Math.min(chunk.wordCount - 1, Math.floor(progress * chunk.wordCount));
+        updateHighlights(chunk.startWord + wIdx);
+      };
+
+      currentAudioEl.onended = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < cloudChunks.length && isPlaying) {
+          playNextCloudChunk(session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      currentAudioEl.onerror = function (e) {
+        if (session !== audioSessionId) return;
+        console.warn('Cloud audio notice, activating system voice fallback:', e);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        
+        // Mode C Fallback: If cloud audio fails (e.g. offline sandbox), use default English voice with subtitle sync
+        var defVoice = getDefaultVoice();
+        if (defVoice) {
+          currentEngine = 'native';
+          var isEnglishVoice = (defVoice.lang || '').toLowerCase().startsWith('en');
+          var textToSpeak = (isEnglishVoice && currentLang !== 'en')
+            ? (VG_SCRIPTS['en'] || '').trim()
+            : allWords.slice(chunk.startWord).join(' ');
+          
+          var metaLang = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+          var badgeText = (isEnglishVoice && currentLang !== 'en')
+            ? '🔊 English Narration (' + metaLang.label + ' Subtitles)'
+            : '🔊 System Audio (' + selectedRate + 'x)';
+          updateEngineIndicator(badgeText);
+          
+          playNativeStream(textToSpeak, (isEnglishVoice && currentLang !== 'en') ? 0 : chunk.startWord, defVoice, session);
+        } else {
+          currentChunkIdx++;
+          if (currentChunkIdx < cloudChunks.length && isPlaying) {
+            setTimeout(function() { playNextCloudChunk(session); }, 60);
+          } else {
+            onPlaybackFinished();
+          }
+        }
+      };
+
+      var p = currentAudioEl.play();
+      if (p !== undefined) {
+        p.catch(function (err) {
+          if (session !== audioSessionId) return;
+          console.warn('Audio play notice:', err);
+        });
+      }
+    }
+
+    // ── Word Ticker for Smooth Subtitle Tracking ──────────────────────────
+    function startWordTickerForChunk(chunk) {
+      if (wordTimer) clearInterval(wordTimer);
+      var wordsInChunk = chunk.wordCount;
+      var wpm = 145 * selectedRate;
+      var totalSec = (wordsInChunk / wpm) * 60;
+      var stepMs = Math.max(80, (totalSec * 1000) / Math.max(1, wordsInChunk));
+      var tick = 0;
+
+      wordTimer = setInterval(function () {
+        if (!isPlaying || isPaused) return;
+        tick++;
+        if (tick < wordsInChunk) {
+          updateHighlights(chunk.startWord + tick);
+        }
+      }, stepMs);
+    }
+
+    function resumeWordTicker() {
+      if (currentEngine === 'native' && currentChunkIdx < speechChunks.length) {
+        startWordTickerForChunk(speechChunks[currentChunkIdx]);
+      } else if (currentEngine === 'cloud' && currentChunkIdx < cloudChunks.length) {
+        startWordTickerForChunk(cloudChunks[currentChunkIdx]);
+      }
+    }
+
+    function startKeepAlive() {
+      if (keepAliveTimer) clearInterval(keepAliveTimer);
+      keepAliveTimer = setInterval(function () {
+        if (!isPlaying || isPaused || currentEngine !== 'native') return;
+        if (synth && synth.speaking) {
+          synth.pause();
+          synth.resume();
+        }
+      }, 10000);
+    }
+
+    // ── Interactive Themed HUD Toggle ─────────────────────────────────────
+    function toggleHud() {
+      showHud = !showHud;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.toggle('active', showHud);
+        hudToggleBtn.innerHTML = showHud 
+          ? '<i class="fa-solid fa-closed-captioning"></i> HUD: ON' 
+          : '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) {
+        hud.style.display = showHud ? 'block' : 'none';
+        if (showHud) {
+          updateHighlights(activeWordIndex);
+        }
+      }
+    }
+
+    // ── Open / Close Right-Side Dock Panel ────────────────────────────────
+    function openPanel() {
+      if (panel) panel.classList.add('open');
+      renderScript(currentLang);
+      updateEngineIndicator();
+    }
+
+    function closePanel() {
+      if (panel) panel.classList.remove('open');
+    }
+
+    // ── Event Bindings ────────────────────────────────────────────────────
+    if (playBtn) {
+      playBtn.addEventListener('click', function() {
+        // Unlock audio elements and speech synthesis on user interaction
+        if (!currentAudioEl) {
+          currentAudioEl = document.createElement('audio');
+          currentAudioEl.id = 'vg-cloud-audio-element';
+          currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+          currentAudioEl.style.display = 'none';
+          document.body.appendChild(currentAudioEl);
+        }
+        if (synth && synth.paused) {
+          try { synth.resume(); } catch (e) {}
+        }
+        playGuide();
+      });
+    }
+
+    if (stopBtn) stopBtn.addEventListener('click', function() { stopGuide(); });
+
+    if (mainTrigger) {
+      mainTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (navTrigger) {
+      navTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+    if (hudToggleBtn) hudToggleBtn.addEventListener('click', toggleHud);
+    if (hudCloseBtn) hudCloseBtn.addEventListener('click', function() {
+      showHud = false;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.remove('active');
+        hudToggleBtn.innerHTML = '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) hud.style.display = 'none';
+    });
+
+    // Rate button handling: IMMEDIATE audible change
+    document.querySelectorAll('.vg-rate-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.vg-rate-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedRate = parseFloat(btn.dataset.rate) || 1.0;
+        updateEngineIndicator();
+
+        if (currentEngine === 'cloud' && currentAudioEl) {
+          currentAudioEl.playbackRate = selectedRate;
+        } else if (currentEngine === 'native' && isPlaying && !isPaused) {
+          startPlayback(activeWordIndex);
+        }
+      });
+    });
+
+    // Click on words in script box to jump playback
+    if (scriptBox) {
+      scriptBox.addEventListener('click', function (e) {
+        var wordEl = e.target.closest('.vg-word');
+        if (!wordEl) return;
+        var idx = parseInt(wordEl.dataset.idx, 10);
+        if (!isNaN(idx)) {
+          updateHighlights(idx);
+          if (isPlaying) {
+            startPlayback(idx);
+          }
+        }
+      });
+    }
+
+    // Initialization
+    function init() {
+      currentLang = detectLanguage();
+      buildLangPills();
+      renderScript(currentLang);
+
+      function onVoicesLoaded() {
+        updateEngineIndicator();
+      }
+      if (synth) {
+        if (synth.getVoices().length > 0) onVoicesLoaded();
+        else if ('addEventListener' in synth) {
+          synth.addEventListener('voiceschanged', onVoicesLoaded);
+        } else {
+          synth.onvoiceschanged = onVoicesLoaded;
+        }
+      } else {
+        updateEngineIndicator();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+
+
+  })();
+  </script>
+
+</body>
+</html>

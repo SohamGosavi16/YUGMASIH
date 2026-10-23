@@ -1,0 +1,345 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600&display=swap');
+
+/* =============================================================
+   KAGE LUXURY DESIGN TOKENS & SYSTEM FOR YUGMA
+   ============================================================= */
+:root {
+  --ink: #05070a;          /* Deep page black */
+  --ink-2: #0a0e12;        /* Raised surface black */
+  --ink-3: #12181f;        /* Border / Card base */
+  --bone: #dfe7e0;         /* Pale sage ivory */
+  --bone-dim: #aab4ad;     /* Muted sage */
+  --muted: #78837c;        /* Slate text */
+  --line: rgba(223, 231, 224, 0.13);
+  --line-soft: rgba(223, 231, 224, 0.07);
+  --vermilion: #e0231c;    /* Sacred vermilion accent */
+  --ember: #ff5a3c;        /* Warm glowing ember */
+  --gold: #c9a24a;         /* Royal temple gold */
+  --gold-glow: rgba(201, 162, 74, 0.35);
+  
+  --font-heading: 'Cormorant Garamond', 'Cinzel', serif;
+  --font-body: 'Outfit', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-cinzel: 'Cinzel', serif;
+  --font-devanagari: 'Noto Serif Devanagari', serif;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  
+  --pad: clamp(20px, 3.4vw, 56px);
+  --nav-h: 76px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100vh;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--ink);
+  color: var(--bone);
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100vh;
+  width: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--vermilion);
+  color: #fff;
+}
+
+/* =============================================================
+   KAGE GRAIN, VIGNETTE & CURSOR OVERLAYS
+   ============================================================= */
+#grain {
+  position: fixed;
+  inset: -1px;
+  z-index: 9990;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  background-image: radial-gradient(rgba(223, 231, 224, 0.2) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+#vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 9980;
+  pointer-events: none;
+  background: radial-gradient(125% 95% at 50% 46%, transparent 42%, rgba(3, 5, 8, 0.78) 100%);
+}
+
+/* =============================================================
+   KAGE BUTTONS & BADGES
+   ============================================================= */
+.kage-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: rgba(10, 14, 18, 0.75);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  color: var(--bone);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.4s var(--ease), background 0.4s var(--ease),
+              color 0.4s var(--ease), transform 0.4s var(--ease-out), box-shadow 0.4s;
+}
+
+.kage-btn:hover {
+  border-color: var(--gold);
+  background: rgba(20, 26, 32, 0.95);
+  color: #fff;
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 8px 24px -6px rgba(201, 162, 74, 0.35);
+}
+
+.kage-btn.active {
+  border-color: var(--vermilion);
+  background: rgba(224, 35, 28, 0.2);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(224, 35, 28, 0.4);
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  text-shadow: 0 1px 16px rgba(3, 6, 8, 0.9);
+}
+
+.jp, .hindi {
+  letter-spacing: 0.15em;
+  opacity: 0.85;
+}
+
+/* =============================================================
+   YUGMA TRANSLATOR & LANGUAGE PICKER UI
+   ============================================================= */
+
+/* Clean Google Translate default widgets */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+#google_translate_element {
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+.goog-tooltip,
+.goog-tooltip:hover,
+#goog-gt-tt,
+.goog-te-balloon-frame {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Language Container & Cards */
+.yugma-lang-container {
+  width: 100%;
+  margin: 16px 0;
+  padding: 14px 16px;
+  background: rgba(10, 14, 20, 0.7);
+  border: 1px solid rgba(201, 162, 74, 0.28);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.yugma-lang-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.yugma-lang-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-cinzel, 'Cinzel', serif);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold, #c9a24a);
+  font-weight: 600;
+}
+
+.yugma-lang-hint {
+  font-size: 10px;
+  color: rgba(232, 223, 200, 0.55);
+  letter-spacing: 0.08em;
+}
+
+.yugma-lang-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 8px;
+  max-height: 190px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Custom subtle scrollbar */
+.yugma-lang-grid::-webkit-scrollbar {
+  width: 4px;
+}
+.yugma-lang-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+.yugma-lang-grid::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 74, 0.35);
+  border-radius: 4px;
+}
+
+.yugma-lang-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(18, 24, 32, 0.65);
+  border: 1px solid rgba(201, 162, 74, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  color: #e8dfc8;
+}
+
+.yugma-lang-card:hover {
+  background: rgba(201, 162, 74, 0.12);
+  border-color: rgba(201, 162, 74, 0.5);
+  transform: translateY(-1px);
+}
+
+.yugma-lang-card.active {
+  background: linear-gradient(135deg, rgba(201, 162, 74, 0.22), rgba(224, 35, 28, 0.15));
+  border-color: #ffd175;
+  box-shadow: 0 0 14px rgba(201, 162, 74, 0.28);
+}
+
+.yugma-lang-card .lang-flag {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.yugma-lang-card .lang-content {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  overflow: hidden;
+}
+
+.yugma-lang-card .lang-native {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.yugma-lang-card .lang-english {
+  font-size: 9px;
+  color: rgba(232, 223, 200, 0.6);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.yugma-lang-card .lang-check {
+  display: none;
+  font-size: 11px;
+  color: #ffd175;
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.yugma-lang-card.active .lang-check {
+  display: block;
+}
+
+/* Nav dropdown styling */
+.nav-lang-dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 36px;
+  box-sizing: border-box;
+  background: rgba(12, 16, 22, 0.78);
+  border: 1px solid var(--line, rgba(201, 162, 74, 0.32));
+  border-radius: 100px;
+  padding: 0 25px 0 12px;
+  color: #e8dfc8;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath fill='none' stroke='%23c9a24a' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' d='M1 1l3 3 3-3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  transition: all 0.22s ease;
+  line-height: 1;
+}
+
+.nav-lang-dropdown:hover,
+.nav-lang-dropdown:focus {
+  border-color: #ffd175;
+  outline: none;
+  box-shadow: 0 0 14px rgba(201, 162, 74, 0.25);
+}
+
+.nav-lang-dropdown option {
+  background: #0c1016;
+  color: #e8dfc8;
+  padding: 8px;
+  font-size: 12px;
+}

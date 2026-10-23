@@ -1,0 +1,66 @@
+{
+  "stateId": "assam",
+  "stateName": "Assam",
+  "stateNameHindi": "असम",
+  "heritage": "Sivasagar Sivadol",
+  "heritageHindi": "शिवसागर शिवदोल",
+  "tradition": "Bihu",
+  "traditionHindi": "बिहू",
+  "location": "Sivasagar (Sibsagar), Upper Brahmaputra Valley, Assam",
+  "era": "1734 CE (Ahom Dynasty, Swargadeo Siba Singha & Queen Ambika)",
+  "unescoYear": "Monument of National Importance (ASI)",
+  "tagline": "The Golden-Crowned Shikhara of the Ahom Kingdom",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "SIVASAGAR SIVADOL",
+      "subtitle": "The Soaring Ahom Temple: Engineering and Devotion on the Borpukhuri Lake",
+      "state": "Assam, India",
+      "dynasty": "Ahom Kingdom (Queen Ambika / Bar Raja)",
+      "summary": "Perched gracefully on the high banks of the vast man-made Borpukhuri lake, Sivasagar Sivadol is the tallest surviving historic stone temple in Northeast India, rising 32 meters and crowned with an authentic 2.5-meter pure gold dome (Kalash)."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "The Golden Age of the Ahom Dynasty",
+      "content": "Built in 1734 CE by Queen Ambika (Bor Raja), queen consort of Ahom Swargadeo Siba Singha, the temple stands as a testament to the supreme architectural and cultural synthesis achieved by the 600-year undefeated Ahom Kingdom.\n\nThe complex consists of three principal temples erected simultaneously along the southern bank of the Borpukhuri tank: Sivadol (dedicated to Lord Shiva), Visnudol (dedicated to Lord Vishnu), and Devidol (dedicated to Goddess Durga).\n\nThe Ahoms successfully resisted 17 attempts of Mughal expansion into Assam, establishing an enduring legacy of indigenous governance, military brilliance, and spiritual devotion in Upper Assam."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "Indigenous Nilachala & Ahom Architecture",
+      "content": "Rising to an imposing height of 32 meters (104 feet), the main Sivadol is built in the Nilachala architectural style characterized by a massive hemispherical lower dome surmounted by a fluted, ribbed beehive-style shikhara spire.\n\nStructural marvels include:\n• Karhal Brick & Stone Construction: Constructed from dressed sandstone ashlar and burnt terracotta bricks bound by an indigenous herbal mortar (Karhal) made from duck egg yolks, sticky Bora rice flour, black gram (Mati Mah), and fish oil.\n• The 8-Foot Pure Gold Kalash: The apex of the shikhara is crowned by an 8-foot (2.5 meter) tall hollow brass and gold Kalash finial installed in 1734 CE.\n• The Sivasagar Tank (Borpukhuri): A 257-acre excavated artificial lake whose water surface stands 3 meters above the surrounding town level without ever overflowing or breaching."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "Terracotta Bas-Reliefs & Royal Motifs",
+      "content": "The outer exterior walls of Sivadol are adorned with high-relief sculpted stone panels and terracotta plaques depicting the sacred iconography of the Shakta, Shaiva, and Vaishnava traditions.\n\nProminent sculptural panels include multi-armed depictions of Nataraja dancing upon the dwarf Apasmara, Mahishasuramardini piercing the buffalo demon, and the sacred Ahom royal heraldry: the mythical winged dragon-lion Ngi Ngao Kham.\n\nThe adjoining mandapas feature brass filigree screens and hand-beaten bell-metal lamps (Gamosa-draped Xorai) cast by indigenous Assamese metal artisans."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "Bihu: The Soul of the Brahmaputra",
+      "content": "Assam's cultural heartbeat is embodied in Bihu—a vibrant, seasonal festival celebrating the rhythm of agriculture, fertility, and community brotherhood across three cycles: Rongali Bihu (Spring), Kongali Bihu (Autumn), and Bhogali Bihu (Harvest).\n\nDressed in golden Muga silk mekhela chador, Assamese youths dance with rapid hand movements and rhythmic hip sways, driven by the resonant beats of the buffalo-horn Pepa, the wooden Dhol drum, the bamboo Toka, and the Gogona harp."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Fascinating Secrets & Seismic Resilience",
+      "content": "• The Miracle Earthquake of 1897 & 1950: While the catastrophic Great Assam earthquakes of 1897 (8.2 magnitude) and 1950 (8.6 magnitude) destroyed entire cities, Sivadol suffered only minor displacement of its golden capstone due to the elastic damping properties of its herbal Bora-rice mortar.\n• The Unfailing Lake Water Table: The 257-acre Borpukhuri lake has never dried up or required re-dredging in nearly 300 years.\n• Maha Shivratri Congregation: Every year during Maha Shivratri, the temple grounds host over 500,000 pilgrims from across the Himalayan and Northeast Indian borders."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Historical Timeline & Coordinates",
+      "content": "• 1228 CE: Sukaphaa founds the Ahom Dynasty.\n• 1734 CE: Queen Ambika commissions Sivadol and the Borpukhuri tank.\n• 1826 CE: Treaty of Yandabo; end of Ahom sovereignty.\n• 1951 CE: Protected under the Archaeological Survey of India (ASI).\n\nGeographic Coordinates: 26.9858° N, 94.6378° E\nAltitude: 95 meters above sea level\nLocation: Sivasagar, Upper Brahmaputra Valley, Assam."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Ahom Buranjis & Archival Records",
+      "content": "• 'Tungkhungia Buranji' (Official Ahom Court Chronicle) compiled by Srinath Duara Barbarua.\n• 'A History of Assam' by Sir Edward Gait (1906).\n• Archaeological Survey of India (Guwahati Circle) Conservation Dossier on Sibsagar Temples.\n• National Mission on Monuments and Antiquities (NMMA) Inventory No. AS-03-01."
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "stateId": "rajasthan",
+  "stateName": "Rajasthan",
+  "stateNameHindi": "राजस्थान",
+  "heritage": "Amber Fort",
+  "heritageHindi": "आमेर दुर्ग (आमेर का किला)",
+  "tradition": "Ghoomar",
+  "traditionHindi": "घूमर",
+  "location": "Amer, Jaipur District, Aravalli Hills, Rajasthan",
+  "era": "1592 CE – 18th Century (Kachwaha Rajput Dynasty)",
+  "unescoYear": "2013 (Part of Hill Forts of Rajasthan)",
+  "tagline": "Opulent Citadel of Mirror Palaces & Rajput Valor",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "AMBER FORT",
+      "subtitle": "The Regal Citadel of Mirror Palaces, Marble Courtyards & Aravalli Bastions",
+      "state": "Rajasthan, India",
+      "dynasty": "Kachwaha Rajput Clan (Raja Man Singh I)",
+      "summary": "Perched dramatically above the shimmering Maota Lake in the craggy Aravalli ranges, Amber Fort blends rugged Rajput military defense with exquisite Mughal-influenced marble courtyards, mirror mosaics, and frescoed gateways."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "Dynastic Glory & The Kachwaha Seat",
+      "content": "Founded originally by the Meena chieftains and consecrated to the goddess Amba (Durga), the citadel rose to sovereign grandeur when Raja Man Singh I, commander of Emperor Akbar's imperial army, laid the foundations of the current palace in 1592 CE.\n\nSuccessive rulers, particularly Mirza Raja Jai Singh I and Sawai Jai Singh II (the visionary builder of Jaipur), expanded the complex with secret subterranean corridors, fortified battlements connecting to the higher Jaigarh Fort, and private royal sanctuaries.\n\nAmber remained the vibrant seat of the Kachwaha dynasty for over a century until Sawai Jai Singh II shifted the royal capital down to the planned grid city of Jaipur in 1727 CE."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "The Four Terraced Courtyards",
+      "content": "Constructed from warm yellow and pink sandstone paired with pure white Makrana marble, the palace ascends in four distinct tiered courtyards:\n• Jaleb Chowk (1st Courtyard): The vast military gathering square and elephant muster ground.\n• Diwan-i-Aam (2nd Courtyard): The Hall of Public Audience, featuring a double row of 27 columns with elephant-bracket capitals.\n• Ganesh Pol (3rd Courtyard Gate): A magnificent multi-storied gateway adorned with fine sufi fresco murals, jali latticed windows for royal ladies (zenana), and sculpted arches.\n• Sheesh Mahal & Sukh Niwas: The private royal sanctum facing Mughal charbagh water gardens cooled by subterranean cascade pipes."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "Sheesh Mahal: Palace of Thousand Mirrors",
+      "content": "The crowning jewel of Amber Fort is the Sheesh Mahal (Mirror Palace), constructed under Mirza Raja Jai Singh. Its walls and vaulted ceilings are inlaid with thousands of concave Belgian glass mirrors and foil convex medallions arranged in intricate floral arabesques.\n\nWhen a single candle is lit in the center of the dark hall, the concave glass geometry replicates the flickering flame across the ceiling, giving the illusion of a sparkling galaxy of celestial stars.\n\nSurrounding panels feature Belgian gesso relief murals, lapis lazuli inlays, and carved marble plinths depicting lotus bouquets, butterflies, and royal hunting emblems."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "Chivalric Majesty & The Ghoomar Dance",
+      "content": "Amber Fort represents the synthesis of valor (Veer Rasa) and grace (Shringara Rasa). In the high royal courtyards, royal queens and ladies performed Ghoomar—a graceful, swirling dance characterized by pirouetting circular movements, veiled faces (ghoonghat), and flowing flared skirts (ghagra).\n\nAccompanied by the rhythmic resonance of the dholak, nagada, and the soulful strains of the Sarangi, Ghoomar celebrates auspicious milestones, royal marriages, and the monsoon festival of Teej, reflecting the royal dignity of Rajasthan."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Subterranean Secrets & Military Genius",
+      "content": "• The Secret 2-Kilometer Tunnel: A reinforced subterranean tunnel connects Amber Fort to the fortress of Jaigarh perched on the mountain ridge above, designed as a royal escape route during sieges.\n• Natural Air Conditioning: In the Sukh Niwas hall, water flowed through perforated marble channels and cascades into an interior fountain, circulating naturally cooled air through perforated marble jali screens.\n• The Sila Devi Shrine: A consecrated black stone idol of Goddess Kali at the entrance, originally gifted to Raja Man Singh after his military campaign in Jessore (Bengal) in 1604 CE.\n• UNESCO Inscription: Inscribed in 2013 as part of the serial World Heritage Site 'Hill Forts of Rajasthan'."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Historical Timeline & Coordinates",
+      "content": "• 1592 CE: Foundation laid by Raja Man Singh I.\n• 1621–1667 CE: Construction of Sheesh Mahal and Ganesh Pol by Mirza Raja Jai Singh I.\n• 1727 CE: Royal court relocates to newly founded Jaipur.\n• 2013 CE: Declared a UNESCO World Heritage Site.\n\nGeographic Coordinates: 26.9855° N, 75.8513° E\nAltitude: 430 meters above sea level\nTerrain: Cheel ka Teela (Hill of Eagles), Aravalli Range."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Archival Sources & Royal Records",
+      "content": "• Jaipur Royal City Palace Archives & 'Kachwaha Vamshavali'.\n• 'Annals and Antiquities of Rajasthan' by Lt. Col. James Tod (1829).\n• Archaeological Survey of India (ASI) Jaipur Circle Monograph on Amer Palace.\n• UNESCO World Heritage Inscription Document Ref. No. 247rev."
+    }
+  ]
+}

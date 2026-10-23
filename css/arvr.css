@@ -1,0 +1,516 @@
+/* =============================================================
+   AR / VR EXPLORATION PORTAL STYLES (KAGE AESTHETIC)
+   ============================================================= */
+
+.arvr-modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease), visibility 0.6s;
+}
+
+.arvr-modal-container.active {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+}
+
+.arvr-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 7, 10, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.arvr-modal-window {
+  position: relative;
+  z-index: 10;
+  width: min(1200px, 96vw);
+  height: min(820px, 92vh);
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.95);
+}
+
+.arvr-modal-header {
+  padding: 16px 24px;
+  background: rgba(8, 12, 16, 0.9);
+  border-bottom: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.arvr-modal-title-group h2 {
+  font-size: 20px;
+  margin: 2px 0 0 0;
+  letter-spacing: 0.12em;
+  color: var(--bone);
+}
+
+.arvr-tag {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.arvr-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+}
+
+.arvr-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.arvr-viewport-container {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+#arvr-webgl-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#arvr-camera-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.85;
+}
+
+.arvr-bottom-hud {
+  padding: 14px 24px;
+  background: rgba(8, 12, 16, 0.95);
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-lighting-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lighting-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
+.lighting-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.light-pill {
+  padding: 6px 14px;
+  background: rgba(223, 231, 224, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  color: var(--bone-dim);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.light-pill:hover, .light-pill.active {
+  border-color: var(--gold);
+  background: rgba(201, 162, 74, 0.2);
+  color: #fff;
+}
+
+/* Hotspot Detail Popup */
+.poi-popup {
+  position: absolute;
+  bottom: 80px;
+  right: 24px;
+  z-index: 20;
+  width: min(340px, 80vw);
+  background: rgba(8, 12, 16, 0.95);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.8), 0 0 20px var(--gold-glow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+
+.poi-popup.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0);
+}
+
+.btn-close-poi {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.poi-popup h4 {
+  font-size: 14px;
+  margin: 0 0 6px 0;
+  color: var(--gold);
+}
+
+.poi-popup p {
+  font-size: 12px;
+  margin: 0;
+  color: var(--bone-dim);
+  line-height: 1.5;
+}
+
+/* Standalone Page Styles */
+.arvr-standalone {
+  background: var(--ink);
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+#arvr-canvas-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  background: #030508;
+  overflow: hidden;
+}
+
+#arvr-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  cursor: grab;
+  outline: none;
+}
+
+#arvr-canvas:active {
+  cursor: grabbing;
+}
+
+#ar-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.arvr-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 72px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(5, 7, 10, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.arvr-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.arvr-badge {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.arvr-title {
+  font-size: 17px;
+  letter-spacing: 0.16em;
+  margin: 2px 0 0 0;
+  color: #fff;
+  font-weight: 700;
+}
+
+.arvr-title span {
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.arvr-controls-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kage-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  background: rgba(10, 14, 20, 0.75);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--bone);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s var(--ease);
+  text-decoration: none;
+}
+
+.kage-btn:hover {
+  background: rgba(201, 162, 74, 0.18);
+  border-color: var(--gold);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.kage-btn.active {
+  background: var(--gold);
+  color: #05070a;
+  border-color: var(--gold);
+  box-shadow: 0 0 16px var(--gold-glow);
+}
+
+.arvr-hud {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 100;
+  max-width: 440px;
+  pointer-events: none;
+}
+
+.hud-card {
+  pointer-events: auto;
+  background: rgba(8, 12, 18, 0.88);
+  border: 1px solid var(--line);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin-bottom: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.hud-card .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.hud-card h3 {
+  font-size: 18px;
+  margin: 2px 0 8px 0;
+  color: #fff;
+  font-weight: 600;
+}
+
+.hud-card p {
+  font-size: 12.5px;
+  color: var(--bone-dim);
+  margin: 0 0 14px 0;
+  line-height: 1.55;
+}
+
+.lighting-presets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.preset-label {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.light-btn {
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  color: var(--bone-dim);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.light-btn:hover, .light-btn.active {
+  background: rgba(201, 162, 74, 0.25);
+  border-color: var(--gold);
+  color: #fff;
+}
+
+.developer-integration-point {
+  pointer-events: auto;
+  background: rgba(201, 162, 74, 0.08);
+  border: 1px dashed rgba(201, 162, 74, 0.35);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 11px;
+  backdrop-filter: blur(12px);
+}
+
+.integration-tag {
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 4px;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+}
+
+.developer-integration-point p {
+  margin: 0;
+  color: var(--bone-dim);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.developer-integration-point code {
+  color: #ffd175;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+}
+
+.audio-guide-pill {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+}
+
+.audio-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  background: linear-gradient(135deg, rgba(201, 162, 74, 0.25), rgba(224, 35, 28, 0.2));
+  border: 1px solid var(--gold);
+  border-radius: 40px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--gold-glow);
+  transition: all 0.3s var(--ease);
+}
+
+.audio-play-btn:hover {
+  background: linear-gradient(135deg, rgba(201, 162, 74, 0.4), rgba(224, 35, 28, 0.35));
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7), 0 0 30px var(--gold-glow);
+}
+
+.audio-play-btn.speaking {
+  border-color: #38bdf8;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.5);
+}
+
+/* Standalone POI Tooltip */
+.standalone-poi-card {
+  position: fixed;
+  top: 90px;
+  right: 24px;
+  z-index: 120;
+  width: min(340px, 86vw);
+  background: rgba(8, 12, 18, 0.94);
+  border: 1px solid var(--gold);
+  border-radius: 14px;
+  padding: 18px 22px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px var(--gold-glow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: all 0.35s var(--ease);
+}
+
+.standalone-poi-card.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.standalone-poi-card h4 {
+  font-size: 15px;
+  color: var(--gold);
+  margin: 0 0 6px 0;
+  font-weight: 600;
+}
+
+.standalone-poi-card p {
+  font-size: 12px;
+  color: var(--bone-dim);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.standalone-poi-card .btn-close-card {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+}

@@ -1,0 +1,1238 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap');
+
+
+/* =========================================
+   RESET
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    width: 100%;
+    min-height: 100vh;
+
+    background: #02070d;
+
+    color: #e5e0d5;
+
+    font-family: "Montserrat", sans-serif;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   SPACE
+========================================= */
+
+.space {
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            #071a2b 0%,
+            #030b14 45%,
+            #01050a 100%
+        );
+
+    z-index: -5;
+}
+
+
+/* =========================================
+   STARS
+========================================= */
+
+.stars {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -4;
+
+    opacity: .45;
+
+    background-image:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.7) 1px,
+            transparent 1px
+        );
+
+    background-size: 110px 110px;
+
+    animation: starsMove 40s linear infinite;
+}
+
+
+@keyframes starsMove {
+
+    from {
+        transform: translate(0, 0);
+    }
+
+    to {
+        transform: translate(-110px, -110px);
+    }
+}
+
+
+/* =========================================
+   EARTH
+========================================= */
+
+.earth {
+
+    position: fixed;
+
+    width: 900px;
+    height: 900px;
+
+    right: -230px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    border-radius: 50%;
+
+    z-index: -3;
+
+    background:
+
+        radial-gradient(
+            circle at 35% 32%,
+            rgba(91, 105, 69, .95) 0%,
+            rgba(55, 80, 67, .9) 15%,
+            rgba(17, 61, 86, .95) 35%,
+            rgba(4, 30, 58, 1) 58%,
+            #020a16 76%
+        );
+
+    box-shadow:
+
+        inset -110px -30px 140px rgba(0,0,0,.9),
+
+        inset 40px 0 80px rgba(65,100,105,.2),
+
+        0 0 100px rgba(16,52,77,.35);
+
+    animation: earthPulse 10s ease-in-out infinite;
+}
+
+
+.earth::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: 50%;
+
+    background:
+
+        linear-gradient(
+            125deg,
+            transparent 25%,
+            rgba(116,132,94,.35) 26%,
+            transparent 42%
+        ),
+
+        linear-gradient(
+            35deg,
+            transparent 40%,
+            rgba(66,91,67,.4) 41%,
+            transparent 55%
+        );
+
+    opacity: .8;
+}
+
+
+.earth::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: -3px;
+
+    border-radius: 50%;
+
+    box-shadow:
+
+        inset -90px -20px 110px rgba(0,0,0,.9),
+
+        inset 15px 0 50px rgba(195,151,53,.08);
+}
+
+
+@keyframes earthPulse {
+
+    0%, 100% {
+        transform: translateY(-50%) scale(1);
+    }
+
+    50% {
+        transform: translateY(-50%) scale(1.025);
+    }
+}
+
+
+/* =========================================
+   OVERLAY
+========================================= */
+
+.overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -2;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            rgba(2,7,13,.99) 0%,
+            rgba(2,7,13,.95) 35%,
+            rgba(2,7,13,.78) 58%,
+            rgba(2,7,13,.35) 100%
+        );
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.header {
+
+    height: 84px;
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 35px;
+
+    border-bottom:
+        1px solid rgba(185,143,51,.16);
+
+    position: relative;
+
+    z-index: 10;
+}
+
+
+.brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+
+.brand-symbol {
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(185,143,51,.7);
+
+    position: relative;
+}
+
+
+.brand-symbol::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 1px;
+
+    height: 100%;
+
+    background:
+        rgba(185,143,51,.45);
+
+    left: 50%;
+}
+
+
+.brand-symbol::after {
+
+    content: "";
+
+    position: absolute;
+
+    height: 1px;
+
+    width: 100%;
+
+    background:
+        rgba(185,143,51,.45);
+
+    top: 50%;
+}
+
+
+.symbol-center {
+
+    position: absolute;
+
+    width: 15px;
+    height: 15px;
+
+    border-radius: 50%;
+
+    background: #8e1116;
+
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+}
+
+
+.brand-name {
+
+    font-family: "Cinzel", serif;
+
+    font-size: 28px;
+
+    letter-spacing: 9px;
+
+    color: #d7d2c7;
+}
+
+
+.brand-subtitle {
+
+    margin-top: 4px;
+
+    color: #8f702e;
+
+    font-size: 10px;
+
+    letter-spacing: 4px;
+}
+
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-back-globe {
+    padding: 10px 20px;
+    border: 1px solid rgba(185,143,51,.55);
+    border-radius: 30px;
+    color: #e5c378;
+    background: rgba(185,143,51,.08);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: all .25s ease;
+    font-weight: 600;
+}
+
+.nav-back-globe:hover {
+    background: #c9a24a;
+    color: #05070a;
+    box-shadow: 0 0 20px rgba(201,162,74,.4);
+    transform: translateY(-1px);
+}
+
+.auth-floating-close-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(185, 143, 51, 0.12);
+    border: 1px solid rgba(185, 143, 51, 0.55);
+    color: #e5c378;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 700;
+    transition: all .25s ease;
+    line-height: 1;
+}
+
+.auth-floating-close-btn:hover {
+    background: #c9a24a;
+    color: #05070a;
+    box-shadow: 0 0 20px rgba(201, 162, 74, 0.5);
+    transform: scale(1.08) rotate(90deg);
+}
+
+.heritage-tag {
+
+    padding: 12px 20px;
+
+    border:
+        1px solid rgba(185,143,51,.2);
+
+    border-radius: 30px;
+
+    color: #927536;
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+}
+
+
+.heritage-tag span {
+
+    margin: 0 7px;
+
+    color: #665326;
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main {
+
+    width: 100%;
+
+    height:
+        calc(100vh - 125px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding-right: 38%;
+}
+
+
+/* =========================================
+   AUTH CARD
+========================================= */
+
+.auth-card {
+
+    width: 425px;
+
+    min-height: 525px;
+
+    padding: 40px 42px;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(17,25,30,.92),
+            rgba(4,10,16,.88)
+        );
+
+    border:
+        1px solid rgba(185,143,51,.32);
+
+    box-shadow:
+
+        0 30px 100px rgba(0,0,0,.6),
+
+        inset 0 1px 0
+        rgba(255,255,255,.025);
+
+    backdrop-filter: blur(20px);
+
+    animation: cardIn 1s ease;
+}
+
+
+@keyframes cardIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================
+   AUTH SECTIONS
+========================================= */
+
+.auth-section {
+
+    display: none;
+}
+
+
+.auth-section.active {
+
+    display: block;
+
+    animation: sectionIn .45s ease;
+}
+
+
+@keyframes sectionIn {
+
+    from {
+        opacity: 0;
+        transform: translateX(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+/* =========================================
+   SECTION TITLE
+========================================= */
+
+.section-tag {
+
+    color: #9b7935;
+
+    font-size: 9px;
+
+    letter-spacing: 3px;
+
+    margin-bottom: 15px;
+}
+
+
+.section-tag:first-letter {
+
+    color: #99171b;
+}
+
+
+h1 {
+
+    font-family: "Cinzel", serif;
+
+    font-weight: 400;
+
+    font-size: 31px;
+
+    line-height: 1.25;
+
+    letter-spacing: 3px;
+
+    color: #ded9ce;
+
+    margin-bottom: 13px;
+}
+
+
+h1 span {
+
+    color: #a58a57;
+}
+
+
+.description {
+
+    color: #858d91;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+
+    margin-bottom: 28px;
+}
+
+
+/* =========================================
+   INPUT FIELDS
+========================================= */
+
+.field {
+
+    margin-bottom: 17px;
+}
+
+
+.field label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #806a3b;
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+}
+
+
+.field input {
+
+    width: 100%;
+
+    height: 47px;
+
+    padding: 0 14px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    border:
+        1px solid rgba(255,255,255,.11);
+
+    border-radius: 2px;
+
+    outline: none;
+
+    color: #dedbd2;
+
+    font-family: "Montserrat", sans-serif;
+
+    font-size: 12px;
+
+    transition: .3s;
+}
+
+
+.field input::placeholder {
+
+    color: #505a5f;
+}
+
+
+.field input:focus {
+
+    border-color:
+        rgba(185,143,51,.7);
+
+    box-shadow:
+        0 0 20px
+        rgba(185,143,51,.06);
+
+    background:
+        rgba(185,143,51,.025);
+}
+
+
+/* =========================================
+   PASSWORD
+========================================= */
+
+.password-box {
+
+    position: relative;
+}
+
+
+.password-box input {
+
+    padding-right: 45px;
+}
+
+
+.eye {
+
+    position: absolute;
+
+    right: 12px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    background: transparent;
+
+    border: none;
+
+    color: #716a5c;
+
+    cursor: pointer;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   OPTIONS
+========================================= */
+
+.options {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin: 2px 0 21px;
+}
+
+
+.remember {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: #646d71;
+
+    font-size: 9px;
+}
+
+
+.remember input {
+
+    accent-color: #a3813b;
+}
+
+
+.forgot {
+
+    background: none;
+
+    border: none;
+
+    color: #a08447;
+
+    font-family: inherit;
+
+    font-size: 9px;
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   ENTER BUTTON
+========================================= */
+
+.enter-button {
+
+    width: 100%;
+
+    height: 51px;
+
+    border-radius: 30px;
+
+    border:
+        1px solid rgba(185,143,51,.65);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(120,82,20,.25),
+            rgba(185,143,51,.08)
+        );
+
+    color: #d5d0c5;
+
+    font-family: "Montserrat", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    letter-spacing: 3px;
+
+    cursor: pointer;
+
+    transition: .3s;
+}
+
+
+.enter-button span {
+
+    margin-left: 10px;
+
+    font-size: 15px;
+}
+
+
+.enter-button:hover {
+
+    transform: translateY(-2px);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(120,82,20,.4),
+            rgba(185,143,51,.15)
+        );
+
+    box-shadow:
+        0 8px 30px
+        rgba(185,143,51,.12);
+}
+
+
+/* =========================================
+   DIVIDER
+========================================= */
+
+.divider {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin: 22px 0;
+}
+
+
+.divider span {
+
+    flex: 1;
+
+    height: 1px;
+
+    background:
+        rgba(255,255,255,.08);
+}
+
+
+.divider p {
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    color: #535b5f;
+}
+
+
+/* =========================================
+   GOOGLE
+========================================= */
+
+.google-button {
+
+    width: 100%;
+
+    height: 46px;
+
+    border-radius: 25px;
+
+    border:
+        1px solid rgba(255,255,255,.1);
+
+    background:
+        rgba(255,255,255,.025);
+
+    color: #969b9c;
+
+    font-family: "Montserrat", sans-serif;
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    transition: .3s;
+}
+
+
+.google-button:hover {
+
+    border-color:
+        rgba(185,143,51,.4);
+
+    background:
+        rgba(255,255,255,.04);
+}
+
+
+.google {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    margin-right: 8px;
+}
+
+
+/* =========================================
+   SWITCH
+========================================= */
+
+.switch {
+
+    text-align: center;
+
+    margin-top: 24px;
+
+    color: #50595d;
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+}
+
+
+.switch button {
+
+    border: none;
+
+    background: none;
+
+    color: #a68543;
+
+    font-family: inherit;
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    margin-left: 5px;
+}
+
+
+.switch button:hover {
+
+    color: #d1ae61;
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+footer {
+
+    position: fixed;
+
+    bottom: 17px;
+
+    left: 35px;
+    right: 35px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #414b50;
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    z-index: 10;
+}
+
+
+/* =========================================
+   SIGNUP
+========================================= */
+
+.signup-section .description {
+
+    margin-bottom: 22px;
+}
+
+
+.signup-section .field {
+
+    margin-bottom: 13px;
+}
+
+
+.signup-switch {
+
+    margin-top: 20px;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width: 900px) {
+
+    .main {
+
+        padding-right: 0;
+    }
+
+    .earth {
+
+        width: 700px;
+        height: 700px;
+
+        right: -400px;
+
+        opacity: .35;
+    }
+
+}
+
+
+@media(max-width: 600px) {
+
+    body {
+
+        overflow-y: auto;
+    }
+
+
+    .header {
+
+        height: 75px;
+
+        padding: 0 20px;
+    }
+
+
+    .brand-symbol {
+
+        width: 38px;
+        height: 38px;
+    }
+
+
+    .brand-name {
+
+        font-size: 20px;
+
+        letter-spacing: 6px;
+    }
+
+
+    .brand-subtitle,
+    .heritage-tag {
+
+        display: none;
+    }
+
+
+    .main {
+
+        height: auto;
+
+        min-height:
+            calc(100vh - 75px);
+
+        padding:
+            30px 18px 50px;
+    }
+
+
+    .auth-card {
+
+        width: 100%;
+
+        max-width: 425px;
+
+        padding: 30px 25px;
+    }
+
+
+    footer {
+
+        display: none;
+    }
+
+
+    .earth {
+
+        opacity: .18;
+    }
+}
+
+/* =============================================================
+   YUGMA TRANSLATOR & LANGUAGE PICKER (AUTH)
+   ============================================================= */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+}
+
+body {
+    top: 0px !important;
+    position: static !important;
+}
+
+#google_translate_element {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+}
+
+.goog-tooltip,
+.goog-tooltip:hover,
+#goog-gt-tt,
+.goog-te-balloon-frame {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+.goog-text-highlight {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.yugma-lang-container {
+    width: 100%;
+    margin: 18px 0;
+    padding: 12px 14px;
+    background: rgba(14, 18, 26, 0.7);
+    border: 1px solid rgba(166, 133, 67, 0.35);
+    border-radius: 10px;
+}
+
+.yugma-lang-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.yugma-lang-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #c9a24a;
+    font-weight: 600;
+}
+
+.yugma-lang-hint {
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.yugma-lang-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 7px;
+    max-height: 160px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.yugma-lang-grid::-webkit-scrollbar {
+    width: 4px;
+}
+.yugma-lang-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+}
+.yugma-lang-grid::-webkit-scrollbar-thumb {
+    background: rgba(166, 133, 67, 0.4);
+    border-radius: 4px;
+}
+
+.yugma-lang-card {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 9px;
+    background: rgba(20, 26, 36, 0.7);
+    border: 1px solid rgba(166, 133, 67, 0.22);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #e8dfc8;
+    text-align: left;
+    font-family: inherit;
+}
+
+.yugma-lang-card:hover {
+    background: rgba(166, 133, 67, 0.15);
+    border-color: #c9a24a;
+    transform: translateY(-1px);
+}
+
+.yugma-lang-card.active {
+    background: linear-gradient(135deg, rgba(166, 133, 67, 0.3), rgba(224, 35, 28, 0.2));
+    border-color: #ffd175;
+    box-shadow: 0 0 10px rgba(166, 133, 67, 0.3);
+}
+
+.yugma-lang-card .lang-flag {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.yugma-lang-card .lang-content {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    overflow: hidden;
+}
+
+.yugma-lang-card .lang-native {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.yugma-lang-card .lang-english {
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.yugma-lang-card .lang-check {
+    display: none;
+    font-size: 10px;
+    color: #ffd175;
+    margin-left: auto;
+    font-weight: bold;
+}
+
+.yugma-lang-card.active .lang-check {
+    display: block;
+}

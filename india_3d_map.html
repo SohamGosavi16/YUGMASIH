@@ -1,0 +1,3252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>India — 3D State Map &amp; Geospatial Explorer</title>
+  <meta name="description"
+    content="Photorealistic 3D Earth globe featuring India's 36 States and Union Territories with NASA satellite textures, dynamic scroll-driven positioning, and interactive spatial search.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ── Reset & CSS Variables ────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-dark: #030308;
+      --bg-card: rgba(10, 14, 28, 0.72);
+      --bg-card-hover: rgba(18, 24, 46, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.35);
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.25);
+      --indigo: #818cf8;
+      --amber: #fbbf24;
+      --emerald: #34d399;
+      --text-main: #f1f5f9;
+      --text-muted: rgba(165, 180, 205, 0.7);
+      --text-dim: rgba(148, 163, 184, 0.45);
+      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-heading: 'Plus Jakarta Sans', var(--font-body);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      color-scheme: dark;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 20% 80%, rgba(129, 140, 248, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.9) 0%, #030308 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(3, 3, 8, 0.8);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.25);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(56, 189, 248, 0.45);
+    }
+
+    /* ── Ambient Background Glow & Stars ──────────────────────────────── */
+    .space-backdrop {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0, 0, 0, 0)),
+        radial-gradient(1.5px 1.5px at 100px 150px, rgba(255, 255, 255, 0.7), rgba(0, 0, 0, 0)),
+        radial-gradient(1px 1px at 240px 80px, rgba(56, 189, 248, 0.8), rgba(0, 0, 0, 0)),
+        radial-gradient(1.5px 1.5px at 450px 320px, #ffffff, rgba(0, 0, 0, 0)),
+        radial-gradient(1px 1px at 600px 180px, rgba(129, 140, 248, 0.6), rgba(0, 0, 0, 0)),
+        radial-gradient(2px 2px at 850px 420px, rgba(255, 255, 255, 0.9), rgba(0, 0, 0, 0)),
+        radial-gradient(1px 1px at 1100px 220px, rgba(56, 189, 248, 0.6), rgba(0, 0, 0, 0)),
+        radial-gradient(1.5px 1.5px at 1350px 580px, #ffffff, rgba(0, 0, 0, 0));
+      background-repeat: repeat;
+      background-size: 1400px 700px;
+      opacity: 0.65;
+    }
+
+    /* ── Navigation Bar ───────────────────────────────────────────────── */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 36px;
+      background: rgba(3, 3, 10, 0.7);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-emblem {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px rgba(14, 165, 233, 0.4);
+      font-size: 1.1rem;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.72rem;
+      color: var(--cyan);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #a5f3fc;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+
+    /* ── Fullscreen Background 3D Globe ─────────────────── */
+    #globe-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: auto;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #globeViz {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    #globeViz:active {
+      cursor: grabbing;
+    }
+
+    /* ── Content Layout & Storytelling Sections ────────────────────────── */
+    .page-container {
+      position: relative;
+      z-index: 10;
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 72px 36px 80px 36px;
+      pointer-events: none;
+    }
+
+    .hero-badge-row,
+    .hero-heading,
+    .hero-description,
+    .hero-stats-grid,
+    .hero-cta-group,
+    .scroll-hint,
+    .section-header,
+    .search-box-wrap,
+    .filter-chips,
+    .detail-card,
+    .state-catalog,
+    .btn-primary,
+    .btn-secondary,
+    .btn-focus,
+    .chip-btn,
+    .search-input,
+    .state-row {
+      pointer-events: auto;
+    }
+
+    /* Section 1: Hero Opening Window */
+    .hero-section {
+      min-height: calc(100vh - 72px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 620px;
+      padding-top: 40px;
+      padding-bottom: 60px;
+    }
+
+    .hero-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(129, 140, 248, 0.12);
+      border: 1px solid rgba(129, 140, 248, 0.3);
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #c7d2fe;
+      letter-spacing: 0.03em;
+    }
+
+    .hero-badge.badge-nasa {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.3);
+      color: #7dd3fc;
+    }
+
+    .hero-heading {
+      font-family: var(--font-heading);
+      font-size: clamp(2.4rem, 4.2vw, 3.6rem);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+
+    .hero-gradient-text {
+      background: linear-gradient(135deg, #ffffff 10%, #7dd3fc 45%, #818cf8 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-description {
+      font-size: 1.05rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 32px;
+      max-width: 540px;
+    }
+
+    .hero-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+
+    .stat-card {
+      padding: 16px;
+      border-radius: 14px;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .stat-number {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 26px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.92rem;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      box-shadow: 0 6px 28px rgba(14, 165, 233, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 22px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-weight: 500;
+      font-size: 0.92rem;
+      text-decoration: none;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .scroll-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      font-weight: 500;
+      animation: floatSlow 2.5s ease-in-out infinite;
+    }
+
+    /* Section 2: Interactive Explorer (Scrolled View) */
+    .explorer-section {
+      min-height: 120vh;
+      padding-top: 40px;
+      max-width: 580px;
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+    }
+
+    .section-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    /* Search & Filter Bar */
+    .search-box-wrap {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 18px 14px 44px;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: #fff;
+      font-size: 0.92rem;
+      font-family: inherit;
+      outline: none;
+      backdrop-filter: blur(16px);
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px var(--cyan-glow);
+      background: var(--bg-card-hover);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Region Filter Chips */
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .filter-chips::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .chip-btn {
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .chip-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    /* State Detail Highlight Card */
+    .detail-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .detail-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .detail-state-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .detail-color-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: var(--cyan);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .detail-card-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .detail-state-name {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .detail-type-badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .info-val {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-top: 2px;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-focus {
+      flex: 1;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--cyan);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-focus:hover {
+      background: rgba(56, 189, 248, 0.25);
+    }
+
+    .btn-focus.btn-outline {
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border-color: var(--border-subtle);
+    }
+
+    .btn-focus.btn-outline:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .state-explore-tag {
+      font-size: 0.75rem;
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    /* State Catalog List */
+    .state-catalog {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 16px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .catalog-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .state-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .state-row:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.2);
+      transform: translateX(4px);
+    }
+
+    .state-row.selected {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--cyan);
+    }
+
+    .state-row-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .state-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .state-name-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .state-region-text {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Floating Controls ────────────────────────────────────────────── */
+    .floating-controls {
+      position: fixed;
+      top: 86px;
+      right: 36px;
+      z-index: 35;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ctrl-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(8, 12, 28, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      color: #e2e8f0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: scale(1.06);
+    }
+
+    .ctrl-btn:active {
+      transform: scale(0.95);
+    }
+
+    .ctrl-btn.active {
+      background: var(--cyan);
+      color: #030308;
+      border-color: var(--cyan);
+    }
+
+    /* ── Loading Screen ───────────────────────────────────────────────── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #030308;
+      transition: opacity 0.6s ease-out;
+    }
+
+    #loading-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader-spinner {
+      width: 56px;
+      height: 56px;
+      border: 3px solid rgba(56, 189, 248, 0.15);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loader-title {
+      margin-top: 20px;
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .loader-sub {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Animations ───────────────────────────────────────────────────── */
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.85);
+      }
+    }
+
+    @keyframes floatSlow {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(6px);
+      }
+    }
+
+    /* ── Responsive Rules ─────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .top-nav {
+        padding: 0 20px;
+      }
+
+      .page-container {
+        padding: 72px 20px 60px 20px;
+      }
+
+      .floating-controls {
+        right: 20px;
+      }
+    }
+
+    /* Globe Hover Tooltip Card */
+    .globe-tooltip-card {
+      font-family: var(--font-body);
+      background: rgba(10, 14, 28, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 10px 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      color: #f1f5f9;
+      min-width: 140px;
+      pointer-events: none;
+    }
+
+    .globe-tooltip-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .globe-tooltip-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .globe-tooltip-meta {
+      font-size: 0.74rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .globe-tooltip-meta b {
+      color: #e2e8f0;
+    }
+
+    .globe-tooltip-meta .zone-tag {
+      color: var(--cyan);
+    }
+
+    /* ── 3D Monument Globe Pins ─────────────────────────────────────── */
+    .globe-monument-pin {
+      position: absolute;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      z-index: 25;
+      user-select: none;
+    }
+    .globe-monument-pin:hover {
+      z-index: 120;
+      transform: scale(1.18);
+    }
+    .m-pin-card {
+      background: rgba(6, 10, 20, 0.94);
+      border: 1px solid var(--pin-color, #f59e0b);
+      border-radius: 8px;
+      padding: 6px 12px;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.85), 0 0 14px var(--pin-color, rgba(245, 158, 11, 0.45));
+      text-align: center;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .m-pin-tag {
+      font-size: 7.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .m-pin-title {
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 1px 0;
+    }
+    .m-pin-action {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: var(--pin-color, #fbbf24);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .m-pin-beacon {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .m-pin-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--pin-color, #f59e0b);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--pin-color, #f59e0b);
+    }
+    .m-pin-wave {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1.5px solid var(--pin-color, #f59e0b);
+      animation: mPinWave 1.8s infinite ease-out;
+    }
+    @keyframes mPinWave {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+  
+    /* ── Multilingual State Voice Guide Widget ────────────────────────── */
+    .state-vg-card {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.75));
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+    .state-vg-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #fbbf24);
+    }
+    .state-vg-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .state-vg-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .state-vg-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .state-vg-titles {
+      display: flex;
+      flex-direction: column;
+    }
+    .state-vg-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.02em;
+    }
+    .state-vg-status {
+      font-size: 0.72rem;
+      color: var(--cyan);
+      font-family: monospace;
+    }
+    /* Animated Waveform */
+    .state-vg-wave {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 18px;
+    }
+    .state-vg-wave span {
+      width: 3px;
+      height: 6px;
+      background: rgba(56, 189, 248, 0.4);
+      border-radius: 2px;
+      transition: height 0.2s ease, background 0.2s ease;
+    }
+    .state-vg-wave.playing span {
+      background: #38bdf8;
+      animation: vgWavePulse 0.9s infinite ease-in-out alternate;
+    }
+    .state-vg-wave.playing span:nth-child(1) { animation-delay: 0.0s; }
+    .state-vg-wave.playing span:nth-child(2) { animation-delay: 0.15s; }
+    .state-vg-wave.playing span:nth-child(3) { animation-delay: 0.3s; }
+    .state-vg-wave.playing span:nth-child(4) { animation-delay: 0.45s; }
+    .state-vg-wave.playing span:nth-child(5) { animation-delay: 0.6s; }
+    @keyframes vgWavePulse {
+      0% { height: 4px; }
+      100% { height: 18px; }
+    }
+    /* Language Selection Row */
+    .state-vg-lang-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .state-vg-lang-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .state-vg-select {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-size: 0.78rem;
+      padding: 4px 8px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .state-vg-select:focus {
+      border-color: var(--cyan);
+    }
+    /* Controls Row */
+    .state-vg-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .state-vg-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    .state-vg-play-btn {
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+      flex: 1;
+      min-width: 140px;
+    }
+    .state-vg-play-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+    }
+    .state-vg-play-btn.playing {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    }
+    .state-vg-stop-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      border: 1px solid var(--border-subtle);
+    }
+    .state-vg-stop-btn:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .state-vg-stop-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .state-vg-rates {
+      display: flex;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+    }
+    .state-vg-rate-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 6px 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .state-vg-rate-btn:hover {
+      color: #fff;
+    }
+    .state-vg-rate-btn.active {
+      background: rgba(56, 189, 248, 0.25);
+      color: var(--cyan);
+    }
+    /* Text display */
+    .state-vg-text-wrap {
+      max-height: 90px;
+      overflow-y: auto;
+      padding: 8px 10px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.77rem;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+    .state-vg-text-wrap::-webkit-scrollbar {
+      width: 4px;
+    }
+    .state-vg-text-wrap::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.3);
+      border-radius: 2px;
+    }
+
+    /* ── 3D Globe Monument Pins & Beacon Animations ── */
+    .globe-monument-pin {
+      pointer-events: auto !important;
+      cursor: pointer;
+      position: relative;
+      transform: translate(-50%, -100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s ease;
+      z-index: 100;
+    }
+    .globe-monument-pin:hover {
+      transform: translate(-50%, -108%) scale(1.1);
+      z-index: 150;
+    }
+    .m-pin-card {
+      background: rgba(10, 15, 26, 0.92);
+      border: 1px solid var(--m-pin-color, #f59e0b);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(245, 158, 11, 0.35);
+      border-radius: 8px;
+      padding: 6px 12px;
+      min-width: 150px;
+      max-width: 220px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+      pointer-events: auto;
+    }
+    .globe-monument-pin:hover .m-pin-card {
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 24px rgba(245, 158, 11, 0.6);
+      background: rgba(13, 20, 36, 0.96);
+    }
+    .m-pin-tag {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--m-pin-color, #f59e0b);
+      margin-bottom: 2px;
+    }
+    .m-pin-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .m-pin-sub {
+      font-size: 9px;
+      color: #94a3b8;
+      margin-top: 2px;
+      line-height: 1.2;
+    }
+    .m-pin-action {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 3px 8px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000000;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .m-pin-beacon {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .m-pin-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--m-pin-color, #f59e0b);
+      box-shadow: 0 0 10px var(--m-pin-color, #f59e0b);
+      position: relative;
+      z-index: 2;
+    }
+    .m-pin-wave {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--m-pin-color, #f59e0b);
+      animation: mPinPulse 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+      z-index: 1;
+    }
+    @keyframes mPinPulse {
+      0% {
+        transform: scale(0.6);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(2.4);
+        opacity: 0;
+      }
+    }
+    .statue-of-unity-pin .m-pin-card {
+      border: 1.5px solid #f59e0b;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.55);
+    }
+    .statue-of-unity-pin .m-pin-dot {
+      background: #f59e0b;
+      box-shadow: 0 0 14px #f59e0b, 0 0 24px #f59e0b;
+    }
+
+  </style>
+</head>
+
+<body>
+  <!-- Space Background Stars -->
+  <div class="space-backdrop"></div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-screen">
+    <div class="loader-spinner"></div>
+    <div class="loader-title">India 3D Map Explorer</div>
+    <div class="loader-sub" id="loading-msg">Initializing photorealistic Earth textures &amp; boundaries…</div>
+  </div>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <a href="#" class="nav-brand">
+      <div class="brand-emblem">🇮🇳</div>
+      <div class="brand-text">
+        <span class="brand-title">SIH 2026</span>
+        <span class="brand-subtitle">India 3D Geospatial Engine</span>
+      </div>
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <a href="all_3d_models.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(223, 167, 83, 0.2); border: 1px solid #dfa753; border-radius: 30px; color: #ffd56b; font-size: 0.78rem; font-weight: 700; text-decoration: none; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'" title="Explore All 16 3D Models">
+        <span>🏛️ ALL 3D MODELS</span>
+      </a>
+      <div class="nav-status">
+        <div class="live-pill">
+          <span class="live-dot"></span>
+          <span id="nav-state-count">36 States &amp; UTs Active</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dynamic Globe Container in Background -->
+  <div id="globe-wrapper">
+    <div id="globeViz"></div>
+  </div>
+
+  <!-- Floating Navigation & View Controls -->
+  <div class="floating-controls">
+    <button type="button" class="ctrl-btn" id="btn-zoom-in" title="Zoom In">+</button>
+    <button type="button" class="ctrl-btn" id="btn-zoom-out" title="Zoom Out">−</button>
+    <button type="button" class="ctrl-btn" id="btn-reset-india" title="Reset View to India">🇮🇳</button>
+    <button type="button" class="ctrl-btn active" id="btn-toggle-spin"
+      title="Toggle Auto-Rotation (Right to Left)">🔄</button>
+  </div>
+
+  <!-- Main Scrollable Storytelling Content -->
+  <main class="page-container">
+    <!-- Section 1: Hero Opening Window -->
+    <section class="hero-section" id="hero-section">
+      <div class="hero-badge-row">
+        <span class="hero-badge">✨ Interactive 3D Globe</span>
+        <span class="hero-badge badge-nasa">🛰️ NASA Blue Marble</span>
+      </div>
+
+      <h1 class="hero-heading">
+        Discover <span class="hero-gradient-text">India's States</span> with High-Precision 3D Maps
+      </h1>
+
+      <p class="hero-description">
+        Experience a photorealistic spherical projection of India with live vector boundaries, state elevation, spatial
+        search, and seamless camera flights.
+      </p>
+
+      <div class="hero-stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">28</div>
+          <div class="stat-label">Federal States</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">8</div>
+          <div class="stat-label">Union Territories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">3.28M</div>
+          <div class="stat-label">km² Land Area</div>
+        </div>
+      </div>
+
+      <div class="hero-cta-group">
+        <a href="#explorer-section" class="btn-primary" id="btn-explore-cta">
+          Explore States &amp; UTs
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <polyline points="19 12 12 19 5 12" />
+          </svg>
+        </a>
+        <button type="button" class="btn-secondary" id="btn-quick-fly">
+          ✈️ Fly to New Delhi
+        </button>
+      </div>
+
+      <div class="scroll-hint">
+        <span>↓ Scroll down to center the globe &amp; access full controls</span>
+      </div>
+    </section>
+
+    <!-- Section 2: Interactive Explorer (Scrolled View) -->
+    <section class="explorer-section" id="explorer-section">
+      <div class="section-header">
+        <div class="section-tag">Interactive Geospatial Hub</div>
+        <h2 class="section-title">State Boundary Explorer</h2>
+      </div>
+
+      <!-- Search Input -->
+      <div class="search-box-wrap">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" id="state-search-input" class="search-input"
+          placeholder="Search state or union territory (e.g. Maharashtra, Kerala)..." autocomplete="off">
+      </div>
+
+      <!-- Region Filter Chips -->
+      <div class="filter-chips" id="filter-chips">
+        <button type="button" class="chip-btn active" data-region="All">All Regions</button>
+        <button type="button" class="chip-btn" data-region="Northern">Northern</button>
+        <button type="button" class="chip-btn" data-region="Southern">Southern</button>
+        <button type="button" class="chip-btn" data-region="Western">Western</button>
+        <button type="button" class="chip-btn" data-region="Eastern">Eastern</button>
+        <button type="button" class="chip-btn" data-region="Central">Central</button>
+        <button type="button" class="chip-btn" data-region="North-Eastern">North-Eastern</button>
+        <button type="button" class="chip-btn" data-region="UT">Union Territories</button>
+      </div>
+
+      <!-- Active Selected State Card -->
+      <div class="detail-card" id="detail-card">
+        <div class="detail-card-header">
+          <div class="detail-state-title">
+            <span class="detail-color-swatch" id="card-swatch"></span>
+            <span class="detail-state-name" id="card-name">Republic of India</span>
+          </div>
+          <span class="detail-type-badge" id="card-type">National View</span>
+        </div>
+
+        <p class="detail-card-desc" id="card-desc">
+          Hover or click on any boundary on the 3D globe or search above to view regional statistics and geospatial
+          parameters.
+        </p>
+
+        <div class="detail-info-grid">
+          <div class="info-item">
+            <span class="info-label">Capital</span>
+            <span class="info-val" id="card-capital">New Delhi</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Geographic Zone</span>
+            <span class="info-val" id="card-zone">South Asia</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Coordinates</span>
+            <span class="info-val" id="card-coords">22° N, 78° E</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Elevation Profile</span>
+            <span class="info-val" id="card-alt">Photorealistic 3D</span>
+          </div>
+        </div>
+
+        
+        <!-- Multilingual State Voice Guide Module -->
+        <div class="state-vg-card" id="state-vg-card">
+          <div class="state-vg-top">
+            <div class="state-vg-header-left">
+              <span class="state-vg-icon">🎙️</span>
+              <div class="state-vg-titles">
+                <span class="state-vg-label">State Voice Guide</span>
+                <span class="state-vg-status" id="state-vg-status">Ready · Auto-Detect</span>
+              </div>
+            </div>
+            <div class="state-vg-wave" id="state-vg-wave">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+
+          <div class="state-vg-lang-row">
+            <label for="state-vg-lang-select" class="state-vg-lang-label">Language:</label>
+            <select id="state-vg-lang-select" class="state-vg-select">
+              <option value="en">English (EN)</option>
+              <option value="hi" selected>हिन्दी (Hindi)</option>
+              <option value="regional">Official State Language</option>
+              <option value="ta">தமிழ் (Tamil)</option>
+              <option value="te">తెలుగు (Telugu)</option>
+              <option value="bn">বাংলা (Bengali)</option>
+              <option value="mr">मराठी (Marathi)</option>
+              <option value="gu">ગુજરાતી (Gujarati)</option>
+              <option value="kn">ಕನ್ನಡ (Kannada)</option>
+              <option value="ml">മലയാളം (Malayalam)</option>
+              <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+              <option value="fr">Français (French)</option>
+              <option value="es">Español (Spanish)</option>
+              <option value="de">Deutsch (German)</option>
+              <option value="ja">日本語 (Japanese)</option>
+              <option value="zh">中文 (Chinese)</option>
+            </select>
+          </div>
+
+          <div class="state-vg-controls">
+            <button type="button" class="state-vg-btn state-vg-play-btn" id="state-vg-play" title="Play Voice Guide">
+              <span id="state-vg-play-icon">▶</span>
+              <span id="state-vg-play-text">Listen Audio Guide</span>
+            </button>
+            <button type="button" class="state-vg-btn state-vg-stop-btn" id="state-vg-stop" title="Stop Audio" disabled>
+              ⏹ Stop
+            </button>
+            <div class="state-vg-rates" id="state-vg-rates">
+              <button type="button" class="state-vg-rate-btn" data-rate="0.75">0.75x</button>
+              <button type="button" class="state-vg-rate-btn active" data-rate="1.0">1.0x</button>
+              <button type="button" class="state-vg-rate-btn" data-rate="1.25">1.25x</button>
+              <button type="button" class="state-vg-rate-btn" data-rate="1.5">1.5x</button>
+              <button type="button" class="state-vg-rate-btn" data-rate="1.75">1.75x</button>
+            </div>
+          </div>
+
+          <!-- Progress Bar for Subtitle Tracker -->
+          <div class="state-vg-progress-wrap">
+            <div class="state-vg-progress-bar" id="state-vg-progress-bar"></div>
+          </div>
+
+          <div class="state-vg-text-wrap">
+            <div id="state-vg-text">
+              Select any state to hear its rich historical, cultural, and geographic story.
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <button type="button" class="btn-focus" id="btn-focus-selected">🎯 Center on State</button>
+          <button type="button" class="btn-focus btn-outline" id="btn-reset-india-2">🇮🇳 India Overview</button>
+          <a href="#" class="btn-focus" id="btn-launch-vr" style="display:none; text-decoration:none; background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight:700;">🥽 Launch 3D AR/VR</a>
+        </div>
+      </div>
+
+      <!-- State Catalog List -->
+      <div class="state-catalog">
+        <div class="catalog-list" id="state-catalog-list">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Globe.gl Dependency -->
+  <script src="https://unpkg.com/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
+
+  <script>
+    // ── Comprehensive Indian States & UTs Database ────────────────────────
+    const INDIA_STATES_DB = {
+      'Andhra Pradesh': { capital: 'Amaravati', region: 'Southern', lat: 15.91, lng: 79.74, type: 'State', desc: 'Known for Tirupati and rich coastal agriculture along the Bay of Bengal.' },
+      'Arunachal Pradesh': { capital: 'Itanagar', region: 'North-Eastern', lat: 28.21, lng: 94.72, type: 'State', desc: 'Land of the Dawn-Lit Mountains in the eastern Himalayas.' },
+      'Assam': { capital: 'Dispur', region: 'North-Eastern', lat: 26.20, lng: 92.93, type: 'State', desc: 'World-famous for Assam tea, silk, and Kaziranga one-horned rhinos.' },
+      'Bihar': { capital: 'Patna', region: 'Eastern', lat: 25.09, lng: 85.31, type: 'State', desc: 'Historic center of learning with Nalanda and ancient Magadha heritage.' },
+      'Chhattisgarh': { capital: 'Raipur', region: 'Central', lat: 21.27, lng: 81.86, type: 'State', desc: 'Rich in mineral resources, dense Sal forests, and waterfalls.' },
+      'Goa': { capital: 'Panaji', region: 'Western', lat: 15.29, lng: 74.12, type: 'State', desc: 'Scenic Konkan coastal state famed for beaches, architecture, and biodiversity.' },
+      'Gujarat': { capital: 'Gandhinagar', region: 'Western', lat: 22.25, lng: 71.19, type: 'State', desc: "Home to the colossal Statue of Unity (182m, world's tallest monument at Kevadia), Rani ki Vav UNESCO stepwell, Gir Asiatic lions, and vibrant cultural heritage." },
+      'Haryana': { capital: 'Chandigarh', region: 'Northern', lat: 29.05, lng: 76.08, type: 'State', desc: 'Leading agricultural and industrial powerhouse surrounding Delhi NCR.' },
+      'Himachal Pradesh': { capital: 'Shimla', region: 'Northern', lat: 31.10, lng: 77.17, type: 'State', desc: 'Picturesque Himalayan valleys, snow-capped peaks, and river systems.' },
+      'Jharkhand': { capital: 'Ranchi', region: 'Eastern', lat: 23.61, lng: 85.27, type: 'State', desc: 'Land of forests, rich in coal, iron ore, and Chota Nagpur plateau beauty.' },
+      'Karnataka': { capital: 'Bengaluru', region: 'Southern', lat: 15.31, lng: 75.71, type: 'State', desc: 'India’s technology and aerospace hub with Western Ghats heritage.' },
+      'Kerala': { capital: 'Thiruvananthapuram', region: 'Southern', lat: 10.85, lng: 76.27, type: 'State', desc: 'God’s Own Country with serene backwaters, spice hills, and high HDI.' },
+      'Madhya Pradesh': { capital: 'Bhopal', region: 'Central', lat: 22.97, lng: 78.65, type: 'State', desc: 'Heart of India, home to tiger reserves, Khajuraho, and Sanchi Stupa.' },
+      'Maharashtra': { capital: 'Mumbai', region: 'Western', lat: 19.75, lng: 75.71, type: 'State', desc: 'Economic engine of India with Mumbai financial capital and Sahyadri ranges.' },
+      'Manipur': { capital: 'Imphal', region: 'North-Eastern', lat: 24.66, lng: 93.90, type: 'State', desc: 'Jewel of India with floating Loktak Lake and vibrant cultural dance.' },
+      'Meghalaya': { capital: 'Shillong', region: 'North-Eastern', lat: 25.46, lng: 91.36, type: 'State', desc: 'Abode of clouds with living root bridges and stunning wet plateau landscapes.' },
+      'Mizoram': { capital: 'Aizawl', region: 'North-Eastern', lat: 23.16, lng: 92.93, type: 'State', desc: 'Rolling bamboo-covered hills, pleasant climates, and high forest density.' },
+      'Nagaland': { capital: 'Kohima', region: 'North-Eastern', lat: 26.15, lng: 94.56, type: 'State', desc: 'Land of festivals, Hornbill culture, and scenic mountain ridges.' },
+      'Odisha': { capital: 'Bhubaneswar', region: 'Eastern', lat: 20.95, lng: 85.09, type: 'State', desc: 'Rich temple architecture, Chilika lagoon, and major eastern ports.' },
+      'Punjab': { capital: 'Chandigarh', region: 'Northern', lat: 31.14, lng: 75.34, type: 'State', desc: 'Land of five rivers, Golden Temple, and fertile agrarian plains.' },
+      'Rajasthan': { capital: 'Jaipur', region: 'Northern', lat: 27.02, lng: 74.21, type: 'State', desc: 'Largest Indian state by area with Thar Desert, palaces, and forts.' },
+      'Sikkim': { capital: 'Gangtok', region: 'North-Eastern', lat: 27.53, lng: 88.51, type: 'State', desc: 'Home to Mt. Kangchenjunga, glacial lakes, and 100% organic farming.' },
+      'Tamil Nadu': { capital: 'Chennai', region: 'Southern', lat: 11.12, lng: 78.65, type: 'State', desc: 'Dravidian temple art, automobile manufacturing hub, and Coromandel coast.' },
+      'Telangana': { capital: 'Hyderabad', region: 'Southern', lat: 18.11, lng: 79.01, type: 'State', desc: 'Major IT and pharma metropolis with rich Deccan heritage.' },
+      'Tripura': { capital: 'Agartala', region: 'North-Eastern', lat: 23.94, lng: 91.98, type: 'State', desc: 'Bordering Bangladesh with royal palaces and tea plantations.' },
+      'Uttar Pradesh': { capital: 'Lucknow', region: 'Northern', lat: 26.84, lng: 80.94, type: 'State', desc: 'Most populous state along the fertile Gangetic plain, Taj Mahal, and Varanasi.' },
+      'Uttarakhand': { capital: 'Dehradun', region: 'Northern', lat: 30.06, lng: 79.01, type: 'State', desc: 'Devbhoomi with source of Ganga and Yamuna rivers in the high Himalayas.' },
+      'West Bengal': { capital: 'Kolkata', region: 'Eastern', lat: 22.98, lng: 87.85, type: 'State', desc: 'Sundarbans delta, Darjeeling tea hills, and intellectual/cultural hub.' },
+      'Andaman and Nicobar Islands': { capital: 'Port Blair', region: 'UT', lat: 11.74, lng: 92.65, type: 'UT', desc: 'Tropical archipelago in the Indian Ocean with pristine coral reefs.' },
+      'Chandigarh': { capital: 'Chandigarh', region: 'UT', lat: 30.73, lng: 76.77, type: 'UT', desc: 'Planned modern city designed by Le Corbusier, joint capital of Punjab & Haryana.' },
+      'Dadra and Nagar Haveli and Daman and Diu': { capital: 'Daman', region: 'UT', lat: 20.42, lng: 72.83, type: 'UT', desc: 'Historic Portuguese colonial ports and beaches on the Arabian Sea.' },
+      'Delhi': { capital: 'New Delhi', region: 'UT', lat: 28.70, lng: 77.10, type: 'UT', desc: 'National Capital Territory of India and seat of union government.' },
+      'Jammu and Kashmir': { capital: 'Srinagar / Jammu', region: 'UT', lat: 33.77, lng: 76.57, type: 'UT', desc: 'Crown of India with Dal Lake, Pir Panjal mountains, and Chinar valleys.' },
+      'Ladakh': { capital: 'Leh', region: 'UT', lat: 34.15, lng: 77.57, type: 'UT', desc: 'High-altitude cold desert with Pangong Lake, monasteries, and mountain passes.' },
+      'Lakshadweep': { capital: 'Kavaratti', region: 'UT', lat: 10.56, lng: 72.64, type: 'UT', desc: 'Enchanting coral atolls and lagoons in the Laccadive Sea.' },
+      'Puducherry': { capital: 'Puducherry', region: 'UT', lat: 11.94, lng: 79.80, type: 'UT', desc: 'French coastal promenade heritage with Auroville spiritual community.' }
+    };
+
+    // Color palette for states
+    const STATE_COLORS = [
+      '#38bdf8', '#818cf8', '#34d399', '#f472b6', '#fbbf24',
+      '#a78bfa', '#2dd4bf', '#fb7185', '#60a5fa', '#4ade80',
+      '#f59e0b', '#06b6d4', '#ec4899', '#8b5cf6', '#10b981',
+      '#f97316', '#6366f1', '#14b8a6', '#e11d48', '#0284c7',
+      '#84cc16', '#d946ef', '#0ea5e9', '#eab308', '#22c55e',
+      '#f43f5e', '#a855f7', '#059669', '#3b82f6', '#ca8a04',
+      '#64748b', '#0d9488', '#9333ea', '#16a34a', '#dc2626', '#7c3aed'
+    ];
+
+    const stateColorMap = new Map();
+    let colorIndex = 0;
+
+    function getStateColor(name) {
+      if (!stateColorMap.has(name)) {
+        stateColorMap.set(name, STATE_COLORS[colorIndex % STATE_COLORS.length]);
+        colorIndex++;
+      }
+      return stateColorMap.get(name);
+    }
+
+    function getStateName(feat) {
+      const p = feat.properties || {};
+      return p.NAME_1 || p.name || p.NAME || p.st_nm || p.state || p.ST_NM || p.dtname || `Region`;
+    }
+
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // ── GeoJSON Data Loading ──────────────────────────────────────────────
+    const GEOJSON_URLS = [
+      'https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson',
+      'https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States',
+      'https://raw.githubusercontent.com/datameet/maps/master/States/states.geojson',
+    ];
+
+    async function loadIndiaGeoJSON() {
+      for (const url of GEOJSON_URLS) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data && data.features && data.features.length > 0) {
+            console.log(`Loaded GeoJSON from: ${url}`);
+            return data;
+          }
+        } catch (e) {
+          console.warn(`Failed source ${url}:`, e.message);
+        }
+      }
+      throw new Error('Unable to load India GeoJSON from any mirror.');
+    }
+
+    // ── Main Controller & Globe Initialization ────────────────────────────
+    let globe = null;
+    let geojsonData = null;
+    let allFeatures = [];
+    let activeHoveredState = null;
+    let activeSelectedState = 'Republic of India';
+    let isAutoRotating = true;
+    let scrollProgress = 0; // 0 = opening, 1 = scrolled
+
+    async function initApp() {
+      const globeContainer = document.getElementById('globeViz');
+      const globeWrapper = document.getElementById('globe-wrapper');
+
+      // 1. Create 3D Globe with Globe.gl
+      globe = Globe()(globeContainer)
+        .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+        .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+        .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+        .showAtmosphere(true)
+        .atmosphereColor('rgba(56, 189, 248, 0.35)')
+        .atmosphereAltitude(0.22)
+        .polygonAltitude(feat => {
+          const name = getStateName(feat);
+          if (name === activeSelectedState) return 0.048;
+          if (name === activeHoveredState) return 0.038;
+          return 0.006;
+        })
+        .polygonCapColor(feat => {
+          const name = getStateName(feat);
+          const baseColor = getStateColor(name);
+          if (name === activeSelectedState) return hexToRgba(baseColor, 0.22);
+          if (name === activeHoveredState) return hexToRgba(baseColor, 0.14);
+          return 'rgba(0, 0, 0, 0)'; // Transparent: No solid color overlay on states
+        })
+        .polygonSideColor(feat => {
+          const name = getStateName(feat);
+          const baseColor = getStateColor(name);
+          if (name === activeSelectedState) return hexToRgba(baseColor, 0.6);
+          if (name === activeHoveredState) return hexToRgba(baseColor, 0.45);
+          return 'rgba(255, 255, 255, 0.02)';
+        })
+        .polygonStrokeColor(feat => {
+          const name = getStateName(feat);
+          if (name === activeSelectedState) return '#ffffff';
+          if (name === activeHoveredState) return '#ffd700'; // Dynamic bright gold border highlight on drag/hover
+          return 'rgba(255, 255, 255, 0.35)'; // Clean subtle border
+        })
+        .polygonLabel(feat => {
+          const name = getStateName(feat);
+          const color = getStateColor(name);
+          const meta = INDIA_STATES_DB[name] || { capital: 'N/A', region: 'India' };
+          return `
+            <div class="globe-tooltip-card">
+              <div class="globe-tooltip-header">
+                <span class="globe-tooltip-swatch" style="background: ${color}"></span>
+                <span>${name}</span>
+              </div>
+              <div class="globe-tooltip-meta">
+                Capital: <b>${meta.capital}</b> · Zone: <b class="zone-tag">${meta.region}</b>
+              </div>
+            </div>
+          `;
+        })
+        .onPolygonHover(hoverD => {
+          const prev = activeHoveredState;
+          activeHoveredState = hoverD ? getStateName(hoverD) : null;
+          if (prev !== activeHoveredState) {
+            globe.polygonAltitude(globe.polygonAltitude());
+            globe.polygonCapColor(globe.polygonCapColor());
+            globe.polygonSideColor(globe.polygonSideColor());
+            globe.polygonStrokeColor(globe.polygonStrokeColor());
+          }
+          if (hoverD) {
+            updateDetailCard(getStateName(hoverD));
+          }
+        })
+        .onPolygonClick(feat => {
+          if (!feat) return;
+          const name = getStateName(feat);
+          selectState(name, true);
+        });
+
+      // Controls configuration - Smooth horizontal rotation from right to left
+      const controls = globe.controls();
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = -0.8; // Negative value rotates camera right, causing globe surface to rotate from right to left
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.zoomSpeed = 1.0;
+      controls.minDistance = 110;
+      controls.maxDistance = 850;
+
+      // Opening view setup (Initial point of view)
+      globe.pointOfView({ lat: 10, lng: 78, altitude: 2.2 }, 0);
+
+      // 2. Fetch GeoJSON Data
+      try {
+        geojsonData = await loadIndiaGeoJSON();
+        allFeatures = geojsonData.features || [];
+
+        // Pre-cache color assignments
+        allFeatures.forEach(f => getStateColor(getStateName(f)));
+
+        globe.polygonsData(allFeatures);
+        buildStateCatalog(allFeatures);
+        document.getElementById('nav-state-count').textContent = `${allFeatures.length} States & UTs Active`;
+      } catch (err) {
+        console.error('GeoJSON loading error:', err);
+        document.getElementById('loading-msg').textContent = '⚠ Could not load boundaries from online mirror.';
+        document.getElementById('loading-msg').style.color = '#f87171';
+      }
+
+      // Hide loading screen
+      setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        if (loader) loader.classList.add('fade-out');
+      }, 1400);
+
+      // 3. Smooth Horizontal Left-to-Right Auto-Rotation Engine
+      function animationLoop() {
+        requestAnimationFrame(animationLoop);
+        if (globe && globe.controls) {
+          globe.controls().update();
+        }
+      }
+
+      requestAnimationFrame(animationLoop);
+
+      // 4. Scroll Tracking & Smooth Camera Transition
+      let hasScrolledDown = false;
+      function handleScroll() {
+        const scrollY = window.scrollY || window.pageYOffset;
+        const triggerThreshold = window.innerHeight * 0.35;
+
+        if (scrollY > triggerThreshold) {
+          if (!hasScrolledDown) {
+            hasScrolledDown = true;
+            // Smoothly fly camera to face India in the explorer section
+            globe.pointOfView({ lat: 22, lng: 78, altitude: 1.45 }, 1200);
+          }
+        } else {
+          if (hasScrolledDown) {
+            hasScrolledDown = false;
+            // Wide view for opening hero section
+            globe.pointOfView({ lat: 18, lng: 79, altitude: 2.1 }, 1000);
+          }
+        }
+      }
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      handleScroll(); // Initial check
+
+      // Handle Window Resize
+      const resizeObserver = new ResizeObserver(() => {
+        if (globe && globeContainer) {
+          globe.width(globeContainer.clientWidth);
+          globe.height(globeContainer.clientHeight);
+        }
+      });
+      resizeObserver.observe(globeWrapper);
+
+      // 5. User Interaction Bindings
+      setupUIInteractions();
+
+      // 6. Interactive 3D Monument Pins (Statue of Unity, Taj Mahal, etc.)
+      initMonumentPins();
+    }
+
+    // ── Interactive 3D Monument Pins on Globe ─────────────────────────────
+    function initMonumentPins() {
+      const MONUMENT_PINS = [
+        {
+          id: 'statue_of_unity',
+          name: 'Statue of Unity',
+          state: 'Gujarat',
+          tag: "WORLD'S TALLEST COLOSSUS (182M)",
+          desc: 'Sadhu Bet, Kevadia, Narmada River',
+          lat: 21.8380,
+          lng: 73.7191,
+          color: '#f59e0b',
+          vrPath: 'statue_of_unity_3d.html'
+        },
+        {
+          id: 'rani_ki_vav',
+          name: 'Rani Ki Vav',
+          state: 'Gujarat',
+          tag: 'UNESCO STEPWELL',
+          desc: 'Patan, Gujarat',
+          lat: 23.8589,
+          lng: 72.1017,
+          color: '#06b6d4',
+          vrPath: 'rani_ki_vav.html'
+        },
+        {
+          id: 'taj_mahal',
+          name: 'Taj Mahal',
+          state: 'Uttar Pradesh',
+          tag: 'MUGHAL MARBLE JEWEL',
+          desc: 'Agra, Uttar Pradesh',
+          lat: 27.1751,
+          lng: 78.0421,
+          color: '#38bdf8',
+          vrPath: 'taj_mahal_3d.html'
+        },
+        {
+          id: 'victoria_memorial',
+          name: 'Victoria Memorial',
+          state: 'West Bengal',
+          tag: 'MARBLE RENAISSANCE',
+          desc: 'Kolkata, West Bengal',
+          lat: 22.5448,
+          lng: 88.3426,
+          color: '#ec4899',
+          vrPath: 'victoriamemorial-vr.html'
+        },
+        {
+          id: 'lepakshi_temple',
+          name: 'Lepakshi Temple',
+          state: 'Andhra Pradesh',
+          tag: 'HANGING PILLAR WONDER',
+          desc: 'Lepakshi, Andhra Pradesh',
+          lat: 13.8044,
+          lng: 77.6053,
+          color: '#fbbf24',
+          vrPath: 'lepakshi_temple_3d.html'
+        },
+        {
+          id: 'brihadisvara',
+          name: 'Brihadisvara Temple',
+          state: 'Tamil Nadu',
+          tag: 'GREAT CHOLA TEMPLE',
+          desc: 'Thanjavur, Tamil Nadu',
+          lat: 10.7828,
+          lng: 79.1318,
+          color: '#f97316',
+          vrPath: 'brihadisvara-vr.html'
+        },
+        {
+          id: 'hampi',
+          name: 'Hampi Vijayanagara',
+          state: 'Karnataka',
+          tag: 'STONE CHARIOT CAPITAL',
+          desc: 'Hampi, Karnataka',
+          lat: 15.3350,
+          lng: 76.4600,
+          color: '#34d399',
+          vrPath: 'hampi_precise.html'
+        },
+        {
+          id: 'amber_fort',
+          name: 'Amber Fort',
+          state: 'Rajasthan',
+          tag: 'RAJPUT PALACE CITADEL',
+          desc: 'Jaipur, Rajasthan',
+          lat: 26.9855,
+          lng: 75.8513,
+          color: '#ff5a3c',
+          vrPath: 'amberfort-vr.html'
+        },
+        {
+          id: 'ajanta_ellora',
+          name: 'Ajanta & Ellora',
+          state: 'Maharashtra',
+          tag: 'KAILASA ROCK MONOLITH',
+          desc: 'Aurangabad, Maharashtra',
+          lat: 20.0268,
+          lng: 75.1780,
+          color: '#e0231c',
+          vrPath: 'ajanta-ellora-caves.html'
+        },
+        {
+          id: 'rajgad_fort',
+          name: 'Rajgad Fort',
+          state: 'Maharashtra',
+          tag: 'KING OF HILL FORTS',
+          desc: 'Pune District, Maharashtra (Sahyadris)',
+          lat: 18.2562,
+          lng: 73.6828,
+          color: '#f97316',
+          vrPath: 'rajgadfort-vr.html'
+        },
+        {
+          id: 'red_fort',
+          name: 'Red Fort (Lal Qila)',
+          state: 'Delhi',
+          tag: 'UNESCO MUGHAL CITADEL',
+          desc: 'Old Delhi, National Capital',
+          lat: 28.6562,
+          lng: 77.2410,
+          color: '#ef4444',
+          vrPath: 'redfort-vr.html'
+        },
+        {
+          id: 'qutub_minar',
+          name: 'Qutub Minar',
+          state: 'Delhi',
+          tag: 'TALLEST BRICK MINARET',
+          desc: 'Mehrauli, New Delhi',
+          lat: 28.5245,
+          lng: 77.1855,
+          color: '#eab308',
+          vrPath: 'qutubminar-vr.html'
+        },
+        {
+          id: 'humayuns_tomb',
+          name: "Humayun's Tomb",
+          state: 'Delhi',
+          tag: 'FIRST CHARBAGH MAUSOLEUM',
+          desc: 'Nizamuddin East, New Delhi',
+          lat: 28.5933,
+          lng: 77.2507,
+          color: '#ec4899',
+          vrPath: 'humayunstomb-vr.html'
+        },
+
+        {
+          id: 'sanchi_stupa',
+          name: 'Great Stupa of Sanchi',
+          state: 'Madhya Pradesh',
+          tag: 'UNESCO ASHOKAN STUPA',
+          desc: 'Sanchi, Raisen District, Madhya Pradesh',
+          lat: 23.4795,
+          lng: 77.7397,
+          color: '#10b981',
+          vrPath: 'sanchistupa-vr.html'
+        },
+        {
+          id: 'gateway_of_india',
+          name: 'Gateway of India',
+          state: 'Maharashtra',
+          tag: 'HISTORIC ARABIAN HARBOR ARCH',
+          desc: 'Apollo Bunder Waterfront, Mumbai, Maharashtra',
+          lat: 18.922,
+          lng: 72.8347,
+          color: '#f59e0b',
+          vrPath: 'gatewayofindia-vr.html'
+        },
+        {
+          id: 'golden_temple',
+          name: 'Golden Temple',
+          state: 'Punjab',
+          tag: 'SACRED GOLDEN SANCTUARY',
+          desc: 'Amritsar, Punjab',
+          lat: 31.62,
+          lng: 74.8765,
+          color: '#ffd700',
+          vrPath: 'goldentemple-vr.html'
+        },
+        {
+          id: 'south_indian_gopuram',
+          name: 'South Indian Temple Gopuram',
+          state: 'Tamil Nadu',
+          tag: 'MONUMENTAL DRAVIDIAN GOPURAM',
+          desc: 'Madurai / Thanjavur, Tamil Nadu',
+          lat: 9.9195,
+          lng: 78.1193,
+          color: '#ec4899',
+          vrPath: 'templegopuram-vr.html'
+        },
+        {
+          id: 'lotus_temple',
+          name: 'Lotus Temple',
+          state: 'Delhi',
+          tag: 'MARBLE LOTUS OF UNIVERSAL PEACE',
+          desc: 'Kalkaji, New Delhi, National Capital Territory',
+          lat: 28.5535,
+          lng: 77.2588,
+          color: '#38bdf8',
+          vrPath: 'lotustemple-vr.html'
+        },
+        {
+          id: 'red_fort_glory',
+          name: 'Red Fort Glory',
+          state: 'Delhi',
+          tag: 'MUGHAL IMPERIAL PAVILIONS',
+          desc: 'Old Delhi',
+          lat: 28.6562,
+          lng: 77.241,
+          color: '#ef4444',
+          vrPath: 'redfortglory-vr.html'
+        },      ];
+
+      if (!globe || typeof globe.htmlElementsData !== 'function') return;
+
+      globe
+        .htmlElementsData(MONUMENT_PINS)
+        .htmlLat(d => d.lat)
+        .htmlLng(d => d.lng)
+        .htmlAltitude(0.015)
+        .htmlElement(d => {
+          const el = document.createElement('div');
+          el.className = 'globe-monument-pin';
+          el.style.setProperty('--m-pin-color', d.color);
+          if (d.id === 'statue_of_unity') {
+            el.classList.add('statue-of-unity-pin');
+          }
+
+          el.innerHTML = `
+            <div class="m-pin-card">
+              <div class="m-pin-tag">${d.tag}</div>
+              <div class="m-pin-title">${d.name}</div>
+              <div class="m-pin-sub">${d.desc}</div>
+              <a href="${d.vrPath}" class="m-pin-action" style="text-decoration:none;">Explore 3D Model ➔</a>
+            </div>
+            <div class="m-pin-beacon">
+              <span class="m-pin-dot"></span>
+              <span class="m-pin-wave"></span>
+            </div>
+          `;
+
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectState(d.state, true);
+            globe.pointOfView({ lat: d.lat, lng: d.lng, altitude: 0.65 }, 1200);
+          });
+
+          return el;
+        });
+    }
+
+    // ── Build State Catalog & Filtering ──────────────────────────────────
+    function buildStateCatalog(features) {
+      const container = document.getElementById('state-catalog-list');
+      container.innerHTML = '';
+
+      const sortedNames = features
+        .map(f => getStateName(f))
+        .sort((a, b) => a.localeCompare(b));
+
+      sortedNames.forEach(name => {
+        const color = getStateColor(name);
+        const meta = INDIA_STATES_DB[name] || { capital: 'N/A', region: 'India' };
+
+        const row = document.createElement('div');
+        row.className = 'state-row';
+        row.dataset.name = name;
+        row.dataset.region = meta.region || 'Other';
+        row.innerHTML = `
+          <div class="state-row-left">
+            <span class="state-swatch" style="background: ${color}"></span>
+            <div>
+              <div class="state-name-text">${name}</div>
+              <div class="state-region-text">${meta.capital} · ${meta.region}</div>
+            </div>
+          </div>
+          <span class="state-explore-tag">Explore →</span>
+        `;
+
+        row.addEventListener('click', () => {
+          selectState(name, true);
+        });
+
+        row.addEventListener('mouseenter', () => {
+          activeHoveredState = name;
+          globe.polygonAltitude(d => getStateName(d) === name ? 0.038 : (getStateName(d) === activeSelectedState ? 0.048 : 0.006));
+          globe.polygonCapColor(globe.polygonCapColor());
+          globe.polygonSideColor(globe.polygonSideColor());
+          globe.polygonStrokeColor(globe.polygonStrokeColor());
+        });
+
+        row.addEventListener('mouseleave', () => {
+          activeHoveredState = null;
+          globe.polygonAltitude(d => getStateName(d) === activeSelectedState ? 0.048 : 0.006);
+          globe.polygonCapColor(globe.polygonCapColor());
+          globe.polygonSideColor(globe.polygonSideColor());
+          globe.polygonStrokeColor(globe.polygonStrokeColor());
+        });
+
+        container.appendChild(row);
+      });
+    }
+
+    // ── State Selection & Camera Fly-To ──────────────────────────────────
+    function selectState(name, scrollToExplorer = false) {
+      activeSelectedState = name;
+      updateDetailCard(name);
+
+      // Highlight selected row in catalog
+      document.querySelectorAll('.state-row').forEach(el => {
+        if (el.dataset.name === name) {
+          el.classList.add('selected');
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          el.classList.remove('selected');
+        }
+      });
+
+      // Update 3D Globe Polygon visual highlights
+      globe.polygonAltitude(d => getStateName(d) === name ? 0.048 : 0.006);
+      globe.polygonCapColor(globe.polygonCapColor());
+      globe.polygonSideColor(globe.polygonSideColor());
+      globe.polygonStrokeColor(globe.polygonStrokeColor());
+
+      // If state has known coordinates, fly camera to it
+      const meta = INDIA_STATES_DB[name];
+      if (meta && meta.lat && meta.lng) {
+        globe.pointOfView({
+          lat: meta.lat,
+          lng: meta.lng,
+          altitude: 0.85
+        }, 1200);
+      }
+
+      // If requested, smooth scroll down to interactive explorer
+      if (scrollToExplorer && window.scrollY < 200) {
+        const expSection = document.getElementById('explorer-section');
+        if (expSection) {
+          expSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+
+    // ── AR/VR Mapping for Explorer ──────────────────────────────────────
+    const ARVR_STATE_MAP = {
+      'Maharashtra': 'ajanta-ellora-caves.html',
+      'Gujarat': 'statue_of_unity_3d.html',
+      'Rajasthan': 'amberfort-vr.html',
+      'Uttar Pradesh': 'taj_mahal_3d.html',
+      'West Bengal': 'victoriamemorial-vr.html',
+      'Tamil Nadu': 'brihadisvara-vr.html',
+      'Karnataka': 'hampi_precise.html',
+      'Kerala': 'padmanabhapuram-vr.html',
+      'Odisha': 'odisha_precise.html',
+      'Assam': 'rang_ghar_precision.html',
+      'Bihar': 'mahabodhi_explorer.html',
+      'Chhattisgarh': 'sirpur_lakshmana_vr.html',
+      'Goa': 'bom_jesus_vr.html',
+      'Andhra Pradesh': 'lepakshi_temple_3d.html',
+      'Delhi': 'redfort-vr.html',
+      'Punjab': 'goldentemple-vr.html',
+      'Madhya Pradesh': 'sanchistupa-vr.html',
+      'Uttarakhand': 'jageshwar-vr.html',
+      'Tripura': 'neermahal-vr.html',
+      'Madhya Pradesh': 'lakshmana_temple_3d.html'
+    };
+
+    // ── Update State Details Card ─────────────────────────────────────────
+    function updateDetailCard(name) {
+      const meta = INDIA_STATES_DB[name] || {
+        capital: 'New Delhi',
+        region: 'National',
+        type: 'Federal Territory',
+        desc: 'Interactive 3D boundary highlight for state/territory of India.',
+        lat: 22,
+        lng: 78
+      };
+
+      const color = getStateColor(name);
+      document.getElementById('card-name').textContent = name;
+      document.getElementById('card-swatch').style.background = color;
+      document.getElementById('card-type').textContent = meta.type || 'State';
+      document.getElementById('card-desc').textContent = meta.desc || 'Geospatial state boundary within the Union of India.';
+      document.getElementById('card-capital').textContent = meta.capital || 'N/A';
+      document.getElementById('card-zone').textContent = meta.region || 'India';
+      document.getElementById('card-coords').textContent = meta.lat ? `${meta.lat}° N, ${meta.lng}° E` : '22° N, 78° E';
+
+      if (typeof window.onStateSelectVoiceGuide === 'function') {
+        window.onStateSelectVoiceGuide(name);
+      }
+
+      const vrBtn = document.getElementById('btn-launch-vr');
+      if (vrBtn) {
+        const vrPath = ARVR_STATE_MAP[name];
+        if (vrPath) {
+          vrBtn.href = vrPath;
+          vrBtn.style.display = 'inline-flex';
+          vrBtn.textContent = (name === 'Gujarat') ? '🗿 Launch Statue of Unity (182m 3D)' :
+                              (name === 'Delhi') ? '🚩 Launch Red Fort & Delhi 3D VR' :
+                              (name === 'Punjab') ? '✨ Launch Golden Temple 3D VR' :
+                              (name === 'Madhya Pradesh') ? '☸️ Launch Sanchi Stupa 3D VR' :
+                              '🥽 Launch 3D AR/VR';
+          vrBtn.title = (name === 'Gujarat') ? "Explore Statue of Unity 3D Model" : `Explore ${name} 3D Model`;
+        } else {
+          vrBtn.style.display = 'none';
+        }
+      }
+    }
+
+    // ── UI Controls & Event Listeners ────────────────────────────────────
+    function setupUIInteractions() {
+      // 1. Zoom Controls
+      document.getElementById('btn-zoom-in').addEventListener('click', () => {
+        const pov = globe.pointOfView();
+        globe.pointOfView({ altitude: Math.max(0.18, pov.altitude * 0.72) }, 400);
+      });
+
+      document.getElementById('btn-zoom-out').addEventListener('click', () => {
+        const pov = globe.pointOfView();
+        globe.pointOfView({ altitude: Math.min(6.0, pov.altitude * 1.38) }, 400);
+      });
+
+      // 2. Reset to India Overview
+      const resetIndiaView = () => {
+        activeSelectedState = 'Republic of India';
+        activeHoveredState = null;
+        updateDetailCard('Republic of India');
+        globe.polygonAltitude(() => 0.006);
+        globe.polygonCapColor(globe.polygonCapColor());
+        globe.polygonSideColor(globe.polygonSideColor());
+        globe.polygonStrokeColor(globe.polygonStrokeColor());
+        globe.pointOfView({ lat: 22, lng: 78, altitude: 1.45 }, 1000);
+      };
+
+      document.getElementById('btn-reset-india').addEventListener('click', resetIndiaView);
+      document.getElementById('btn-reset-india-2').addEventListener('click', resetIndiaView);
+
+      // 3. Toggle Right-to-Left Auto-Spin
+      const spinBtn = document.getElementById('btn-toggle-spin');
+      spinBtn.addEventListener('click', () => {
+        isAutoRotating = !isAutoRotating;
+        if (globe && globe.controls) {
+          globe.controls().autoRotate = isAutoRotating;
+        }
+        spinBtn.classList.toggle('active', isAutoRotating);
+        spinBtn.title = isAutoRotating ? 'Auto-Rotation ON (Right to Left)' : 'Auto-Rotation PAUSED';
+      });
+
+      // 4. Hero Action Buttons
+      document.getElementById('btn-explore-cta').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('explorer-section').scrollIntoView({ behavior: 'smooth' });
+      });
+
+      document.getElementById('btn-quick-fly').addEventListener('click', () => {
+        selectState('Delhi', true);
+      });
+
+      document.getElementById('btn-focus-selected').addEventListener('click', () => {
+        if (activeSelectedState && INDIA_STATES_DB[activeSelectedState]) {
+          selectState(activeSelectedState, false);
+        } else {
+          resetIndiaView();
+        }
+      });
+
+      // 5. Search Bar Filtering
+      const searchInput = document.getElementById('state-search-input');
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.state-row');
+
+        rows.forEach(row => {
+          const name = row.dataset.name.toLowerCase();
+          const region = row.dataset.region.toLowerCase();
+          const matches = name.includes(query) || region.includes(query);
+          row.style.display = matches ? 'flex' : 'none';
+        });
+
+        // Auto select if exact match found
+        const exactMatch = allFeatures.find(f => getStateName(f).toLowerCase() === query);
+        if (exactMatch) {
+          selectState(getStateName(exactMatch), false);
+        }
+      });
+
+      // 6. Region Filter Chips
+      const chipBtns = document.querySelectorAll('.chip-btn');
+      chipBtns.forEach(chip => {
+        chip.addEventListener('click', () => {
+          chipBtns.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+
+          const region = chip.dataset.region;
+          const rows = document.querySelectorAll('.state-row');
+
+          rows.forEach(row => {
+            if (region === 'All' || row.dataset.region === region) {
+              row.style.display = 'flex';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+
+    // Launch Application
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+
+  <script>
+  // ── State Voice Guide Universal Dual-Engine & Subtitle Tracker ──────────
+  (function() {
+    const STATE_SCRIPTS = {
+  "Republic of India": {
+    "en": "Welcome to the Republic of India — the world's largest democracy, cradle of ancient civilisations, and home to over 1.4 billion people across twenty-eight federal states and eight union territories. Stretching from the snow-capped summits of the Himalayas in the north to the tropical shores of Kanyakumari in the south, India encompasses over three point two eight million square kilometres of incredible geographical, cultural, linguistic, and architectural diversity. Explore this interactive 3D globe to discover each state's distinct legacy.",
+    "hi": "भारत गणराज्य में आपका स्वागत है — विश्व का सबसे बड़ा लोकतंत्र, प्राचीन सभ्यताओं का उद्गम स्थल और 28 राज्यों तथा 8 केंद्र शासित प्रदेशों में फैली 1.4 अरब से अधिक की आबादी। उत्तर में बर्फ से ढके हिमालय से लेकर दक्षिण में कन्याकुमारी के उष्णकटिबंधीय तटों तक, भारत अपनी अद्वितीय सांस्कृतिक, भाषाई और भौगोलिक विविधता के लिए विख्यात है। 3D ग्लोब के माध्यम से प्रत्येक राज्य की धरोहर का अन्वेषण करें।",
+    "regional": "భారత గణతంత్ర రాజ్యానికి స్వాగతం — ప్రపంచంలోనే అతిపెద్ద ప్రజాస్వామ్యం మరియు ప్రాచీన సంస్కృతుల నిలయం.",
+    "fr": "Bienvenue en République de l'Inde — la plus grande démocratie du monde et le berceau de civilisations millénaires avec 28 États et 8 territoires de l'Union.",
+    "es": "Bienvenido a la República de la India — la democracia más grande del mundo y cuna de civilizaciones milenarias.",
+    "de": "Willkommen in der Republik Indien — der größten Demokratie der Welt und Wiege alter Hochkulturen.",
+    "ja": "インド共和国へようこそ。世界最大の民主主義国であり、古代文明の発祥地です。",
+    "zh": "欢迎来到印度共和国——世界最大的民主国家与千年文明的摇篮。"
+  },
+  "Andhra Pradesh": {
+    "en": "Welcome to Andhra Pradesh — the jewel of the Coromandel coast with nearly one thousand kilometres of scenic Bay of Bengal shoreline. Revered for the sacred hilltop shrine of Tirumala Tirupati, the legendary Lepakshi Veerabhadra Temple with its floating pillar, and Amaravati's profound Buddhist heritage. Andhra Pradesh is a vital economic engine driven by agriculture, aquaculture, aerospace, and thriving digital technology corridors.",
+    "hi": "आंध्र प्रदेश में आपका स्वागत है — बंगाल की खाड़ी के लगभग एक हज़ार किलोमीटर लंबे तट वाला समृद्ध राज्य। तिरुपति बालाजी का पावन मंदिर, लेपाक्षी का हैंगिंग पिलर और अमरावती की बौद्ध धरोहर इसकी महान पहचान हैं। आंध्र प्रदेश अपनी उर्वर कृषि, समुद्री व्यापार और उभरते सूचना प्रौद्योगिकी केंद्रों के लिए प्रसिद्ध है।",
+    "regional": "ఆంధ్రప్రదేశ్‌కు స్వాగతం — తిరుమల తిరుపతి దేవస్థానం, లేపాక్షి వీరభద్రాలయం మరియు అమరావతి బౌద్ధ వారసత్వంతో అలరారే శిల్పకళా సంపన్న రాష్ట్రం.",
+    "fr": "Bienvenue en Andhra Pradesh — terre des temples sacrés de Tirupati et de Lepakshi sur la côte de Coromandel.",
+    "es": "Bienvenido a Andhra Pradesh — hogar del santuario de Tirupati y el templo de Lepakshi.",
+    "de": "Willkommen in Andhra Pradesh — dem Land des berühmten Tirupati-Heiligtums und der Lepakshi-Tempel.",
+    "ja": "アーンドラ・プラデーシュ州へようこそ。ティルパティ寺院やレーパークシの空中柱で名高い歴史の地です。",
+    "zh": "欢迎来到安得拉邦——拥有蒂鲁帕蒂圣殿与莱帕克希神庙的孟加拉湾沿岸文化与科技大邦。"
+  },
+  "Arunachal Pradesh": {
+    "en": "Welcome to Arunachal Pradesh — the enchanting Land of the Dawn-Lit Mountains, where India first greets the morning sun. Nestled in the Eastern Himalayas, it boasts the magnificent seventeenth-century Tawang Monastery, snow-crowned passes like Sela Pass, and the pristine Namdapha National Park, renowned for biodiversity.",
+    "hi": "अरुणाचल प्रदेश में आपका स्वागत है — उगते सूरज की पावन भूमि, जहाँ भारत की धरती पर सूर्य की पहली किरणें पड़ती हैं। पूर्वी हिमालय की गोद में बसा यह राज्य सत्रहवीं शताब्दी के ऐतिहासिक तवांग बौद्ध मठ, सेला दर्रे और नामदाफा राष्ट्रीय उद्यान की जैव-विविधता के लिए विश्व विख्यात है।",
+    "regional": "अरुणाचल प्रदेश — भारताच्या पूर्वेकडील उगवत्या सूर्याची भूमी आणि तवांग मठाचे पवित्र स्थान.",
+    "fr": "Bienvenue en Arunachal Pradesh — le pays des montagnes illuminées par l'aube dans l'Himalaya oriental.",
+    "es": "Bienvenido a Arunachal Pradesh — la tierra de las montañas iluminadas por el amanecer.",
+    "de": "Willkommen in Arunachal Pradesh — dem Land der morgendlichen Bergsonne im östlichen Himalaya.",
+    "ja": "アルナーチャル・プラデーシュ州へようこそ。東ヒマラヤに位置し、インドで最も早く朝日を迎える地です。",
+    "zh": "欢迎来到阿鲁纳恰尔邦——晨光破晓的高山之邦，以达旺寺和壮丽的东喜马拉雅雪山闻名。"
+  },
+  "Assam": {
+    "en": "Welcome to Assam — the verdant sentinel of Northeast India, cradled by the mighty Brahmaputra River. Globally celebrated for its aromatic Assam tea, golden Muga silk, and the Kaziranga National Park — sanctuary to two-thirds of the world's great one-horned rhinoceroses. Assam is home to the ancient Ahom kingdom's architectural wonder, Rang Ghar, and the sacred Kamakhya Temple.",
+    "hi": "असम में आपका स्वागत है — ब्रह्मपुत्र नदी की घाटी में बसा पूर्वोत्तर का प्रवेश द्वार। असम चाय के विश्व प्रसिद्ध बागानों, सुनहरे मूंगा रेशम और काजीरंगा राष्ट्रीय उद्यान के एक सींग वाले गैंडों के लिए जाना जाता है। अहोम साम्राज्य का ऐतिहासिक रंग घर और पावन कामाख्या मंदिर यहाँ की अमूल्य धरोहर हैं।",
+    "regional": "অসমলৈ স্বাগতম — ব্ৰহ্মপুত্ৰৰ পাৰত কাজিৰঙাৰ এশিঙীয়া গঁড়, সুগন্ধি চাহ আৰু আহোম ৰাজ্যৰ ঐতিহাসিক ৰংঘৰৰ ভূমি।",
+    "fr": "Bienvenue en Assam — célèbre pour son thé réputé, la soie Muga dorée et les rhinocéros unicornes de Kaziranga.",
+    "es": "Bienvenido a Assam — hogar del té aromático y el Parque Nacional Kaziranga.",
+    "de": "Willkommen in Assam — bekannt für weltberühmten Tee und das Kaziranga-Panzernashorn.",
+    "ja": "アッサム州へようこそ。ブラマプトラ川が潤す紅茶の名産地であり、カジランガの一角サイの聖域です。",
+    "zh": "欢迎来到阿萨姆邦——雅鲁藏布江流经的茶叶之乡，拥有卡齐兰加独角犀牛与阿洪王朝朗格哈尔遗迹。"
+  },
+  "Bihar": {
+    "en": "Welcome to Bihar — the cradle of ancient Indian thought, philosophy, and empires. Here, over 2,500 years ago, Lord Buddha attained supreme enlightenment under the Bodhi Tree at Bodh Gaya, while Lord Mahavira revitalised Jainism. Bihar was the seat of the mighty Magadha and Mauryan Empires, and home to Nalanda Mahavihara — the world's first residential international university.",
+    "hi": "बिहार में आपका स्वागत है — ज्ञान, दर्शन और महान साम्राज्यों की ऐतिहासिक भूमि। बोधगया में भगवान बुद्ध को बोधि वृक्ष के नीचे कैवल्य ज्ञान प्राप्त हुआ, और भगवान महावीर ने जैन धर्म को नई दिशा दी। मगध व मौर्य साम्राज्यों की राजधानी और दुनिया के पहले आवासीय अंतरराष्ट्रीय विश्वविद्यालय नालंदा की यह पावन धरती है।",
+    "regional": "বিহার — ভগবান বুদ্ধের বোধিসত্ত্ব ও প্রাচীন নালন্দা বিশ্ববিদ্যালয়ের পুণ্যভূমি।",
+    "fr": "Bienvenue au Bihar — berceau du bouddhisme à Bodh Gaya et de l'ancienne université de Nalanda.",
+    "es": "Bienvenido a Bihar — cuna del budismo en Bodh Gaya y de la histórica universidad de Nalanda.",
+    "de": "Willkommen in Bihar — der Wiege des Buddhismus mit Bodh Gaya und der antiken Universität Nalanda.",
+    "ja": "ビハール州へようこそ。仏陀が悟りを開いたブッダガヤや古代ナーランダー大学の地です。",
+    "zh": "欢迎来到比哈尔邦——佛教与耆那教圣地，以菩提迦耶大菩提寺与古代那烂陀大学著称。"
+  },
+  "Chhattisgarh": {
+    "en": "Welcome to Chhattisgarh — the green heart of central India, adorned with forty-four percent forest cover, roaring Chitrakote waterfalls, and immense mineral wealth. Home to the eighth-century red-brick Lakshmana Temple of Sirpur, ancient tribal bastions, and the vibrant Bastar iron-craft and dokra metalwork traditions.",
+    "hi": "छत्तीसगढ़ में आपका स्वागत है — घने जंगलों, चित्रकोट जलप्रपात और समृद्ध खनिज संपदा से संपन्न राज्य। सिरपुर का आठवीं शताब्दी का ईंटों से निर्मित लक्ष्मण मंदिर, प्राचीन जनजातीय संस्कृति और बस्तर की विश्व प्रसिद्ध ढोकरा धातु कला इसकी अद्वितीय पहचान हैं।",
+    "regional": "छत्तीसगढ़ — सिरपुर के ऐतिहासिक लक्ष्मण मंदिर और बस्तर की समृद्ध आदिवासी कला की पावन भूमि।",
+    "fr": "Bienvenue au Chhattisgarh — le cœur vert de l'Inde avec ses cascades et le temple en briques de Sirpur.",
+    "es": "Bienvenido a Chhattisgarh — el corazón verde de la India, hogar del templo Lakshmana de Sirpur.",
+    "de": "Willkommen in Chhattisgarh — dem waldreichen Herzen Indiens mit dem Lakshmana-Tempel von Sirpur.",
+    "ja": "チャッティースガル州へようこそ。豊かな森林とシルプルのレンガ造りラクシュマナ寺院の地です。",
+    "zh": "欢迎来到恰蒂斯加尔邦——森林覆盖率极高的印度绿心，以锡尔普尔砖造拉克什玛那神庙闻名。"
+  },
+  "Goa": {
+    "en": "Welcome to Goa — India's coastal paradise on the Konkan shoreline, renowned for pristine sun-drenched beaches, scenic estuaries, and UNESCO World Heritage Portuguese colonial architecture. Home to the Basilica of Bom Jesus holding the sacred relics of St. Francis Xavier, Goa seamlessly blends vibrant susegad living with rich biodiversity across the Western Ghats.",
+    "hi": "गोवा में आपका स्वागत है — कोंकण तट पर बसा भारत का तटीय स्वर्ग, जो सुनहरे समुद्र तटों, पुर्तगाली औपनिवेशिक वास्तुकला और यूनेस्को विश्व धरोहर बेसिलिका ऑफ बॉम जीसस के लिए दुनिया भर में प्रसिद्ध है। गोवा पश्चिमी घाट की समृद्ध जैव-विविधता और उत्सवप्रिय संस्कृति का जीवंत प्रतीक है।",
+    "regional": "गोंयांत तुमकां येवकार — सुंदर दर्यावेळो, पोर्तुगेज वास्तुकला आनी बॉम जिझस बेसिलिकाची पावन भूय.",
+    "fr": "Bienvenue à Goa — paradis côtier réputé pour ses plages et la basilique de Bon Jésus.",
+    "es": "Bienvenido a Goa — paraíso costero famoso por sus playas y la basílica del Buen Jesús.",
+    "de": "Willkommen in Goa — dem Küstenparadies mit UNESCO-Weltkulturerbe und der Basilika Bom Jesus.",
+    "ja": "ゴア州へようこそ。美しい海岸線とポルトガル様式のボム・ジェズ・バシリカ教会で知られる楽園です。",
+    "zh": "欢迎来到果阿邦——拥有金色沙滩与联合国世界遗产仁慈耶稣大教堂的海滨明珠。"
+  },
+  "Gujarat": {
+    "en": "Welcome to Gujarat — a powerhouse of maritime enterprise with India's longest coastline spanning sixteen hundred kilometres. Birthplace of Mahatma Gandhi and Sardar Vallabhbhai Patel, Gujarat features UNESCO sites including Rani ki Vav subterranean stepwell, the ancient Harappan port of Lothal, Champaner-Pavagadh, and the Gir forests — the last sanctuary of the Asiatic Lion.",
+    "hi": "गुजरात में आपका स्वागत है — 1600 किलोमीटर लंबी तटरेखा और समृद्ध व्यापारिक परंपरा वाला राज्य। राष्ट्रपिता महात्मा गांधी और सरदार वल्लभभाई पटेल की जन्मभूमि, पाटन की भव्य रानी की वाव, लोथल की हड़प्पा सभ्यता और गिर के एशियाई शेरों के लिए गुजरात दुनिया भर में विख्यात है।",
+    "regional": "ગુજરાતમાં આપનું સ્વાગત છે — મહાત્મા ગાંધીની જન્મભૂમિ, પાટણની રાણી કી વાવ અને ગીરના સાવજોની પવિત્ર ભૂમિ.",
+    "fr": "Bienvenue au Gujarat — terre natale de Gandhi, célèbre pour le puits à degrés de Rani ki Vav et les lions d'Asie.",
+    "es": "Bienvenido a Gujarat — tierra natal de Gandhi y hogar del pozo escalonado Rani ki Vav.",
+    "de": "Willkommen in Gujarat — der Heimat Gandhis mit dem Stufenbrunnen Rani ki Vav und den Gir-Löwen.",
+    "ja": "グジャラート州へようこそ。ガンディー生誕の地であり、階段井戸ラーニー・キー・ヴァーヴとアジアライオンで有名です。",
+    "zh": "欢迎来到古吉拉特邦——甘地的故乡，拥有王后阶梯井、古哈拉帕港口洛塔尔与吉尔亚洲狮保护区。"
+  },
+  "Haryana": {
+    "en": "Welcome to Haryana — the historic gateway of North India and birthplace of the Bhagavad Gita on the battlefields of Kurukshetra. Surrounding the national capital, Haryana combines rich Vedic heritage and agricultural prowess with modern automotive, technology, and cyber-city hubs like Gurugram.",
+    "hi": "हरियाणा में आपका स्वागत है — कुरुक्षेत्र की पावन भूमि जहाँ भगवान कृष्ण ने गीता का अमर उपदेश दिया। समृद्ध वैदिक परंपराओं और कृषि संपन्नता के साथ, आज हरियाणा गुरुग्राम जैसे आधुनिक साइबर सिटी और ऑटोमोबाइल उद्योग का प्रमुख केंद्र है।",
+    "regional": "ਹਰਿਆਣਾ ਵਿੱਚ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ — ਕੁਰੂਕਸ਼ੇਤਰ ਦੀ ਧਰਤੀ ਜਿੱਥੇ ਗੀਤਾ ਦਾ ਸੰਦੇਸ਼ ਗੂੰਜਿਆ।",
+    "fr": "Bienvenue dans l'Haryana — berceau de la Bhagavad Gita à Kurukshetra et pôle technologique moderne.",
+    "es": "Bienvenido a Haryana — cuna de la Bhagavad Gita en Kurukshetra y gran potencia industrial.",
+    "de": "Willkommen in Haryana — der Wiege der Bhagavad Gita in Kurukshetra und modernem Industriezentrum.",
+    "ja": "ハリヤーナー州へようこそ。クルクシェートラでバガヴァッド・ギーターが説かれた歴史と現代産業の地です。",
+    "zh": "欢迎来到哈里亚纳邦——薄伽梵歌诞生之地俱卢之野与古鲁格拉姆现代科技金融中心所在地。"
+  },
+  "Himachal Pradesh": {
+    "en": "Welcome to Himachal Pradesh — Devbhoomi, the Abode of the Gods in the Western Himalayas. Famed for breathtaking apple orchards, snow-laden passes like Rohtang, UNESCO Kalka-Shimla mountain railway, and Dharamshala — the residence of the Dalai Lama. Himachal is an oasis of alpine majesty, hydro energy, and serene Tibetan Buddhist culture.",
+    "hi": "हिमाचल प्रदेश में आपका स्वागत है — देवभूमि, पश्चिमी हिमालय की गोद में बसा रमणीय राज्य। बर्फ से ढकी पर्वत चोटियों, रोहतांग दर्रे, कालका-शिमला टॉय ट्रेन और धर्मशाला के बौद्ध मठों के लिए प्रसिद्ध, यह राज्य अपनी प्राकृतिक सुंदरता और समृद्ध संस्कृति से हर किसी का मन मोह लेता है।",
+    "regional": "हिमाचल प्रदेश — देवभूमि, धौलाधार पर्वत श्रेणी और शिमला-मनाली की बर्फीली वादियों का घर।",
+    "fr": "Bienvenue en Himachal Pradesh — terre des dieux dans l'Himalaya et siège de Dharamshala.",
+    "es": "Bienvenido a Himachal Pradesh — la tierra de los dioses en el Himalaya occidental.",
+    "de": "Willkommen in Himachal Pradesh — dem Land der Götter mit atemberaubenden Himalaya-Gipfeln.",
+    "ja": "ヒマーチャル・プラデーシュ州へようこそ。神々の住まう地と呼ばれ、ダラムサラやシムラーの山岳景観が広がります。",
+    "zh": "欢迎来到喜马偕尔邦——喜马拉雅众神之乡，拥有达兰萨拉藏传佛教中心与卡尔卡-西姆拉高山铁路。"
+  },
+  "Jharkhand": {
+    "en": "Welcome to Jharkhand — the Land of Forests on the Chota Nagpur Plateau, blessed with over forty percent of India's mineral reserves, roaring Hundru and Jonha waterfalls, and the sacred Parasnath Jain pilgrimage peak. Celebrated for rich Santhal, Munda, and Oraon tribal cultures and vibrant Sohrai wall murals.",
+    "hi": "झारखंड में आपका स्वागत है — छोटानागपुर पठार पर वनों और झरनों की धरती। देश के खनिज भंडार का 40 प्रतिशत समेटे, यह राज्य पारसनाथ जैन तीर्थ, हुंडरू जलप्रपात और संथाल, मुंडा तथा उरांव जनजातीय संस्कृतियों व सोहराई चित्रकला के लिए जाना जाता है।",
+    "regional": "ঝাড়খণ্ড — ছোটনাগপুর মালভূমির অরণ্য, জলপ্রপাত এবং প্রাচীন আদিবাসী সংস্কৃতির লীলাভূমি।",
+    "fr": "Bienvenue au Jharkhand — terre de forêts, de cascades et de richesses minérales de l'Inde.",
+    "es": "Bienvenido a Jharkhand — la tierra de los bosques y cascadas del altiplano de Chota Nagpur.",
+    "de": "Willkommen in Jharkhand — dem Land der dichten Wälder, Wasserfälle und reichen Bodenschätze.",
+    "ja": "ジヤールカンド州へようこそ。豊かな原生林、滝、そして鉱物資源に恵まれた大地です。",
+    "zh": "欢迎来到贾坎德邦——森林矿产之邦，拥有帕拉斯纳特耆那教圣山与绚丽的索赫拉伊土著壁画。"
+  },
+  "Karnataka": {
+    "en": "Welcome to Karnataka — a majestic confluence of medieval royal glory and cutting-edge space and IT innovation. Home to the legendary Vijayanagara capital ruins at Hampi, Hoysala temples of Belur and Halebidu, Gol Gumbaz of Vijayapura, and Mysore Palace. Its capital Bengaluru shines as India's Silicon Valley and biotech nucleus.",
+    "hi": "कर्नाटक में आपका स्वागत है — विजयनगर साम्राज्य के वैभव और आधुनिक सूचना प्रौद्योगिकी का अनुपम संगम। हम्पी के यूनेस्को विश्व धरोहर स्मारक, बेलूर-हलेबिडु के होयसल मंदिर, मैसूर पैलेस और विजयपुरा का गोल गुम्बज इसकी ऐतिहासिक शान हैं। राजधानी बेंगलुरु भारत की सिलिकॉन वैली के रूप में जानी जाती है।",
+    "regional": "ಕರ್ನಾಟಕಕ್ಕೆ ಸುಸ್ವಾಗತ — ಹಂಪಿಯ ಶಿಲಾ ರಥ, ಹೊಯ್ಸಳ ದೇವಾಲಯಗಳು, ಮೈಸೂರು ಅರಮನೆ ಮತ್ತು ಸಿಲಿಕಾನ್ ಸಿಟಿ ಬೆಂಗಳೂರಿನ ಭವ್ಯ ನಾಡು.",
+    "fr": "Bienvenue au Karnataka — terre des ruines royales de Hampi et capitale technologique à Bangalore.",
+    "es": "Bienvenido a Karnataka — hogar de las ruinas de Hampi y del Silicon Valley de la India en Bangalore.",
+    "de": "Willkommen in Karnataka — Heimat der UNESCO-Welterbestätte Hampi und der Tech-Metropole Bengaluru.",
+    "ja": "カルナータカ州へようこそ。ハンピの壮大な石造遺跡とインドのシリコンバレー・ベンガルールを擁する州です。",
+    "zh": "欢迎来到卡纳塔克邦——毗奢耶那伽罗王朝都城亨比古迹与印度硅谷班加罗尔所在地。"
+  },
+  "Kerala": {
+    "en": "Welcome to Kerala — God's Own Country on the tropical Malabar Coast. Globally revered for its tranquil emerald backwaters, Munnar tea hills, Ayurvedic healing traditions, Kathakali classical dance, and historic trade ports like Kochi where Arab, Chinese, and European merchants met for millennia.",
+    "hi": "केरल में आपका स्वागत है — ईश्वर का अपना देश, मालाबार तट का अद्वितीय सौंदर्य। शांत बैकवाटर्स, मुन्नार के चाय बागान, आयुर्वेद की प्राचीन परंपराएं, कथकली नृत्य और कोच्चि के ऐतिहासिक बंदरगाह केरल को विश्व भर में एक स्वप्निल गंतव्य बनाते हैं।",
+    "regional": "കേരളത്തിലേക്ക് സ്വാഗതം — ദൈവത്തിന്റെ സ്വന്തം നാട്, കായലുകളും കഥകളിയും സുഗന്ധവ്യഞ്ജനങ്ങളും നിറഞ്ഞ ഹരിതഭൂമി.",
+    "fr": "Bienvenue au Kerala — le pays des dieux, célèbre pour ses backwaters et ses traditions ayurvédiques.",
+    "es": "Bienvenido a Kerala — el país propio de Dios, famoso por sus remansos de agua y el Ayurveda.",
+    "de": "Willkommen in Kerala — Gottes eigenem Land mit paradiesischen Backwaters und Ayurveda-Kultur.",
+    "ja": "ケーララ州へようこそ。「神の住む国」と称され、優美なバックウォーターとアーユルヴェーダで知られます。",
+    "zh": "欢迎来到喀拉拉邦——“神之国度”，以碧水环绕的回水水道、阿育吠陀养生与卡塔卡利舞蹈闻名。"
+  },
+  "Madhya Pradesh": {
+    "en": "Welcome to Madhya Pradesh — the Heart of India, boasting the highest concentration of UNESCO World Heritage Sites in central India: the exquisitely carved temples of Khajuraho, the ancient Great Stupa of Sanchi, and the prehistoric rock shelters of Bhimbetka. Home to the world's premier tiger reserves including Kanha and Bandhavgarh.",
+    "hi": "मध्य प्रदेश में आपका स्वागत है — भारत का हृदय स्थल, खजुराहो के भव्य पाषाण मंदिरों, सांची के बौद्ध स्तूप और भीमबेटका की प्रागैतिहासिक शैलचित्रों का घर। कान्हा और बांधवगढ़ जैसे राष्ट्रीय उद्यानों के साथ, मध्य प्रदेश को भारत के 'टाइगर स्टेट' के रूप में भी जाना जाता है।",
+    "regional": "मध्य प्रदेश — खजुराहो के भव्य मंदिर, सांची का महान स्तूप और भारत के हृदय की सांस्कृतिक शान।",
+    "fr": "Bienvenue au Madhya Pradesh — cœur de l'Inde, abritant les temples de Khajuraho et le stupa de Sanchi.",
+    "es": "Bienvenido a Madhya Pradesh — el corazón de la India con los templos de Khajuraho y Sanchi.",
+    "de": "Willkommen in Madhya Pradesh — dem Herzen Indiens mit Khajuraho und den Tigern von Kanha.",
+    "ja": "マディヤ・プラデーシュ州へようこそ。カジュラーホー寺院群やサーンチー仏塔を擁するインドの心臓部です。",
+    "zh": "欢迎来到中央邦——印度之心，汇聚卡修拉霍雕塑神庙、桑吉大塔与坎哈孟加拉虎国家公园。"
+  },
+  "Maharashtra": {
+    "en": "Welcome to Maharashtra — India's premier economic powerhouse and cultural titan along the Sahyadri mountains. Home to Mumbai, India's financial and cinematic capital, and UNESCO world treasures: the Ajanta and Ellora rock-cut caves, Chhatrapati Shivaji Terminus, and majestic hill forts engineered by Chhatrapati Shivaji Maharaj.",
+    "hi": "महाराष्ट्र में आपका स्वागत है — भारत की आर्थिक राजधानी मुंबई और सह्याद्रि की वीर गाथाओं की भूमि। अजंता और एलोरा की पाषाण तराशी गई गुफाएं, छत्रपति शिवाजी महाराज के अभेद्य किले और गणेशोत्सव की भव्यता इस राज्य की अद्वितीय पहचान हैं।",
+    "regional": "महाराष्ट्रात आपले स्वागत आहे — सह्याद्रीच्या कुशीतील अजिंठा-वेरूळ लेण्या, छत्रपती शिवाजी महाराजांचे गडकिल्ले आणि आर्थिक राजधानी मुंबईची भूमी.",
+    "fr": "Bienvenue au Maharashtra — puissance économique abritant Mumbai et les grottes d'Ajanta et d'Ellora.",
+    "es": "Bienvenido a Maharashtra — motor económico con Mumbai y las cuevas de Ajanta y Ellora.",
+    "de": "Willkommen in Maharashtra — dem Wirtschaftszentrum mit Mumbai und den Höhlen von Ajanta und Ellora.",
+    "ja": "マハーラーシュトラ州へようこそ。ムンバイの活気とアジャンター・エローラ石窟の美が息づく州です。",
+    "zh": "欢迎来到马哈拉施特拉邦——金融巨都孟买所在地，拥有阿旃陀与埃洛拉石窟世界遗产。"
+  },
+  "Manipur": {
+    "en": "Welcome to Manipur — the Jewel of India, endowed with the world's only floating national park on Loktak Lake, Keibul Lamjao, home to the endangered Sangai brow-antlered deer. Renowned for its graceful Raas Leela classical dance, polo origins, and martial arts heritage.",
+    "hi": "मणिपुर में आपका स्वागत है — भारत का रत्न, लोकतक झील के तैरते हुए द्वीपों और शंघाई हिरण के एकमात्र आवास केबल लामजाओ के लिए विख्यात। मणिपुरी रासलीला शास्त्रीय नृत्य, पोलो खेल की जन्मभूमि और समृद्ध मार्शल आर्ट्स यहाँ की गौरवशाली परंपरा हैं।",
+    "regional": "মণিপুৰ — লোকটাক হ্ৰদৰ ওপঙা কেবুল লামজাও ৰাষ্ট্ৰীয় উদ্যান আৰু ৰাসলীলা নৃত্যৰ গৌৰৱময় ভূমি।",
+    "fr": "Bienvenue au Manipur — joyau de l'Inde avec son lac flottant Loktak et la danse classique Raas Leela.",
+    "es": "Bienvenido a Manipur — la joya de la India, famosa por el lago flotante Loktak.",
+    "de": "Willkommen in Manipur — dem Juwel Indiens mit dem schwimmenden Loktak-See.",
+    "ja": "マニプル州へようこそ。浮かぶ島を持つロークタック湖と古典舞踊ラース・リーラーの地です。",
+    "zh": "欢迎来到曼尼普尔邦——“印度的宝石”，拥有世界唯一的浮岛国家公园洛克塔克湖与古典舞蹈。"
+  },
+  "Meghalaya": {
+    "en": "Welcome to Meghalaya — the Abode of Clouds, blessed with the wettest places on Earth, Mawsynram and Cherrapunji. Famous for ingenious bio-engineered Living Root Bridges woven by the Khasi and Jaintia tribes across roaring rainforest rivers, deep limestone caves, and crystal-clear Umngot waters at Dawki.",
+    "hi": "मेघालय में आपका स्वागत है — बादलों का घर, जहाँ पृथ्वी पर सर्वाधिक वर्षा वाले स्थल मासिनराम और चेरापूंजी स्थित हैं। खासी जनजातियों द्वारा जीवित पेड़ों की जड़ों से बुने 'लिविंग रूट ब्रिज', डाउकी की कांच जैसी पारदर्शी उमंगोट नदी और गहरी गुफाएं इस राज्य को प्रकृति का अजूबा बनाती हैं।",
+    "regional": "মেঘালয় — মেঘৰ দেশ, জীৱন্ত শিপাৰ দলং আৰু স্বচ্ছ উমংগোট নদীৰ অপৰূপ সৌন্দৰ্য।",
+    "fr": "Bienvenue au Meghalaya — la demeure des nuages et ses légendaires ponts de racines vivantes.",
+    "es": "Bienvenido a Meghalaya — la morada de las nubes y los puentes de raíces vivas.",
+    "de": "Willkommen in Meghalaya — der Heimat der Wolken mit den lebenden Wurzelbrücken.",
+    "ja": "メーガーラヤ州へようこそ。「雲の住処」と呼ばれ、生きた木の根の橋と清流で名高い土地です。",
+    "zh": "欢迎来到梅加拉亚邦——“云居之所”，以乞拉朋齐降雨量与卡西族活树根桥生态奇观著称。"
+  },
+  "Mizoram": {
+    "en": "Welcome to Mizoram — the Land of the Hill People, draped in rolling bamboo hills, pristine evergreen canopies, and pleasant year-round climates. Celebrated for high literacy, close-knit communities, the joyous Cheraw bamboo dance, and tranquil Vantawng Falls.",
+    "hi": "मिजोरम में आपका स्वागत है — नीली पहाड़ियों और बांस के जंगलों की शांत भूमि। चेराव बांस नृत्य, उच्च साक्षरता दर, वांटावंग जलप्रपात और मिजो समाज की समृद्ध सांस्कृतिक विरासत इस सुरम्य राज्य की पहचान हैं।",
+    "regional": "মিজোৰাম — নীলা পাহাৰ আৰু চেৰাও বাঁহ নৃত্যৰ শান্তিময় ভূমি।",
+    "fr": "Bienvenue au Mizoram — terre de collines verdoyantes et de la danse des bambous Cheraw.",
+    "es": "Bienvenido a Mizoram — tierra de colinas verdes y la alegre danza del bambú Cheraw.",
+    "de": "Willkommen in Mizoram — dem Land der Hügel mit dem traditionellen Bambustanz Cheraw.",
+    "ja": "ミゾラム州へようこそ。竹林の丘陵が連なり、チェラウ竹踊りで知られる穏やかな州です。",
+    "zh": "欢迎来到米佐拉姆邦——竹林覆盖的高山之邦，以欢快的切罗竹竿舞与清澈的万陶恩瀑布著称。"
+  },
+  "Nagaland": {
+    "en": "Welcome to Nagaland — the Land of Festivals, set amidst rugged ridges and lush mountain valleys. Celebrated for sixteen indigenous Naga tribes, each with vibrant woven textiles, heroic warrior folklore, and the world-renowned Hornbill Festival hosted annually in Kisama Heritage Village.",
+    "hi": "नागालैंड में आपका स्वागत है — त्योहारों की भूमि, जहाँ 16 प्रमुख नागा जनजातियाँ अपनी विशिष्ट परंपराओं, पारंपरिक वेशभूषा और वीरता की गाथाओं के साथ रहती हैं। किसामा हेरिटेज विलेज में आयोजित होने वाला विश्व प्रसिद्ध हॉर्नबिल फेस्टिवल यहाँ की सांस्कृतिक धरोहर का सबसे बड़ा उत्सव है।",
+    "regional": "নাগালেণ্ড — ১৬টা নগা জনগোষ্ঠী আৰু বিশ্ববিখ্যাত হৰ্ণবিল উৎসৱৰ ৰঙীন দেশ।",
+    "fr": "Bienvenue au Nagaland — terre des festivals et du prestigieux festival Hornbill des tribus naga.",
+    "es": "Bienvenido a Nagaland — tierra de festivales y del célebre Festival Hornbill.",
+    "de": "Willkommen in Nagaland — dem Land der Feste mit dem weltberühmten Hornbill Festival.",
+    "ja": "ナガランド州へようこそ。16の誇り高き部族文化と勇壮なホーンビル祭りで名高い土地です。",
+    "zh": "欢迎来到那加兰邦——节日之邦，以十六个原住民族与每年盛大的犀鸟文化节享誉世界。"
+  },
+  "Odisha": {
+    "en": "Welcome to Odisha — the soul of ancient Kalinga, famed for maritime trade, classical Odissi dance, and monumental temple architecture. Home to the UNESCO World Heritage Sun Temple at Konark — carved as a cosmic sun chariot, Puri Jagannath Temple, and Chilika Lake — Asia's largest brackish lagoon hosting millions of migratory flamingos.",
+    "hi": "ओडिशा में आपका स्वागत है — प्राचीन कलिंग की ऐतिहासिक भूमि, शास्त्रीय ओडिसी नृत्य और भव्य मंदिर वास्तुकला का केंद्र। कोणार्क का विश्व धरोहर सूर्य मंदिर — जो सूर्य के विशाल रथ के रूप में तराशा गया है, पुरी का श्री जगन्नाथ मंदिर और एशिया की सबसे बड़ी खारे पानी की लैगून चिल्का झील इसकी शान हैं।",
+    "regional": "ଓଡ଼ିଶାକୁ ସ୍ୱାଗତ — କୋଣାର୍କ ସୂର୍ଯ୍ୟ ମନ୍ଦିର, ପୁରୀ ଜଗନ୍ନାଥ ଧାମ, ଓଡ଼ିଶୀ ନୃତ୍ୟ ଏବଂ ଚିଲିକା ହ୍ରଦର ପବିତ୍ର ଭୂମି।",
+    "fr": "Bienvenue en Odisha — terre du temple du Soleil de Konark et du sanctuaire de Jagannath à Puri.",
+    "es": "Bienvenido a Odisha — hogar del Templo del Sol de Konark y el templo de Jagannath en Puri.",
+    "de": "Willkommen in Odisha — der Heimat des Sonnentempels von Konark und des Jagannath-Heiligtums.",
+    "ja": "オリッサ州へようこそ。コナーラクの太陽寺院、プリーのジャガンナート寺院、そしてオディッシー舞踊の地です。",
+    "zh": "欢迎来到奥迪沙邦——古卡林加古国，拥有科纳克太阳神庙、普里贾格纳特神庙与奇利卡咸水湖。"
+  },
+  "Punjab": {
+    "en": "Welcome to Punjab — the fertile Land of Five Rivers, agricultural granary of India, and spiritual heart of Sikhism. Home to the sacred Harmandir Sahib, the Golden Temple in Amritsar, echoing with divine Gurbani hymns, vibrant Bhangra folk dance, and a legendary spirit of generosity and hospitality.",
+    "hi": "पंजाब में आपका स्वागत है — पांच नदियों की पावन धरती, देश का अन्नदाता और सिख धर्म का आध्यात्मिक केंद्र। अमृतसर का स्वर्ण मंदिर (श्री हरमंदिर साहिब), जहाँ हर समय गुरुवाणी के पावन स्वर गूंजते हैं, यहाँ का जीवंत भांगड़ा नृत्य और पंजाबियों का विशाल हृदय पूरी दुनिया में प्रसिद्ध है।",
+    "regional": "ਪੰਜਾਬ ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ — ਸ੍ਰੀ ਹਰਿਮੰਦਰ ਸਾਹਿਬ ਅੰਮ੍ਰਿਤਸਰ, ਪੰਜ ਦਰਿਆਵਾਂ ਦੀ ਧਰਤੀ ਅਤੇ ਭੰਗੜੇ ਦੀ ਰੰਗਲੀ ਸ਼ਾਨ।",
+    "fr": "Bienvenue au Pendjab — terre du Temple d'Or d'Amritsar et berceau du sikhisme.",
+    "es": "Bienvenido al Punyab — hogar del Templo Dorado de Amritsar y granero de la India.",
+    "de": "Willkommen im Punjab — dem Land des Goldenen Tempels von Amritsar und der fünf Flüsse.",
+    "ja": "パンジャーブ州へようこそ。アムリトサルの黄金寺院と五つの大河が潤す穀倉地帯です。",
+    "zh": "欢迎来到旁遮普邦——五河之原，阿姆利则锡克教圣地金庙所在地与印度大粮仓。"
+  },
+  "Rajasthan": {
+    "en": "Welcome to Rajasthan — the Land of Kings, where royal valor and desert splendour unite across the Great Thar Desert. Crowned by magnificent UNESCO Hill Forts including Amber, Chittorgarh, and Kumbhalgarh, romantic lake palaces of Udaipur, and the Pink City of Jaipur. Rajasthan is an epic canvas of chivalry, vibrant folk music, and desert caravans.",
+    "hi": "राजस्थान में आपका स्वागत है — राजाओं की पावन भूमि, जहाँ शूरवीरता और राजसी शान थार रेगिस्तान के सुनहरे टीलों पर चमकती है। आमेर, चित्तौड़गढ़ और कुंभलगढ़ के यूनेस्को पहाड़ी किले, उदयपुर के झील महल और गुलाबी नगरी जयपुर राजस्थान की भव्यता को अमर बनाते हैं।",
+    "regional": "राजस्थान में आपरो स्वागत है — वीरों री धरती, आमेर रो किल्लो, चित्तौड़गढ़ और गुलाबी नगर जयपुर री शान।",
+    "fr": "Bienvenue au Rajasthan — la terre des rois, des forts majestueux d'Amber et de Chittorgarh.",
+    "es": "Bienvenido a Rajastán — la tierra de los reyes, fortalezas legendarias y palacios reales.",
+    "de": "Willkommen in Rajasthan — dem Land der Könige mit den UNESCO-Bergfestungen von Amber und Chittorgarh.",
+    "ja": "ラージャスターン州へようこそ。アンベール城などの城塞群と優美な宮殿が輝く「王たちの地」です。",
+    "zh": "欢迎来到拉贾斯坦邦——“王者之地”，塔尔沙漠中的琥珀堡、奇托尔加尔堡与斋浦尔粉红之城。"
+  },
+  "Sikkim": {
+    "en": "Welcome to Sikkim — a pristine Himalayan wonderland crowned by Mount Kangchenjunga, the world's third highest peak. India's first fully organic state, Sikkim hosts the sacred Rumtek and Enchey monasteries, high-altitude glacial lakes like Tsomgo, and the UNESCO mixed heritage Khangchendzonga National Park.",
+    "hi": "सिक्किम में आपका स्वागत है — कंचनजंगा पर्वत की छांव में बसा हिमालय का रत्न। भारत का पहला शत-प्रतिशत जैविक राज्य, रूमटेक और एन्चे मठ, त्सोमगो हिमनदी झील और यूनेस्को विश्व धरोहर कंचनजंगा राष्ट्रीय उद्यान इसकी अद्वितीय प्राकृतिक और आध्यात्मिक सुंदरता का प्रमाण हैं।",
+    "regional": "सिक्किम — कञ्चनजङ्घा हिमालको काखमा बसेको पहिलो जैविक राज्य र बौद्ध गुम्बाको देश।",
+    "fr": "Bienvenue au Sikkim — merveille himalayenne couronnée par le mont Kangchenjunga et premier État 100% bio.",
+    "es": "Bienvenido a Sikkim — joya del Himalaya dominada por el monte Kangchenjunga.",
+    "de": "Willkommen in Sikkim — dem ersten vollständig ökologischen Bundesstaat am Fuße des Kangchenjunga.",
+    "ja": "シッキム州へようこそ。世界第3位の高峰カンチェンジュンガを望む全土有機農業の州です。",
+    "zh": "欢迎来到锡金邦——干城章嘉峰下的喜马拉雅明珠，全印度首个全有机农业邦与佛教寺院之乡。"
+  },
+  "Tamil Nadu": {
+    "en": "Welcome to Tamil Nadu — the sanctuary of Dravidian civilization, preserving millennia of uninterrupted literary, spiritual, and architectural grandeur. Celebrated for monumental gopurams of the Great Living Chola Temples including Thanjavur's Brihadisvara, Shore Temple of Mamallapuram, Madurai Meenakshi, and the classical Bharatanatyam dance.",
+    "hi": "तमिलनाडु में आपका स्वागत है — द्रविड़ सभ्यता और संस्कृति का पावन केंद्र। तंजावुर का गगनचुंबी बृहदीश्वर मंदिर, महाबलीपुरम के तटीय मंदिर, मदुरै का मीनाक्षी अम्मन मंदिर और शास्त्रीय भरतनाट्यम नृत्य तमिलनाडु की समृद्ध और अमर विरासत हैं।",
+    "regional": "தமிழ்நாட்டிற்கு நல்வரவு — தஞ்சாவூர் பெரிய கோயில், மாமல்லபுரம் கடற்கரை கோயில், மதுரை மீனாட்சி அம்மன் ஆலயம் மற்றும் பரதநாட்டியத்தின் பொன்மண்.",
+    "fr": "Bienvenue au Tamil Nadu — sanctuaire de l'architecture dravidienne et du temple Brihadisvara à Thanjavur.",
+    "es": "Bienvenido a Tamil Nadu — cuna de la arquitectura dravídica y el gran templo Brihadisvara.",
+    "de": "Willkommen in Tamil Nadu — der Wiege dravidischer Kultur mit dem Brihadisvara-Tempel von Thanjavur.",
+    "ja": "タミル・ナードゥ州へようこそ。大チョーラ寺院群やバラタナーティヤム舞踊が息づくドラヴィダ文化の殿堂です。",
+    "zh": "欢迎来到泰米尔纳德邦——达罗毗荼文明摇篮，拥有坦贾武尔布里哈迪斯瓦拉大庙与马杜赖米纳克希神庙。"
+  },
+  "Telangana": {
+    "en": "Welcome to Telangana — the gateway of the Deccan plateau, where historic royal legacy meets twenty-first century technology. Home to the thirteenth-century UNESCO Ramappa Temple, the majestic hill fortress of Golconda with acoustic marvels, and Hyderabad — famous for the Charminar, Nizami biryani, and global tech campuses.",
+    "hi": "तेलंगाना में आपका स्वागत है — दक्कन के पठार पर स्थित ऐतिहासिक भव्यता और आधुनिक तकनीक का संगम। तेरहवीं शताब्दी का यूनेस्को रामप्पा मंदिर, गोलकोंडा का मजबूत किला और हैदराबाद की चारमीनार तथा स्वादिष्ट बिरयानी इस राज्य की शान हैं।",
+    "regional": "తెలంగాణకు స్వాగతం — యునెస్కో రామప్ప దేవాలయం, గోల్కొండ కోట, చార్మినార్ మరియు చారిత్రక దక్కన్ వారసత్వ నెలవు.",
+    "fr": "Bienvenue au Telangana — carrefour historique du Deccan avec le temple de Ramappa et Hyderabad.",
+    "es": "Bienvenido a Telangana — hogar del templo Ramappa y el histórico fuerte de Golconda.",
+    "de": "Willkommen in Telangana — mit dem UNESCO-Ramappa-Tempel und der historischen Festung Golconda.",
+    "ja": "テランガーナ州へようこそ。ラマッパ寺院とゴルコ cannda城塞、ハイデラバードのIT都市を擁します。",
+    "zh": "欢迎来到特伦甘纳邦——德干高原门户，以联合国教科文组织拉玛帕神庙、戈尔康达城堡与海得拉巴著称。"
+  },
+  "Tripura": {
+    "en": "Welcome to Tripura — the historic realm of the Manikya kings, bordered on three sides by Bangladesh. Renowned for Neermahal, the picturesque water palace built in 1930 inside Rudrasagar Lake, the colossal rock-carved Shaivite panels of Unakoti, and the royal Ujjayanta Palace in Agartala.",
+    "hi": "त्रिपुरा में आपका स्वागत है — माणिक्य राजवंश का ऐतिहासिक राज्य। रुद्रसागर झील के बीच तैरता हुआ नीरमहल — जो भारत के केवल दो जल महलों में से एक है, उनाकोटी की विशाल पाषाण नक्काशी और अगरतला का उज्ज्वयंत पैलेस त्रिपुरा की समृद्ध सांस्कृतिक धरोहर के प्रतीक हैं।",
+    "regional": "ত্রিপুরায় স্বাগতম — রুদ্রসাগর হ্রদের রাজকীয় নীরমহল, ঊনকোটির বিশাল পাথরের ভাস্কর্য এবং মাণিক্য রাজবংশের পুণ্যভূমি।",
+    "fr": "Bienvenue au Tripura — abritant le palais sur l'eau de Neermahal et les sculptures rupestres d'Unakoti.",
+    "es": "Bienvenido a Tripura — hogar del palacio flotante Neermahal y los relieves de Unakoti.",
+    "de": "Willkommen in Tripura — Heimat des Wasserpalastes Neermahal und der Felsreliefs von Unakoti.",
+    "ja": "トリプラ州へようこそ。湖水に浮かぶニールマハル水上宮殿やウナコティの巨大磨崖仏で知られる州です。",
+    "zh": "欢迎来到特里普拉邦——马尼基亚王室之邦，以鲁德拉萨加尔湖中的内尔玛哈尔水上宫殿闻名。"
+  },
+  "Uttar Pradesh": {
+    "en": "Welcome to Uttar Pradesh — the heartland of India's civilisational journey along the sacred Ganga and Yamuna rivers. Home to world-renowned UNESCO World Heritage Sites: the peerless white-marble Taj Mahal and Agra Fort, the ancient spiritual city of Varanasi on the holy Ganges, Ayodhya, Mathura, and Sarnath, where the Buddha first set the Wheel of Dhamma in motion.",
+    "hi": "उत्तर प्रदेश में आपका स्वागत है — गंगा और यमुना की गोद में बसी भारत की सांस्कृतिक धुरी। आगरा का विश्व प्रसिद्ध ताजमहल और लाल किला, भगवान शिव की अविनाशी नगरी काशी (वाराणसी), अयोध्या, मथुरा और सारनाथ जहाँ बुद्ध ने अपना पहला धर्मोपदेश दिया — यह राज्य भारत की आत्मा है।",
+    "regional": "उत्तर प्रदेश — ताजमहल, पावन काशी विश्वनाथ, अयोध्या और सारनाथ की ऐतिहासिक एवं आध्यात्मिक पुण्यधरा।",
+    "fr": "Bienvenue en Uttar Pradesh — abritant le Taj Mahal à Agra, la ville sacrée de Varanasi et Sarnath.",
+    "es": "Bienvenido a Uttar Pradesh — hogar del icónico Taj Mahal y la ciudad sagrada de Benarés.",
+    "de": "Willkommen in Uttar Pradesh — der Heimat des Taj Mahal und der heiligen Stadt Varanasi.",
+    "ja": "ウッタル・プラデーシュ州へようこそ。世界遺産タージ・マハルや聖地バラナシを擁するインドの精神的中心地です。",
+    "zh": "欢迎来到北方邦——恒河滋养的文明中心，拥有泰姬陵、圣城瓦拉纳西、鹿野苑与阿格拉古堡。"
+  },
+  "Uttarakhand": {
+    "en": "Welcome to Uttarakhand — Devbhoomi, the Land of the Gods in the Central Himalayas, where the holy Ganga and Yamuna originate from glacial heights. Home to the sacred Char Dham pilgrimage, Valley of Flowers, Jim Corbett National Park, and the ancient stone sanctuary of Jageshwar Dham.",
+    "hi": "उत्तराखंड में आपका स्वागत है — देवभूमि, जहाँ हिमालय की बर्फीली चोटियों से पतित-पावनि गंगा और यमुना का उद्गम होता है। बद्रीनाथ, केदारनाथ, गंगोत्री, यमुनोत्री की चार धाम यात्रा, अल्मोड़ा का जागेश्वर धाम और फूलों की घाटी इस पावन धरा को अलौकिक दिव्यता प्रदान करते हैं।",
+    "regional": "उत्तराखंड — चार धाम, केदारनाथ-बद्रीनाथ और जागेश्वर धाम की पावन देवभूमि।",
+    "fr": "Bienvenue en Uttarakhand — la terre des dieux aux sources du Gange et temples de Jageshwar.",
+    "es": "Bienvenido a Uttarakhand — la tierra de los dioses donde nace el sagrado río Ganges.",
+    "de": "Willkommen in Uttarakhand — dem Land der Götter an den Quellen des Ganges mit Jageshwar Dham.",
+    "ja": "ウッタラーカンド州へようこそ。聖なるガンジス川の水源とジャーゲーシュワル寺院群が位置する神々の地です。",
+    "zh": "欢迎来到北阿坎德邦——喜马拉雅众神之乡，圣河恒河发源地与贾格什瓦尔神庙群所在地。"
+  },
+  "West Bengal": {
+    "en": "Welcome to West Bengal — the intellectual, literary, and artistic crucible of modern India stretching from the snowy peaks of Darjeeling to the mangrove forests of the Sundarbans. Home to Kolkata, city of palaces and Nobel laureate Rabindranath Tagore, Victoria Memorial, terracotta temples of Bishnupur, and the royal Bengal Tiger.",
+    "hi": "पश्चिम बंगाल में आपका स्वागत है — साहित्य, कला और स्वतंत्रता संग्राम की ऐतिहासिक भूमि। दार्जिलिंग के हिमालयी चाय बागानों से लेकर सुंदरबन के मैंग्रोव वनों तक, नोबेल विजेता रवींद्रनाथ टैगोर की कर्मभूमि, कोलकाता का विक्टोरिया मेमोरियल और दुर्गा पूजा का महापर्व बंगाल की जीवंत पहचान हैं।",
+    "regional": "পশ্চিমবঙ্গে স্বাগতম — বিশ্বকবি রবীন্দ্রনাথের দেশ, ভিক্টোরিয়া মেমোরিয়াল, সুন্দরবনের রয়েল বেঙ্গল টাইগার এবং দার্জিলিংয়ের অপরূপ শৈলশহর।",
+    "fr": "Bienvenue au Bengale-Occidental — patrie de Rabindranath Tagore, de Calcutta et du Victoria Memorial.",
+    "es": "Bienvenido a Bengala Occidental — tierra de Rabindranath Tagore, Calcuta y el Victoria Memorial.",
+    "de": "Willkommen in Westbengalen — der Heimat von Rabindranath Tagore, Kalkutta und den Sundarbans.",
+    "ja": "西ベンガル州へようこそ。タゴールの故郷であり、コルカタのヴィクトリア記念堂やスンダルバンスが有名です。",
+    "zh": "欢迎来到西孟加拉邦——泰戈尔的故乡，拥有加尔各答维多利亚纪念堂与孙德尔本斯红树林孟加拉虎保护区。"
+  },
+  "Andaman and Nicobar Islands": {
+    "en": "Welcome to the Andaman and Nicobar Islands — an emerald tropical archipelago of over five hundred islands in the Bay of Bengal. Famous for pristine coral reefs, Radhanagar beach, and the historic Cellular Jail in Port Blair, where Indian freedom fighters endured solitary confinement for the nation's independence.",
+    "hi": "अंडमान और निकोबार द्वीप समूह में आपका स्वागत है — बंगाल की खाड़ी में 500 से अधिक द्वीपों का सुरम्य द्वीप समूह। अपनी प्राचीन प्रवाल भित्तियों, हैवलॉक द्वीप के राधानगर बीच और पोर्ट ब्लेयर की ऐतिहासिक सेल्यूलर जेल (काला पानी) के लिए यह केंद्र शासित प्रदेश प्रसिद्ध है।",
+    "regional": "அந்தமான் நிக்கோபார் தீவுகளுக்கு நல்வரவு — வரலாற்று சிறப்புமிக்க செல்லுலார் சிறை மற்றும் அழகிய பவளப்பாறைகள்.",
+    "fr": "Bienvenue aux îles Andaman et Nicobar — archipel tropical de récifs coralliens et prison cellulaire historique.",
+    "es": "Bienvenido a las Islas Andamán y Nicobar — archipiélago paradisíaco con la histórica prisión celular.",
+    "de": "Willkommen auf den Andamanen und Nikobaren — dem tropischen Archipel mit dem historischen Cellular Jail.",
+    "ja": "アンダマン・ニコバル諸島へようこそ。サンゴ礁と歴史あるポートブレアの獄舎で知られる楽園です。",
+    "zh": "欢迎来到安达曼-尼科巴群岛——孟加拉湾上的热带珊瑚群岛，拥有著名的布莱尔港蜂窝监狱历史遗迹。"
+  },
+  "Chandigarh": {
+    "en": "Welcome to Chandigarh — the City Beautiful, India's premier master-planned city designed by visionary architect Le Corbusier in the 1950s. Serving as the joint capital of Punjab and Haryana, Chandigarh is celebrated for the whimsical Rock Garden built by Nek Chand, tranquil Sukhna Lake, and urban symmetry.",
+    "hi": "चंडीगढ़ में आपका स्वागत है — 'द सिटी ब्यूटीफुल', जिसे विख्यात वास्तुकार ली कोर्बुज़िए ने योजनाबद्ध रूप से तैयार किया था। पंजाब और हरियाणा की संयुक्त राजधानी, यह शहर नेक चंद के रॉक गार्डन, सुखना झील और अपने हरित तथा अनुशासित शहरी नियोजन के लिए प्रसिद्ध है।",
+    "regional": "ਚੰਡੀਗੜ੍ਹ ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ — ਲੀ ਕਾਰਬੂਜ਼ੀਅਰ ਦੁਆਰਾ ਡਿਜ਼ਾਈਨ ਕੀਤਾ ਗਿਆ 'ਦਿ ਸਿਟੀ ਬਿਊਟੀਫੁਲ' ਅਤੇ ਸੁਖਨਾ ਝੀਲ।",
+    "fr": "Bienvenue à Chandigarh — la ville belle conçue par Le Corbusier, capitale commune du Pendjab et de l'Haryana.",
+    "es": "Bienvenido a Chandigarh — la Ciudad Hermosa diseñada por Le Corbusier.",
+    "de": "Willkommen in Chandigarh — der von Le Corbusier entworfenen Modellstadt Indiens.",
+    "ja": "チャンディーガルへようこそ。ル・コルビュジエが設計した近代都市計画の結晶です。",
+    "zh": "欢迎来到昌迪加尔——由现代建筑大师勒·柯布西耶规划设计的“美丽之城”。"
+  },
+  "Dadra and Nagar Haveli and Daman and Diu": {
+    "en": "Welcome to Dadra and Nagar Haveli and Daman and Diu — a coastal union territory rich in Portuguese maritime heritage along the Arabian Sea. Renowned for sixteenth-century sea forts like Moti Daman and Diu Fort, tranquil beaches, and lush tribal woodlands along the Daman Ganga River.",
+    "hi": "दादरा और नगर हवेली तथा दमन और दीव में आपका स्वागत है — अरब सागर के तट पर पुर्तगाली समुद्री विरासत से संपन्न केंद्र शासित प्रदेश। दीव और मोती दमन के ऐतिहासिक समुद्री किले, शांत समुद्र तट और समृद्ध जनजातीय संस्कृति यहाँ के मुख्य आकर्षण हैं।",
+    "regional": "દાદરા અને નગર હવેલી અને દમણ અને દીવમાં આપનું સ્વાગત છે — પોર્ટુગીઝ કિલ્લાઓ અને સુંદર દરિયાકિનારો.",
+    "fr": "Bienvenue à Dadra et Nagar Haveli et Daman et Diu — côte chargée d'histoire portugaise.",
+    "es": "Bienvenido a Dadra y Nagar Haveli y Damán y Diu — fortalezas marinas y playas portuguesas.",
+    "de": "Willkommen in Dadra und Nagar Haveli und Daman und Diu — portugiesisches Kolonialerbe am Arabischen Meer.",
+    "ja": "ダードラー及びナガル・ハヴェーリー並びにダマン及びディーウへようこそ。ポルトガル要塞の歴史が息づく海岸です。",
+    "zh": "欢迎来到达德拉-纳加尔哈维利和达曼-第乌——坐拥阿拉伯海畔十六世纪葡萄牙海防要塞的联邦属地。"
+  },
+  "Delhi": {
+    "en": "Welcome to Delhi — the National Capital Territory of India and crossroads of world history, where ancient empires rose and fell across millennia. Crowned by three UNESCO World Heritage Sites: the formidable Red Fort, the soaring twelfth-century Qutub Minar, and the grand Mughal garden tomb of Humayun. Delhi embodies the heart and governance of modern India.",
+    "hi": "दिल्ली में आपका स्वागत है — भारत का राष्ट्रीय राजधानी क्षेत्र और सहस्राब्दियों के इतिहास का साक्षी महानगर। लाल किला, बारहवीं शताब्दी का कुतुब मीनार, हुमायूँ का मकबरा, इंडिया गेट और अक्षरधाम मंदिर दिल्ली की ऐतिहासिक और आधुनिक गरिमा के प्रतीक हैं।",
+    "regional": "ਦਿੱਲੀ ਵਿੱਚ ਸੁਆਗਤ ਹੈ — ਭਾਰਤ ਦੀ ਰਾਜਧਾਨੀ, ਲਾਲ ਕਿਲ੍ਹਾ, ਕੁਤਬ ਮੀਨਾਰ ਅਤੇ ਇਤਿਹਾਸਕ ਸ਼ਾਨ।",
+    "fr": "Bienvenue à Delhi — le territoire de la capitale nationale, avec le Fort Rouge et le Qutub Minar.",
+    "es": "Bienvenido a Delhi — capital nacional de la India, hogar del Fuerte Rojo y el Qutub Minar.",
+    "de": "Willkommen in Delhi — der Hauptstadt Indiens mit dem Roten Fort und dem Qutb Minar.",
+    "ja": "デリーへようこそ。赤い城やクトゥブ・ミナールが語る幾重の歴史と現代インドの首都です。",
+    "zh": "欢迎来到德里——印度国家首都直辖区，汇聚红堡、顾特卜塔与胡马雍陵世界文化遗产。"
+  },
+  "Jammu and Kashmir": {
+    "en": "Welcome to Jammu and Kashmir — the Paradise on Earth, celebrated for sublime Himalayan valleys, shikara boats gliding on Dal Lake, and snow-laden meadows of Gulmarg and Pahalgam. Rich in saffron cultivation, Pashmina handlooms, and sacred shrines including the historic Shankaracharya Temple and Hazratbal.",
+    "hi": "जम्मू और कश्मीर में आपका स्वागत है — धरती का स्वर्ग, जहाँ डल झील पर तैरते शिकारे, गुलमर्ग और पहलगाम की बर्फ से ढकी वादियां और चिनार के पेड़ मन मोह लेते हैं। केसर की खेती, पश्मीना शॉल और वैष्णो देवी का पावन दरबार इस केंद्र शासित प्रदेश की पहचान हैं।",
+    "regional": "کٔشیٖر مَنٛز چھُ تُہُند اِستقبال — دَل سَر، شِکارٕ تہٕ گُل مَرگٕچ پَرَبَت وادی۔",
+    "fr": "Bienvenue au Jammu-et-Cachemire — le paradis sur terre avec le lac Dal et les vallées himalayennes.",
+    "es": "Bienvenido a Jammu y Cachemira — el paraíso en la tierra con el lago Dal y las montañas del Himalaya.",
+    "de": "Willkommen in Jammu und Kaschmir — dem Paradies auf Erden mit dem Dal-See und Kaschmir-Schals.",
+    "ja": "ジャンムー・カシミールへようこそ。「地上の楽園」と称されるダル湖と白銀の渓谷が広がる地です。",
+    "zh": "欢迎来到查谟和克什米尔——“人间天堂”，达尔湖上漂流的希卡拉木舟与古尔马尔格雪原胜景。"
+  },
+  "Ladakh": {
+    "en": "Welcome to Ladakh — the Land of High Mountain Passes on the roof of the world. A mesmerising high-altitude desert framed by the Karakoram and Great Himalayas, famed for dramatic Tibetan Buddhist monasteries like Thiksey and Hemis, azure glacial waters of Pangong Lake, and Khardung La pass.",
+    "hi": "लद्दाख में आपका स्वागत है — दुनिया की छत पर बसा 'ऊंचे दर्रों का देश'। काराकोरम और हिमालय की पर्वत श्रेणियों के बीच यह शीत मरुस्थल ठीकसे और हेमिस जैसे प्राचीन बौद्ध मठों, पैंगोंग झील के नीले पानी और खारदुंग ला दर्रे के लिए पूरी दुनिया में अद्वितीय है।",
+    "regional": "ལ་དྭགས་ལ་ཕེབས་པར་དགའ་བསུ་ཞུ། — ཐིག་སེ་དགོན་པ་དང་པང་གོང་མཚོའི་མཛེས་ལྗོངས།",
+    "fr": "Bienvenue au Ladakh — le pays des hauts cols, avec le lac Pangong et les monastères bouddhistes.",
+    "es": "Bienvenido a Ladakh — la tierra de los altos pasos de montaña y el lago Pangong.",
+    "de": "Willkommen in Ladakh — dem Land der hohen Pässe mit dem Pangong-See und uralten Klöstern.",
+    "ja": "ラダックへようこそ。カラコルム山脈に抱かれた高山砂漠とパンゴン湖、チベット仏教僧院の聖地です。",
+    "zh": "欢迎来到拉达克——世界屋脊上的“高山山口之地”，以班公错深蓝湖水与提克西佛教修道院著称。"
+  },
+  "Lakshadweep": {
+    "en": "Welcome to Lakshadweep — the Hundred Thousand Islands, a pristine tropical archipelago of thirty-six coral atolls in the Arabian Sea. Renowned for turquoise lagoons, untouched coral reefs, scuba marine wonderlands at Bangaram and Agatti, and vibrant coastal island life.",
+    "hi": "लक्षद्वीप में आपका स्वागत है — अरब सागर में छत्तीस प्रवाल एटोलों (मूंगा द्वीपों) का सुंदर समूह। फिरोज़ी रंग की लैगून, समृद्ध समुद्री जीवन, अगत्ती और बंगारम के प्राचीन प्रवाल भित्तियों के साथ यह द्वीपसमूह भारत का एक अद्भुत प्राकृतिक रत्न है।",
+    "regional": "ലക്ഷദ്വീപിലേക്ക് സ്വാഗതം — അറബിക്കടലിലെ മുപ്പത്താറ് പവിഴപ്പുറ്റുകളുടെ വിസ്മയ ദ്വീപസമൂഹം.",
+    "fr": "Bienvenue aux Lakshadweep — archipel préservé d'atolls coralliens et de lagons turquoise.",
+    "es": "Bienvenido a Lakshadweep — archipiélago de atolones de coral y lagunas turquesas en el mar Arábigo.",
+    "de": "Willkommen in Lakshadweep — dem unberührten Atoll-Archipel mit türkisfarbenen Lagunen.",
+    "ja": "ラクシャドウィープへようこそ。アラビア海に浮かぶ36のサンゴ環礁とエメラルドのラグーンです。",
+    "zh": "欢迎来到拉克沙群岛——阿拉伯海中的珊瑚环礁明珠，以绿松石色泻湖与未受污染的海洋生态闻名。"
+  },
+  "Puducherry": {
+    "en": "Welcome to Puducherry — the French Riviera of the East along the Bay of Bengal coast. Famed for colonial French Quarter villas with mustard-yellow walls and bougainvillaea, the seaside Promenade beach, Sri Aurobindo Ashram, and the global experimental township of Auroville.",
+    "hi": "पुदुचेरी में आपका स्वागत है — पूर्व का फ्रेंच रिवेरा। फ्रांसीसी औपनिवेशिक वास्तुकला, पीली दीवारों और बोगनविलिया से सजी गलियां, प्रोमेनेड बीच, श्री अरबिंदो आश्रम और अंतरराष्ट्रीय आध्यात्मिक नगरी ऑरोविल पुदुचेरी को एक शांत और विशिष्ट पहचान देते हैं।",
+    "regional": "புதுச்சேரிக்கு நல்வரவு — பிரெஞ்சு காலனித்துவ கட்டடக் கலை, ஆரோவில் மற்றும் அமைதியான கடற்கரை நகரம்.",
+    "fr": "Bienvenue à Pondichéry — la Riviera française de l'Orient, avec l'ashram de Sri Aurobindo et Auroville.",
+    "es": "Bienvenido a Puducherry — la Riviera francesa del Este, famosa por Auroville.",
+    "de": "Willkommen in Puducherry — der französischen Kolonialperle mit Auroville am Golf von Bengalen.",
+    "ja": "ポンディシェリへようこそ。フランス風の街並みとオーロヴィル精神共同体で知られる海辺の町です。",
+    "zh": "欢迎来到本地治里——“东方的法国里维埃拉”，拥有法式殖民风情街区与黎明之城奥罗维尔。"
+  }
+};
+
+    let currentSpeakingState = 'Republic of India';
+    let currentSpeakingLang = 'hi';
+    let currentRate = 1.0;
+    let isPlaying = false;
+    let isPaused = false;
+    let isCloudMode = false;
+    let showHud = true;
+
+    // Trackers
+    let wordSpans = [];
+    let allWords = [];
+    let activeWordIndex = 0;
+    let speechUtterance = null;
+    let speechTimer = null;
+
+    // Cloud Audio
+    let audioChunks = [];
+    let currentChunkIdx = 0;
+    let currentAudio = null;
+
+    // UI elements
+    const playBtn = document.getElementById('state-vg-play');
+    const stopBtn = document.getElementById('state-vg-stop');
+    const playIcon = document.getElementById('state-vg-play-icon');
+    const playText = document.getElementById('state-vg-play-text');
+    const statusEl = document.getElementById('state-vg-status');
+    const waveEl = document.getElementById('state-vg-wave');
+    const textEl = document.getElementById('state-vg-text');
+    const langSelect = document.getElementById('state-vg-lang-select');
+    const rateBtns = document.querySelectorAll('.state-vg-rate-btn');
+    const progressBar = document.getElementById('state-vg-progress-bar');
+    const hud = document.getElementById('state-vg-hud');
+    const hudContent = document.getElementById('state-vg-hud-content');
+    const hudStateName = document.getElementById('state-vg-hud-state-name');
+    const hudLang = document.getElementById('state-vg-hud-lang');
+    const hudClose = document.getElementById('state-vg-hud-close');
+
+    const LANG_LABELS = {
+      'en': 'English',
+      'hi': 'हिन्दी',
+      'regional': 'Regional',
+      'ta': 'தமிழ்',
+      'te': 'తెలుగు',
+      'bn': 'বাংলা',
+      'mr': 'मराठी',
+      'gu': 'ગુજરાતી',
+      'kn': 'ಕನ್ನಡ',
+      'ml': 'മലയാളം',
+      'pa': 'ਪੰਜਾਬੀ',
+      'fr': 'Français',
+      'es': 'Español',
+      'de': 'Deutsch',
+      'ja': '日本語',
+      'zh': '中文'
+    };
+
+    function detectDefaultLang() {
+      const navLang = (navigator.language || navigator.userLanguage || 'hi').toLowerCase();
+      if (navLang.startsWith('hi')) return 'hi';
+      if (navLang.startsWith('ta')) return 'ta';
+      if (navLang.startsWith('te')) return 'te';
+      if (navLang.startsWith('bn')) return 'bn';
+      if (navLang.startsWith('mr')) return 'mr';
+      if (navLang.startsWith('gu')) return 'gu';
+      if (navLang.startsWith('kn')) return 'kn';
+      if (navLang.startsWith('ml')) return 'ml';
+      if (navLang.startsWith('pa')) return 'pa';
+      if (navLang.startsWith('fr')) return 'fr';
+      if (navLang.startsWith('es')) return 'es';
+      if (navLang.startsWith('de')) return 'de';
+      if (navLang.startsWith('ja')) return 'ja';
+      if (navLang.startsWith('zh')) return 'zh';
+      return 'en';
+    }
+
+    function getNativeVoice(langKey) {
+      if (!window.speechSynthesis) return null;
+      const voices = window.speechSynthesis.getVoices() || [];
+      const target = langKey.toLowerCase();
+      return voices.find(v => {
+        const vlang = (v.lang || '').toLowerCase().replace('_', '-');
+        return vlang.startsWith(target + '-') || vlang === target;
+      });
+    }
+
+    function getScript(stateName, langKey) {
+      const stateObj = STATE_SCRIPTS[stateName] || STATE_SCRIPTS['Republic of India'];
+      if (!stateObj) return "";
+      if (stateObj[langKey]) return stateObj[langKey];
+      if (langKey === 'regional' && stateObj.regional) return stateObj.regional;
+      if (stateObj.regional && ['ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa'].includes(langKey)) {
+        return stateObj.regional;
+      }
+      if (stateObj.hi) return stateObj.hi;
+      return stateObj.en || "";
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function updateCardScriptView(stateName) {
+      currentSpeakingState = stateName;
+      const script = getScript(stateName, currentSpeakingLang);
+      allWords = script.trim().split(/\s+/);
+
+      if (textEl) {
+        textEl.innerHTML = allWords.map((w, i) => 
+          `<span class="state-vg-word" id="svg-w-${i}" data-idx="${i}">${escapeHtml(w)} </span>`
+        ).join('');
+        wordSpans = allWords.map((_, i) => document.getElementById(`svg-w-${i}`));
+      }
+
+      if (hudStateName) hudStateName.textContent = stateName.toUpperCase();
+      if (hudLang) hudLang.textContent = (LANG_LABELS[currentSpeakingLang] || currentSpeakingLang).toUpperCase();
+      if (hudContent && !isPlaying) {
+        hudContent.textContent = script.substring(0, 110) + (script.length > 110 ? '…' : '');
+      }
+
+      activeWordIndex = 0;
+      updateSubtitleHighlight(0);
+      if (progressBar) progressBar.style.width = '0%';
+
+      if (statusEl && !isPlaying) {
+        const nativeVoice = getNativeVoice(currentSpeakingLang);
+        statusEl.textContent = nativeVoice ? `Ready · Voice Native` : `Ready · Native Cloud Audio`;
+      }
+    }
+
+    // Subtitle Tracker: Sync word highlight in transcript and cinema HUD
+    function updateSubtitleHighlight(idx) {
+      activeWordIndex = Math.max(0, Math.min(idx, allWords.length - 1));
+
+      // 1. Highlight in detail-card text box
+      for (let i = 0; i < wordSpans.length; i++) {
+        const el = wordSpans[i];
+        if (!el) continue;
+        if (i < activeWordIndex) {
+          el.className = 'state-vg-word spoken';
+        } else if (i === activeWordIndex) {
+          el.className = 'state-vg-word active';
+          if (isPlaying && textEl) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          el.className = 'state-vg-word';
+        }
+      }
+
+      // 2. Highlight in Floating Cinema HUD
+      if (hud && hudContent && showHud) {
+        const windowSize = 9;
+        const start = Math.max(0, activeWordIndex - 3);
+        const end = Math.min(allWords.length, start + windowSize);
+        let hudHtml = '';
+        for (let k = start; k < end; k++) {
+          const cls = (k < activeWordIndex) ? 'state-hud-word spoken' : (k === activeWordIndex ? 'state-hud-word active' : 'state-hud-word pending');
+          hudHtml += `<span class="${cls}">${escapeHtml(allWords[k])} </span>`;
+        }
+        hudContent.innerHTML = hudHtml;
+      }
+
+      // 3. Progress bar
+      if (progressBar && allWords.length > 1) {
+        const pct = Math.min(100, Math.round((activeWordIndex / (allWords.length - 1)) * 100));
+        progressBar.style.width = pct + '%';
+      }
+    }
+
+    // Chunk text for Cloud TTS (< 160 chars per request)
+    function splitIntoChunks(text, maxLen = 80) {
+      const sentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      const chunks = [];
+      let cur = '';
+      for (let s of sentences) {
+        s = s.trim();
+        if (!s) continue;
+        if ((cur + ' ' + s).trim().length <= maxLen) {
+          cur = cur ? cur + ' ' + s : s;
+        } else {
+          if (cur) chunks.push(cur.trim());
+          if (s.length > maxLen) {
+            const words = s.split(/\s+/);
+            let sub = '';
+            for (let w of words) {
+              if ((sub + ' ' + w).trim().length <= maxLen) {
+                sub = sub ? sub + ' ' + w : w;
+              } else {
+                if (sub) chunks.push(sub.trim());
+                sub = w;
+              }
+            }
+            cur = sub;
+          } else {
+            cur = s;
+          }
+        }
+      }
+      if (cur) chunks.push(cur.trim());
+      return chunks;
+    }
+
+    // ── Dedicated Single-Audio Element & Bulletproof Session Control ──
+    let mapAudioSessionId = 0;
+    let currentAudioEl = document.getElementById('state-vg-audio-element');
+    if (!currentAudioEl) {
+      currentAudioEl = document.createElement('audio');
+      currentAudioEl.id = 'state-vg-audio-element';
+      currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+      currentAudioEl.style.display = 'none';
+      document.body.appendChild(currentAudioEl);
+    } else {
+      currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+    }
+
+    // Cloud Native Audio Player (Guarantees ALL Indian and foreign languages work)
+    function playCloudAudio() {
+      const script = getScript(currentSpeakingState, currentSpeakingLang);
+      const rawChunks = splitIntoChunks(script, 80);
+
+      audioChunks = [];
+      let wordCursor = 0;
+      rawChunks.forEach(c => {
+        const chunkWords = c.trim().split(/\s+/).length;
+        audioChunks.push({
+          text: c,
+          startWord: wordCursor,
+          wordCount: chunkWords
+        });
+        wordCursor += chunkWords;
+      });
+
+      currentChunkIdx = 0;
+      isCloudMode = true;
+      isPlaying = true;
+      isPaused = false;
+      updatePlayControls(true, false);
+      if (hud && showHud) hud.style.display = 'block';
+
+      playNextCloudChunk();
+    }
+
+    function playNextCloudChunk() {
+      const mySession = mapAudioSessionId;
+      if (mySession !== mapAudioSessionId || !isPlaying || currentChunkIdx >= audioChunks.length) {
+        onPlaybackFinished();
+        return;
+      }
+
+      const chunk = audioChunks[currentChunkIdx];
+      const ttsLang = currentSpeakingLang === 'regional' ? 'hi' : currentSpeakingLang;
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${ttsLang}&client=tw-ob&q=${encodeURIComponent(chunk.text)}`;
+
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+      currentAudioEl.pause();
+      currentAudioEl.removeAttribute('src');
+      currentAudioEl.onplay = null;
+      currentAudioEl.ontimeupdate = null;
+      currentAudioEl.onended = null;
+      currentAudioEl.onerror = null;
+
+      currentAudioEl.playbackRate = currentRate;
+      currentAudioEl.src = url;
+
+      currentAudioEl.onplay = () => {
+        if (mySession !== mapAudioSessionId) return;
+        if (statusEl) statusEl.textContent = `Streaming (${ttsLang.toUpperCase()}) · Subtitles Synced`;
+      };
+
+      currentAudioEl.ontimeupdate = () => {
+        if (mySession !== mapAudioSessionId) return;
+        if (!currentAudioEl || !currentAudioEl.duration) return;
+        const progress = currentAudioEl.currentTime / currentAudioEl.duration;
+        const wordInChunk = Math.min(chunk.wordCount - 1, Math.floor(progress * chunk.wordCount));
+        updateSubtitleHighlight(chunk.startWord + wordInChunk);
+      };
+
+      currentAudioEl.onended = () => {
+        if (mySession !== mapAudioSessionId) return;
+        currentChunkIdx++;
+        if (currentChunkIdx < audioChunks.length && isPlaying) {
+          playNextCloudChunk();
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      currentAudioEl.onerror = (e) => {
+        if (mySession !== mapAudioSessionId) return;
+        console.warn('Audio chunk notice, advancing:', e);
+        currentChunkIdx++;
+        if (currentChunkIdx < audioChunks.length && isPlaying) {
+          setTimeout(() => {
+            if (mySession === mapAudioSessionId) playNextCloudChunk();
+          }, 100);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      const p = currentAudioEl.play();
+      if (p !== undefined) {
+        p.catch(err => {
+          if (mySession !== mapAudioSessionId) return;
+          console.warn('Audio play notice:', err);
+        });
+      }
+    }
+
+    // Native Browser Speech Synthesis
+    function playNativeSynthesis(voice) {
+      const mySession = mapAudioSessionId;
+      const script = getScript(currentSpeakingState, currentSpeakingLang);
+
+      if (currentAudioEl) {
+        currentAudioEl.pause();
+        currentAudioEl.removeAttribute('src');
+        currentAudioEl.onplay = null;
+        currentAudioEl.ontimeupdate = null;
+        currentAudioEl.onended = null;
+        currentAudioEl.onerror = null;
+      }
+
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+      speechUtterance = new SpeechSynthesisUtterance(script);
+      speechUtterance.voice = voice;
+      speechUtterance.lang = voice.lang;
+      speechUtterance.rate = currentRate;
+      speechUtterance.pitch = 0.95;
+      speechUtterance.volume = 1.0;
+
+      isCloudMode = false;
+      isPlaying = true;
+      isPaused = false;
+      updatePlayControls(true, false);
+      if (hud && showHud) hud.style.display = 'block';
+
+      const totalDurationEst = (allWords.length / (140 * currentRate)) * 60;
+      const startTime = Date.now();
+
+      speechUtterance.onboundary = (e) => {
+        if (mySession !== mapAudioSessionId) return;
+        if (e.name === 'word') {
+          const estIdx = Math.floor((e.charIndex / (script.length || 1)) * allWords.length);
+          updateSubtitleHighlight(estIdx);
+        }
+      };
+
+      clearInterval(speechTimer);
+      speechTimer = setInterval(() => {
+        if (mySession !== mapAudioSessionId || !isPlaying || isPaused) return;
+        const elapsed = (Date.now() - startTime) / 1000;
+        const est = Math.min(allWords.length - 1, Math.floor((elapsed / totalDurationEst) * allWords.length));
+        updateSubtitleHighlight(est);
+      }, 120);
+
+      speechUtterance.onend = () => {
+        if (mySession !== mapAudioSessionId) return;
+        onPlaybackFinished();
+      };
+
+      speechUtterance.onerror = (e) => {
+        if (mySession !== mapAudioSessionId) return;
+        if (e.error === 'canceled' || e.error === 'interrupted') return;
+        console.warn('Synthesis error notice:', e);
+        onPlaybackFinished();
+      };
+
+            setTimeout(() => {
+        if (mySession !== mapAudioSessionId || !isPlaying) return;
+        window.speechSynthesis.speak(speechUtterance);
+      }, 50);
+
+      // Keep synthesis alive in Chrome
+      clearInterval(window._vgKeepAlive);
+      window._vgKeepAlive = setInterval(() => {
+        if (!window.speechSynthesis.speaking) { clearInterval(window._vgKeepAlive); return; }
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+      }, 12000);
+    }
+
+    // Play/Pause Controller
+    function playVoiceGuide() {
+      if (isPlaying && !isPaused) {
+        // Pause
+        if (isCloudMode && currentAudioEl) {
+          currentAudioEl.pause();
+        } else if (window.speechSynthesis) {
+          window.speechSynthesis.pause();
+        }
+        isPaused = true;
+        updatePlayControls(false, true);
+        return;
+      }
+
+      if (isPaused) {
+        // Resume
+        if (isCloudMode && currentAudioEl) {
+          currentAudioEl.play().catch(()=>{});
+        } else if (window.speechSynthesis) {
+          window.speechSynthesis.resume();
+        }
+        isPaused = false;
+        isPlaying = true;
+        updatePlayControls(true, false);
+        return;
+      }
+
+      stopVoiceGuide();
+      mapAudioSessionId++;
+
+      const nativeVoice = getNativeVoice(currentSpeakingLang);
+      if (nativeVoice) {
+        playNativeSynthesis(nativeVoice);
+      } else {
+        playCloudAudio();
+      }
+    }
+
+    function stopVoiceGuide() {
+      mapAudioSessionId++;
+      clearInterval(speechTimer);
+      clearInterval(window._vgKeepAlive);
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      if (currentAudioEl) {
+        currentAudioEl.pause();
+        currentAudioEl.removeAttribute('src');
+        currentAudioEl.onplay = null;
+        currentAudioEl.ontimeupdate = null;
+        currentAudioEl.onended = null;
+        currentAudioEl.onerror = null;
+      }
+      isPlaying = false;
+      isPaused = false;
+      updatePlayControls(false, false);
+      activeWordIndex = 0;
+      updateSubtitleHighlight(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function onPlaybackFinished() {
+      stopVoiceGuide();
+      if (progressBar) progressBar.style.width = '100%';
+      if (hudContent) {
+        hudContent.textContent = 'Narration complete. Click Play to listen again.';
+      }
+    }
+
+    function updatePlayControls(playing, paused) {
+      if (!playBtn) return;
+      if (playing && !paused) {
+        playBtn.classList.add('playing');
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playText) playText.textContent = 'Pause Guide';
+        if (stopBtn) stopBtn.disabled = false;
+        if (waveEl) waveEl.classList.add('playing');
+        if (statusEl) statusEl.textContent = `Speaking (${currentSpeakingLang.toUpperCase()})`;
+      } else if (paused) {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playText) playText.textContent = 'Resume Guide';
+        if (stopBtn) stopBtn.disabled = false;
+        if (waveEl) waveEl.classList.remove('playing');
+        if (statusEl) statusEl.textContent = 'Paused';
+      } else {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playText) playText.textContent = 'Listen Audio Guide';
+        if (stopBtn) stopBtn.disabled = true;
+        if (waveEl) waveEl.classList.remove('playing');
+        if (statusEl) statusEl.textContent = 'Ready';
+      }
+    }
+
+    // Event Listeners
+    if (playBtn) playBtn.addEventListener('click', playVoiceGuide);
+    if (stopBtn) stopBtn.addEventListener('click', stopVoiceGuide);
+
+    if (langSelect) {
+      langSelect.addEventListener('change', (e) => {
+        currentSpeakingLang = e.target.value;
+        const wasPlaying = isPlaying;
+        if (isPlaying) stopVoiceGuide();
+        updateCardScriptView(currentSpeakingState);
+        if (wasPlaying) playVoiceGuide();
+      });
+    }
+
+    rateBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        rateBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentRate = parseFloat(btn.dataset.rate) || 1.0;
+        if (currentAudio) currentAudio.playbackRate = currentRate;
+        if (isPlaying) {
+          const curIdx = activeWordIndex;
+          stopVoiceGuide();
+          playVoiceGuide();
+          updateSubtitleHighlight(curIdx);
+        }
+      });
+    });
+
+    // Click words in text box to jump highlight
+    if (textEl) {
+      textEl.addEventListener('click', (e) => {
+        const wordEl = e.target.closest('.state-vg-word');
+        if (!wordEl) return;
+        const idx = parseInt(wordEl.dataset.idx, 10);
+        if (!isNaN(idx)) updateSubtitleHighlight(idx);
+      });
+    }
+
+    // Close HUD
+    if (hudClose) {
+      hudClose.addEventListener('click', () => {
+        showHud = false;
+        if (hud) hud.style.display = 'none';
+      });
+    }
+
+    // Global hooks
+    window.onStateSelectVoiceGuide = (name) => {
+      const wasPlaying = isPlaying;
+      if (isPlaying) stopVoiceGuide();
+      updateCardScriptView(name);
+      if (wasPlaying) playVoiceGuide();
+    };
+
+    function init() {
+      currentSpeakingLang = detectDefaultLang();
+      if (langSelect) langSelect.value = currentSpeakingLang;
+      updateCardScriptView('Republic of India');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+
+
+  <!-- Cinema Floating Subtitle HUD on 3D Globe -->
+  <div id="state-vg-hud" class="state-vg-hud" style="display:none;" aria-live="polite">
+    <div class="state-vg-hud-header">
+      <div class="state-vg-hud-badge">
+        <span class="state-vg-hud-dot"></span>
+        <span id="state-vg-hud-state-name">INDIA</span> · <span id="state-vg-hud-lang">HINDI</span>
+      </div>
+      <div class="state-vg-hud-title">Live Subtitle Tracker</div>
+      <button type="button" class="state-vg-hud-close" id="state-vg-hud-close" title="Hide HUD">✕</button>
+    </div>
+    <div class="state-vg-hud-content" id="state-vg-hud-content">
+      Select a state to explore and listen to its story.
+    </div>
+  </div>
+
+</body>
+
+</html>

@@ -1,0 +1,3438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="referrer" content="no-referrer">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Neermahal — 3D Lake Palace AR / VR Experience</title>
+    <meta name="description"
+        content="Cinematic 3D, WebXR AR & VR architectural exploration of Neermahal (Twijilikma), the 1930s royal water palace in Rudrasagar Lake, Tripura, India.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Three.js and Controls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/DeviceOrientationControls.js"></script>
+
+    <style>
+        /* ── Reset & Theme Variables ─────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        :root {
+            --bg-dark: #040810;
+            --gold: #dfa753;
+            --gold-bright: #ffd580;
+            --palace-white: #f5f1eb;
+            --terracotta: #c45b38;
+            --water-teal: #14b8a6;
+            --text-main: #f8fafc;
+            --text-muted: rgba(226, 232, 240, 0.7);
+            --glass-bg: rgba(6, 12, 24, 0.78);
+            --glass-border: rgba(223, 167, 83, 0.28);
+            --font-serif: 'Cinzel', serif;
+            --font-mono: 'Space Grotesk', monospace;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-body);
+        }
+
+        #webgl-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            outline: none;
+        }
+
+        /* ── Glassmorphic HUD & Overlays ─────────────────────────────────── */
+        .hud-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px 32px;
+        }
+
+        .hud-interactive {
+            pointer-events: auto;
+        }
+
+        /* Header Navigation */
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .heritage-badge {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 10px 22px;
+            border-radius: 40px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 15px rgba(223, 167, 83, 0.15);
+        }
+
+        .heritage-emblem {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 10px var(--gold));
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        .heritage-titles h1 {
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            color: var(--gold-bright);
+            text-transform: uppercase;
+        }
+
+        .heritage-titles p {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-glass {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            text-decoration: none;
+        }
+
+        .btn-glass:hover {
+            border-color: var(--gold);
+            background: rgba(223, 167, 83, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(223, 167, 83, 0.3);
+            color: #fff;
+        }
+
+        .btn-glass.active {
+            background: linear-gradient(135deg, rgba(223, 167, 83, 0.38), rgba(20, 184, 166, 0.35));
+            border-color: var(--gold-bright);
+            color: var(--gold-bright);
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(223, 167, 83, 0.4);
+        }
+
+        /* ── Bottom Control Deck ─────────────────────────────────────────── */
+        .bottom-deck {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            width: 100%;
+            gap: 20px;
+        }
+
+        /* Left Side: Atmosphere Presets & Diya Ceremony */
+        .control-pod {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 14px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 480px;
+        }
+
+        .pod-label {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chip-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chip-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip-btn:hover {
+            border-color: var(--gold);
+            background: rgba(223, 167, 83, 0.18);
+        }
+
+        .chip-btn.active {
+            background: var(--gold);
+            color: #03060d;
+            font-weight: 700;
+            border-color: var(--gold-bright);
+            box-shadow: 0 0 16px rgba(223, 167, 83, 0.6);
+        }
+
+        /* Center View Dock */
+        .view-dock {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 8px 14px;
+            border-radius: 40px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+        }
+
+        /* Right Side: WebXR & Quick Actions */
+        .immersive-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .xr-highlight-btn {
+            background: linear-gradient(135deg, #dfa753 0%, #14b8a6 100%) !important;
+            color: #02050b !important;
+            font-weight: 700 !important;
+            border: none !important;
+            box-shadow: 0 0 25px rgba(20, 184, 166, 0.5) !important;
+            font-size: 0.85rem !important;
+            padding: 12px 24px !important;
+            animation: pulse-border 2.8s infinite;
+        }
+
+        /* ── Floating 3D Hotspot Tags ────────────────────────────────────── */
+        .hotspot-tag {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            background: rgba(4, 8, 16, 0.88);
+            border: 1px solid var(--gold);
+            color: var(--gold-bright);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            pointer-events: auto;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 16px rgba(223, 167, 83, 0.45);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+            z-index: 5;
+            white-space: nowrap;
+        }
+
+        .hotspot-tag::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--water-teal);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--water-teal);
+            animation: beacon 1.6s infinite;
+        }
+
+        .hotspot-tag:hover {
+            background: var(--gold);
+            color: #040812;
+            transform: translate(-50%, -50%) scale(1.08);
+            box-shadow: 0 0 26px rgba(255, 213, 128, 0.85);
+        }
+
+        /* ── Lore Card Modal ─────────────────────────────────────────────── */
+        .lore-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 5, 12, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            padding: 20px;
+        }
+
+        .lore-modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lore-card {
+            background: rgba(8, 14, 28, 0.96);
+            border: 1px solid var(--gold);
+            border-radius: 24px;
+            max-width: 680px;
+            width: 100%;
+            padding: 36px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(223, 167, 83, 0.25);
+            transform: translateY(20px);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .lore-modal-backdrop.active .lore-card {
+            transform: translateY(0);
+        }
+
+        .lore-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .lore-close-btn:hover {
+            background: var(--gold);
+            color: #000;
+        }
+
+        .lore-header-tag {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--water-teal);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .lore-title {
+            font-family: var(--font-serif);
+            font-size: 1.85rem;
+            color: var(--gold-bright);
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .lore-body {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+            margin-bottom: 24px;
+        }
+
+        .lore-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            border-top: 1px solid rgba(223, 167, 83, 0.2);
+            padding-top: 20px;
+        }
+
+        .meta-box small {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .meta-box span {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gold-bright);
+        }
+
+        /* ── Floating Help Toast ─────────────────────────────────────────── */
+        .help-toast {
+            position: fixed;
+            top: 96px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(4, 8, 16, 0.88);
+            border: 1px solid var(--glass-border);
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            backdrop-filter: blur(10px);
+            z-index: 15;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        /* ── Loading Screen ──────────────────────────────────────────────── */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: radial-gradient(circle at 50% 50%, #0d1a2d 0%, #02050c 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        #loading-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-palace-icon {
+            font-size: 3.8rem;
+            color: var(--gold);
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 25px rgba(223, 167, 83, 0.7));
+            animation: float 2.5s ease-in-out infinite alternate;
+        }
+
+        .loader-ring {
+            width: 54px;
+            height: 54px;
+            border: 3px solid rgba(223, 167, 83, 0.2);
+            border-top-color: var(--gold-bright);
+            border-right-color: var(--water-teal);
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+            margin-bottom: 24px;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+        }
+
+        .loader-heading {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            letter-spacing: 6px;
+            color: var(--gold-bright);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .loader-sub {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        /* ── Keyframe Animations ─────────────────────────────────────────── */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes beacon {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.6);
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes pulse-glow {
+            from {
+                filter: drop-shadow(0 0 6px var(--gold));
+            }
+
+            to {
+                filter: drop-shadow(0 0 20px var(--gold-bright));
+            }
+        }
+
+        @keyframes pulse-border {
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(20, 184, 166, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 35px rgba(223, 167, 83, 0.85);
+            }
+        }
+
+        /* ── Responsive Styling ──────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .hud-layer {
+                padding: 16px;
+            }
+
+            .heritage-titles p {
+                display: none;
+            }
+
+            .bottom-deck {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .control-pod {
+                max-width: 100%;
+            }
+
+            .view-dock {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .immersive-actions {
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .lore-card {
+                padding: 24px;
+            }
+
+            .lore-meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+    </style>
+
+  
+
+  
+
+  
+  
+  <style id="vg-master-styles">
+
+    /* ════ RIGHT-SIDE DOCKED HERITAGE VOICE GUIDE SYSTEM ════ */
+
+    /* ── Floating Microphone Trigger (Icon-Only, Same Bottom-Right Position) ── */
+    .voice-guide-fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 2px solid rgba(251, 191, 36, 0.85);
+      color: #0b0f19;
+      font-size: 1.45rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.45), 0 0 22px rgba(245, 158, 11, 0.3);
+      z-index: 99990;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .voice-guide-fab:hover {
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 12px 38px rgba(245, 158, 11, 0.7), 0 0 30px rgba(245, 158, 11, 0.45);
+      color: #000;
+    }
+    .voice-guide-fab:active { transform: scale(0.94); }
+    .voice-guide-fab span { display: none !important; }
+
+    /* ── NO SUBWINDOW BACKDROP: 3D Scene Remains Fully Visible & Interactive ── */
+    .vg-backdrop {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
+    /* ── Docked on Corner of Right Side in Middle Position ────────────────── */
+    .vg-panel {
+      position: fixed;
+      top: 50%;
+      right: 24px;
+      transform: translateY(-50%) translateX(calc(100% + 40px));
+      width: min(90vw, 420px);
+      max-height: 86vh;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .vg-panel.open {
+      transform: translateY(-50%) translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .vg-panel-inner {
+      background: rgba(8, 12, 26, 0.96);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 22px;
+      padding: 20px 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(245, 158, 11, 0.2);
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      max-height: 86vh;
+    }
+
+    .vg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+    .vg-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .vg-icon-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.15));
+      border: 1px solid rgba(245, 158, 11, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+    .vg-title-group h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #fbbf24;
+      letter-spacing: -0.01em;
+    }
+    .vg-title-group p {
+      margin: 2px 0 0 0;
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+    .vg-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Themed HUD Toggle Button (Royal Gold Pill) ── */
+    .vg-hud-toggle-btn {
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #fbbf24;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .vg-hud-toggle-btn:hover {
+      background: rgba(245, 158, 11, 0.28);
+      border-color: #fbbf24;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+      transform: translateY(-1px);
+    }
+    .vg-hud-toggle-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #fde68a;
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+    }
+
+    /* ── Themed Close Button ── */
+    .vg-close-btn {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 700;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .vg-close-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+      color: #ffffff;
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
+    }
+
+    /* ── Language Row ── */
+    .vg-lang-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      scrollbar-width: thin;
+      flex-shrink: 0;
+    }
+    .vg-lang-row::-webkit-scrollbar { height: 4px; }
+    .vg-lang-row::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 2px; }
+    .vg-lang-pill {
+      flex-shrink: 0;
+      padding: 5px 11px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .vg-lang-pill:hover { background: rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.45); color: #fff; }
+    .vg-lang-pill.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #fbbf24;
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+    }
+
+    /* ── Prominent, Crisp, High-Contrast Script Box ── */
+    .vg-script-box {
+      flex: 1;
+      min-height: 180px;
+      max-height: 290px;
+      overflow-y: auto;
+      background: rgba(4, 7, 18, 0.92);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+      scrollbar-width: thin;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+      user-select: text;
+    }
+    .vg-script-box::-webkit-scrollbar { width: 5px; }
+    .vg-script-box::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 3px; }
+    .vg-word {
+      display: inline;
+      color: #e2e8f0;
+      transition: color 0.12s ease, background-color 0.12s ease;
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 1px 2px;
+    }
+    .vg-word:hover { background: rgba(245, 158, 11, 0.2); }
+    .vg-word.vg-word-active {
+      color: #0b0f19 !important;
+      background: #fbbf24 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.85);
+    }
+    .vg-word.vg-word-spoken { color: #ffd56b; opacity: 0.92; }
+
+    /* ── Controls ── */
+    .vg-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .vg-btn {
+      flex: 1;
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .vg-play {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b0f19;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    }
+    .vg-play:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
+    .vg-play.playing {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+    }
+    .vg-stop {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+    }
+    .vg-stop:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+    .vg-stop:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Progress Bar ── */
+    .vg-progress-wrap {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .vg-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      transition: width 0.15s ease;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+
+    /* ── Distinct Speed Timeline (Audibly Changes English & All Voices) ── */
+    .vg-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .vg-rate-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .vg-rate-row span {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-right: 2px;
+    }
+    .vg-rate-btn {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .vg-rate-btn:hover { color: #fff; border-color: rgba(245, 158, 11, 0.4); }
+    .vg-rate-btn.active {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: #fbbf24;
+      color: #fbbf24;
+      font-weight: 800;
+    }
+    .vg-voice-info {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    /* ── Themed Floating Cinema Subtitle HUD on 3D Viewport ── */
+    .vg-subtitle-hud {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(88vw, 680px);
+      background: rgba(6, 10, 24, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      border-radius: 18px;
+      padding: 12px 18px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(245, 158, 11, 0.25);
+      z-index: 100000;
+      pointer-events: auto;
+      font-family: system-ui, -apple-system, sans-serif;
+      transition: all 0.25s ease;
+    }
+    .vg-hud-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .vg-hud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fbbf24;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .vg-hud-dot {
+      width: 6px;
+      height: 6px;
+      background: #fbbf24;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #fbbf24;
+      animation: vgDotPulse 1.2s infinite alternate;
+    }
+    @keyframes vgDotPulse {
+      0% { opacity: 0.4; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+    .vg-hud-title {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .vg-hud-close {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .vg-hud-close:hover {
+      color: #fff;
+      background: rgba(239, 68, 68, 0.35);
+      border-color: #ef4444;
+      transform: rotate(90deg);
+    }
+    .vg-hud-content {
+      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+      line-height: 1.55;
+      text-align: center;
+      color: #e2e8f0;
+      min-height: 2.6em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .vg-hud-content .vg-hud-word {
+      display: inline;
+      transition: color 0.12s ease, text-shadow 0.12s ease;
+      padding: 0 2px;
+    }
+    .vg-hud-content .vg-hud-word.active {
+      color: #ffd56b;
+      font-weight: 800;
+      text-shadow: 0 0 14px rgba(251, 191, 36, 0.8), 0 0 24px rgba(245, 158, 11, 0.4);
+    }
+    .vg-hud-content .vg-hud-word.spoken { color: #ffffff; opacity: 0.95; }
+    .vg-hud-content .vg-hud-word.pending { color: #64748b; opacity: 0.55; }
+
+    @media (max-width: 640px) {
+      .vg-panel {
+        right: 12px;
+        width: calc(100vw - 24px);
+        max-height: 82vh;
+      }
+      .voice-guide-fab {
+        bottom: 20px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        font-size: 1.25rem;
+      }
+      .vg-subtitle-hud {
+        width: calc(100vw - 28px);
+        bottom: 84px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" role="status" aria-live="polite">
+        <div class="loader-palace-icon">🏰</div>
+        <div class="loader-ring"></div>
+        <h2 class="loader-heading">Neermahal Palace</h2>
+        <p class="loader-sub">INITIALIZING 3D RUDRASAGAR LAKE WATER AND WEBXR PIPELINE</p>
+    </div>
+
+    <!-- 3D Canvas -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Hotspots Layer -->
+
+<div id="hotspots-container"></div>
+
+    <!-- HUD Layer -->
+    <div class="hud-layer">
+        <!-- Header -->
+        <header class="header-bar">
+            <div class="heritage-badge hud-interactive">
+                <div class="heritage-emblem">👑</div>
+                <div class="heritage-titles">
+                    <h1>Neermahal</h1>
+                    <p>1930 ROYAL WATER PALACE (TWIJILIKMA) • RUDRASAGAR LAKE, TRIPURA</p>
+                    <div class="heritage-provenance" style="margin-top:8px; padding:7px 12px; background:rgba(223, 167, 83, 0.12); border:1px solid rgba(223, 167, 83, 0.4); border-radius:8px; display:flex; flex-direction:column; gap:4px; font-size:10.5px; max-width:480px;">
+                        <div style="display:flex; justify-content:space-between; gap:10px; align-items:baseline;">
+                            <span style="color:#94a3b8; font-size:8.5px; text-transform:uppercase; letter-spacing:0.8px; font-weight:700;"><i class="fa-solid fa-monument" style="color:var(--gold);"></i> BUILT FOR:</span>
+                            <strong style="color:#ffd56b; text-align:right;">King Bir Bikram Kishore Manikya Bahadur (Manikya Dynasty)</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; gap:10px; align-items:baseline;">
+                            <span style="color:#94a3b8; font-size:8.5px; text-transform:uppercase; letter-spacing:0.8px; font-weight:700;"><i class="fa-solid fa-location-dot" style="color:var(--gold);"></i> PICKED FROM:</span>
+                            <span style="color:#e2e8f0; text-align:right;">Melaghar, Tripura (Rudrasagar Lake Island)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions hud-interactive">
+                <a href="index.html?guest=true" class="btn-glass" title="Return to Geospatial Map">
+                    <span>🌐</span> India Map
+                </a>
+                <a href="jageshwar-vr.html" class="btn-glass" title="Visit Jageshwar Dham VR">
+                    <span>🛕</span> Jageshwar VR
+                </a>
+
+<button type="button" class="btn-glass" id="btn-audio" title="Toggle Royal Ambiance Audio">
+                    <span id="audio-icon">🔊</span> <span id="audio-text">Ambiance ON</span>
+                </button>
+                <button type="button" class="btn-glass" id="btn-deepotsav" title="Release Floating Lotus Diyas">
+                    <span>🪔</span> Deepotsav
+                </button>
+            </div>
+        </header>
+
+        <!-- Help Toast -->
+        <div class="help-toast" id="help-toast">
+            Drag to Orbit • Scroll to Zoom • Click Hotspots to Inspect Architecture
+        </div>
+
+        <!-- Bottom Controls -->
+        <footer class="bottom-deck">
+            <!-- Atmosphere & Lighting Control -->
+            <div class="control-pod hud-interactive">
+                <div class="pod-label">
+                    <span>Rudrasagar Atmosphere</span>
+                    <span id="atmosphere-desc">Golden Sunset (Godhuli)</span>
+                </div>
+                <div class="chip-group">
+                    <button type="button" class="chip-btn active" data-time="sunset">🌅 Sunset Gold</button>
+                    <button type="button" class="chip-btn" data-time="day">☀️ Radiant Sun</button>
+                    <button type="button" class="chip-btn" data-time="night">🌙 Moonlit Lake</button>
+                    <button type="button" class="chip-btn" data-time="monsoon">🌧️ Monsoon Mist</button>
+                </div>
+            </div>
+
+            <!-- View Modes -->
+            <div class="view-dock hud-interactive">
+                <button type="button" class="btn-glass active" id="mode-orbit" title="Orbit Inspection Mode">
+                    <span>🔄</span> Orbit
+                </button>
+                <button type="button" class="btn-glass" id="mode-boat" title="Royal Lake Boat Tour">
+                    <span>🚤</span> Boat Cruise
+                </button>
+                <button type="button" class="btn-glass" id="mode-drone" title="Cinematic Aerial Drone Flyover">
+                    <span>🚁</span> Drone Tour
+                </button>
+                <button type="button" class="btn-glass" id="mode-walk" title="Palace Terrace Walk">
+                    <span>🚶</span> Terrace Walk
+                </button>
+            </div>
+
+            <!-- WebXR AR & VR Buttons -->
+            <div class="immersive-actions hud-interactive">
+                <button type="button" class="btn-glass xr-highlight-btn" id="btn-enter-vr"
+                    title="Enter Immersive WebXR VR">
+                    <span>🥽</span> Enter VR Mode
+                </button>
+                <button type="button" class="btn-glass" id="btn-enter-ar" title="Enter Augmented Reality Mode">
+                    <span>📱</span> Enter AR Mode
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Lore Modal -->
+    <div class="lore-modal-backdrop" id="lore-modal">
+        <div class="lore-card">
+            <button type="button" class="lore-close-btn" id="lore-close">✕</button>
+            <div class="lore-header-tag" id="lore-category">Water Palace Architecture</div>
+            <h2 class="lore-title" id="lore-title">Andar Mahal (Western Residential Wing)</h2>
+            <p class="lore-body" id="lore-desc">
+                The private royal residence of Maharaja Bir Bikram Kishore Manikya, featuring exquisite marble Jharokha
+                balconies, cool cross-ventilated arcades, and private lake-facing terraces.
+            </p>
+            <div class="lore-meta-grid">
+                <div class="meta-box">
+                    <small>Built Period</small>
+                    <span id="lore-era">1930–1938 CE</span>
+                </div>
+                <div class="meta-box">
+                    <small>Architectural Style</small>
+                    <span id="lore-style">Indo-Saracenic AND Mughal-Tripuri</span>
+                </div>
+                <div class="meta-box">
+                    <small>Significance</small>
+                    <span id="lore-sig">Largest Lake Palace in Eastern India</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // ── Database of Architectural Hotspots ──────────────────────────────
+        const HOTSPOTS_DATA = [
+            {
+                id: 'central-dome',
+                name: 'Central Onion Dome & Durbar',
+                pos: new THREE.Vector3(0, 11, 0),
+                category: 'Imperial Centerpiece',
+                era: '1930–1938 CE',
+                style: 'Mughal Fluted Dome & Drum',
+                significance: 'Royal Reception & Council Hall',
+                desc: 'The colossal central fluted dome rises majestically above the palace plinth. Underneath lies the high-ceilinged Durbar hall with arched clerestory windows designed to capture refreshing lake breezes from all four directions.'
+            },
+            {
+                id: 'andar-mahal',
+                name: 'Andar Mahal (Royal Chambers)',
+                pos: new THREE.Vector3(-14, 6.5, 0),
+                category: 'Private Residence',
+                era: 'Manikya Dynasty',
+                style: 'Indo-Islamic Royal Apartments',
+                significance: 'Maharaja & Maharani Quarters',
+                desc: 'The western wing, known as Andar Mahal, served as the private residence for Maharaja Bir Bikram Kishore Manikya and the royal family. It features shaded colonnaded verandas, intricate marble Jharokha balconies, and private scenic lake outlooks.'
+            },
+            {
+                id: 'rang-mahal',
+                name: 'Rang Mahal & Open-Air Stage',
+                pos: new THREE.Vector3(14, 5.5, 0),
+                category: 'Cultural Theatre',
+                era: 'Commissioned 1930',
+                style: 'Arcaded Pavilion & Amphitheatre',
+                significance: 'Music, Drama & Dance Stage',
+                desc: 'The eastern wing features an open-air theatrical court where classical Manipuri dance, Tripuri folk music, and light & sound spectacles were performed for royal guests as torches and lanterns reflected across the water.'
+            },
+            {
+                id: 'boat-ghat',
+                name: 'Royal Water Gate & Motorboat Dock',
+                pos: new THREE.Vector3(0, 1.2, 7.5),
+                category: 'Hydrological Architecture',
+                era: 'Constructed by Martin & Burn Co.',
+                style: 'Arched Covered Waterway',
+                significance: 'Direct Lake Boat Access',
+                desc: 'Because Neermahal sits surrounded entirely by Rudrasagar Lake, arrival was exclusively by boat. This grand stepped ghat and arched canal allowed royal motorboats to dock directly inside the covered lower slipways of the palace.'
+            },
+            {
+                id: 'minaret-tower',
+                name: 'Octagonal Minaret Watchtower',
+                pos: new THREE.Vector3(-22, 9, 7),
+                category: 'Defensive & Aesthetic Kiosk',
+                era: '1930s Engineering',
+                style: 'Chhatri & Jaali Kiosk',
+                significance: 'Lake Horizon Panorama',
+                desc: 'One of the four lofty octagonal corner towers that punctuate the palace perimeter. Fitted with delicate stone Jaali lattice screens and domed pavilions, these towers guarded the royal approaches across the 6 sq km lake.'
+            },
+            {
+                id: 'terrace-garden',
+                name: 'Mughal Terrace Courtyard & Fountain',
+                pos: new THREE.Vector3(0, 3.2, 2),
+                category: 'Palace Landscape',
+                era: 'Charbagh Inspired',
+                style: 'Geometric Terraced Water Garden',
+                significance: 'Cooling Microclimate',
+                desc: 'Built on the elevated plinth, the formal terrace garden features red sandstone paved pathways, geometric lawns, and an active central marble fountain that sprays mist to cool the royal veranda.'
+            },
+            {
+                id: 'rudrasagar-wetland',
+                name: 'Rudrasagar Lake (Ramsar Wetland)',
+                pos: new THREE.Vector3(26, 1.5, 18),
+                category: 'Ramsar Wetland Ecology',
+                era: 'Designated Ramsar Site #1572',
+                style: 'Freshwater Hydro-ecosystem',
+                significance: 'Winter Haven for Migratory Birds',
+                desc: 'Rudrasagar Lake (Twijilikma) spans over 6.1 sq km and is fed by three hill streams. It provides habitat for endangered bird species, rare water lilies (Nymphaea lotus), and freshwater carp fish.'
+            }
+        ];
+
+        // ── Global State ────────────────────────────────────────────────────
+        let scene, camera, renderer, controls;
+        let palaceGroup, waterMesh, waterMaterial, natureGroup, boatsGroup, floatingDiyasGroup;
+        let ambientLight, dirLight, hemisphereLight, waterReflectionLight, skyMesh;
+        let currentMode = 'orbit';
+        let isAudioPlaying = false;
+        let audioCtx, droneAngle = 0, boatAngle = 0;
+        let activeHotspots = [];
+        let diyaObjects = [], fountainParticles = [], migratoryBirds = [];
+
+        // ── Initialization ──────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            initScene();
+            buildRudrasagarLake();
+            buildNeermahalPalace();
+            buildRoyalBoats();
+            buildWetlandFloraAndFauna();
+            setupLighting();
+            setupHotspots();
+            setupControls();
+            setupAtmosphereSwitcher();
+            setupAudioSynth();
+            setupWebXR();
+            setupEventListeners();
+            animate();
+
+            // Dismiss Loading Screen
+            setTimeout(() => {
+                const loader = document.getElementById('loading-screen');
+                if (loader) loader.classList.add('fade-out');
+            }, 1000);
+        });
+
+        // ── 3D Scene & Camera Setup ─────────────────────────────────────────
+        function initScene() {
+            const canvas = document.getElementById('webgl-canvas');
+            scene = new THREE.Scene();
+
+            scene.background = new THREE.Color(0x060c18);
+            scene.fog = new THREE.FogExp2(0x060c18, 0.012);
+
+            camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 1200);
+            camera.position.set(28, 16, 32);
+
+            renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true,
+                alpha: false,
+                powerPreference: 'high-performance'
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.25;
+            renderer.xr.enabled = true;
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 - 0.01; // Don't clip under lake
+            controls.minDistance = 4;
+            controls.maxDistance = 110;
+            controls.target.set(0, 4.5, 0);
+
+            palaceGroup = new THREE.Group();
+            natureGroup = new THREE.Group();
+            boatsGroup = new THREE.Group();
+            floatingDiyasGroup = new THREE.Group();
+
+            scene.add(palaceGroup);
+            scene.add(natureGroup);
+            scene.add(boatsGroup);
+            scene.add(floatingDiyasGroup);
+
+            buildSkyDome();
+        }
+
+        // ── Sky Dome with Panoramic Atmosphere ──────────────────────────────
+        function buildSkyDome() {
+            const skyGeo = new THREE.SphereGeometry(450, 32, 24);
+            const textureLoader = new THREE.TextureLoader();
+
+            // Load generated Neermahal background texture
+            textureLoader.load('neermahal_bg.jpg', (tex) => {
+                tex.mapping = THREE.EquirectangularReflectionMapping;
+                const skyMat = new THREE.MeshBasicMaterial({
+                    map: tex,
+                    side: THREE.BackSide
+                });
+                skyMesh = new THREE.Mesh(skyGeo, skyMat);
+                scene.add(skyMesh);
+            }, undefined, () => {
+                // Fallback gradient sky
+                const skyMat = new THREE.MeshBasicMaterial({
+                    color: 0x16263e,
+                    side: THREE.BackSide
+                });
+                skyMesh = new THREE.Mesh(skyGeo, skyMat);
+                scene.add(skyMesh);
+            });
+        }
+
+        // ── Procedural Textures & Materials ─────────────────────────────────
+        function createMarblePlasterTexture(base = '#f4efe6', speckle = '#dfd8cc', trim = '#c8bc9b') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = base;
+            ctx.fillRect(0, 0, 512, 512);
+
+            // Fine stucco and marble grain
+            for (let i = 0; i < 20000; i++) {
+                const x = Math.random() * 512;
+                const y = Math.random() * 512;
+                ctx.fillStyle = Math.random() > 0.6 ? speckle : 'rgba(0,0,0,0.03)';
+                ctx.fillRect(x, y, Math.random() * 3 + 1, Math.random() * 2 + 1);
+            }
+
+            // Decorative horizontal architectural stringcourses
+            ctx.fillStyle = trim;
+            for (let y = 0; y < 512; y += 64) {
+                ctx.fillRect(0, y, 512, 2);
+                ctx.fillRect(0, y + 4, 512, 1);
+            }
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(2, 2);
+            return tex;
+        }
+
+        function createRedSandstoneTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#9e462d';
+            ctx.fillRect(0, 0, 512, 512);
+
+            // Mughal geometric paving pattern
+            ctx.strokeStyle = '#6e2a18';
+            ctx.lineWidth = 3;
+            const size = 32;
+            for (let x = 0; x < 512; x += size) {
+                for (let y = 0; y < 512; y += size) {
+                    ctx.strokeRect(x, y, size, size);
+                    ctx.fillStyle = (x + y) % (size * 2) === 0 ? '#aa4f35' : '#933e26';
+                    ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+                }
+            }
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(4, 4);
+            return tex;
+        }
+
+        const marbleTexture = createMarblePlasterTexture();
+        const sandstoneTexture = createRedSandstoneTexture();
+
+        const palaceWhiteMaterial = new THREE.MeshStandardMaterial({
+            map: marbleTexture,
+            color: 0xf5f1eb,
+            roughness: 0.45,
+            metalness: 0.08,
+            bumpMap: marbleTexture,
+            bumpScale: 0.03
+        });
+
+        const terracottaMaterial = new THREE.MeshStandardMaterial({
+            map: sandstoneTexture,
+            color: 0xb85638,
+            roughness: 0.65,
+            metalness: 0.15
+        });
+
+        const goldKalashMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffca3a,
+            roughness: 0.25,
+            metalness: 0.88,
+            emissive: 0x443000,
+            emissiveIntensity: 0.2
+        });
+
+        const darkWoodMaterial = new THREE.MeshStandardMaterial({
+            color: 0x2e1e16,
+            roughness: 0.7,
+            metalness: 0.1
+        });
+
+        const greenLawnMaterial = new THREE.MeshStandardMaterial({
+            color: 0x224c2e,
+            roughness: 0.9,
+            metalness: 0.05
+        });
+
+        // ── Rudrasagar Lake & Water Shader ──────────────────────────────────
+        function buildRudrasagarLake() {
+            const waterGeo = new THREE.PlaneGeometry(350, 350, 128, 128);
+            waterGeo.rotateX(-Math.PI / 2);
+
+            // Water material with high specular Fresnel and movement
+            waterMaterial = new THREE.MeshStandardMaterial({
+                color: 0x082b3a,
+                roughness: 0.08,
+                metalness: 0.92,
+                transparent: true,
+                opacity: 0.92
+            });
+
+            waterMesh = new THREE.Mesh(waterGeo, waterMaterial);
+            waterMesh.position.y = 0;
+            waterMesh.receiveShadow = true;
+            scene.add(waterMesh);
+
+            // Lake Bed & Distant Wetland Shoreline Ring
+            const shoreGeo = new THREE.RingGeometry(55, 240, 64, 8);
+            shoreGeo.rotateX(-Math.PI / 2);
+            const pos = shoreGeo.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i);
+                const z = pos.getZ(i);
+                const dist = Math.sqrt(x * x + z * z);
+                if (dist > 65) {
+                    const elevation = Math.sin(x * 0.04) * Math.cos(z * 0.04) * 8 + (dist - 65) * 0.18;
+                    pos.setY(i, elevation - 0.2);
+                }
+            }
+            shoreGeo.computeVertexNormals();
+
+            const shoreMat = new THREE.MeshStandardMaterial({
+                color: 0x122a1c,
+                roughness: 0.95
+            });
+            const shore = new THREE.Mesh(shoreGeo, shoreMat);
+            shore.position.y = -0.1;
+            shore.receiveShadow = true;
+            scene.add(shore);
+        }
+
+        // ── Procedural Architecture: Neermahal Water Palace ─────────────────
+        function buildNeermahalPalace() {
+            // 1. Massive Palace Substructure Plinth (Rising from Lake)
+            const plinthGeo = new THREE.BoxGeometry(48, 2.4, 20);
+            const plinth = new THREE.Mesh(plinthGeo, terracottaMaterial);
+            plinth.position.y = 1.2;
+            plinth.castShadow = true;
+            plinth.receiveShadow = true;
+            palaceGroup.add(plinth);
+
+            // Plinth Stone Balustrade (Marble Railing around water perimeter)
+            const railMat = new THREE.MeshStandardMaterial({ color: 0xded8cc, roughness: 0.5 });
+            const railFrontGeo = new THREE.BoxGeometry(47.6, 0.6, 0.4);
+            const railFront = new THREE.Mesh(railFrontGeo, railMat);
+            railFront.position.set(0, 2.7, 9.8);
+            palaceGroup.add(railFront);
+
+            const railBack = railFront.clone();
+            railBack.position.z = -9.8;
+            palaceGroup.add(railBack);
+
+            // 2. Central Durbar Hall & Grand Onion Dome
+            const centralBlockGeo = new THREE.BoxGeometry(16, 6.5, 14);
+            const centralBlock = new THREE.Mesh(centralBlockGeo, palaceWhiteMaterial);
+            centralBlock.position.set(0, 2.4 + 3.25, 0);
+            centralBlock.castShadow = true;
+            centralBlock.receiveShadow = true;
+            palaceGroup.add(centralBlock);
+
+            // Front Portico with Triple Poly-lobed Mughal Arches
+            for (let i = -1; i <= 1; i++) {
+                const archGeo = new THREE.CylinderGeometry(1.6, 1.6, 3.8, 16, 1, false, 0, Math.PI);
+                archGeo.rotateZ(Math.PI / 2);
+                const arch = new THREE.Mesh(archGeo, terracottaMaterial);
+                arch.position.set(i * 4.2, 5.2, 7.05);
+                palaceGroup.add(arch);
+
+                // Portico Columns
+                const colGeo = new THREE.CylinderGeometry(0.32, 0.38, 4.2, 12);
+                const colLeft = new THREE.Mesh(colGeo, palaceWhiteMaterial);
+                colLeft.position.set(i * 4.2 - 1.4, 4.5, 7.1);
+                colLeft.castShadow = true;
+                palaceGroup.add(colLeft);
+
+                const colRight = colLeft.clone();
+                colRight.position.x = i * 4.2 + 1.4;
+                palaceGroup.add(colRight);
+            }
+
+            // Dome Octagonal Drum Base
+            const drumGeo = new THREE.CylinderGeometry(5.2, 5.6, 2.2, 8);
+            const drum = new THREE.Mesh(drumGeo, palaceWhiteMaterial);
+            drum.position.set(0, 2.4 + 6.5 + 1.1, 0);
+            drum.castShadow = true;
+            palaceGroup.add(drum);
+
+            // Fluted Mughal Onion Dome
+            const domeGeo = new THREE.SphereGeometry(5.2, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.62);
+            domeGeo.scale(1, 1.35, 1);
+            const dome = new THREE.Mesh(domeGeo, palaceWhiteMaterial);
+            dome.position.set(0, drum.position.y + 1.1, 0);
+            dome.castShadow = true;
+            palaceGroup.add(dome);
+
+            // Golden Kalash & Lotus Finial
+            const kalashGeo = new THREE.SphereGeometry(0.75, 16, 16);
+            const kalash = new THREE.Mesh(kalashGeo, goldKalashMaterial);
+            kalash.position.set(0, dome.position.y + 6.2, 0);
+            palaceGroup.add(kalash);
+
+            const spireGeo = new THREE.ConeGeometry(0.2, 1.8, 12);
+            const spire = new THREE.Mesh(spireGeo, goldKalashMaterial);
+            spire.position.set(0, kalash.position.y + 1.2, 0);
+            palaceGroup.add(spire);
+
+            // 3. Andar Mahal (Western Wing - Residential)
+            const andarBlockGeo = new THREE.BoxGeometry(13, 5.2, 12);
+            const andarBlock = new THREE.Mesh(andarBlockGeo, palaceWhiteMaterial);
+            andarBlock.position.set(-14.5, 2.4 + 2.6, 0);
+            andarBlock.castShadow = true;
+            andarBlock.receiveShadow = true;
+            palaceGroup.add(andarBlock);
+
+            // Andar Mahal Jharokha Balconies
+            createJharokhaBalcony(new THREE.Vector3(-14.5, 6.2, 6.2), 0);
+            createJharokhaBalcony(new THREE.Vector3(-20.5, 6.2, 0), -Math.PI / 2);
+
+            // Rooftop Chhatri Pavilions on Andar Mahal
+            createChhatriKiosk(new THREE.Vector3(-14.5, 2.4 + 5.2, 3.5), 1.8);
+            createChhatriKiosk(new THREE.Vector3(-14.5, 2.4 + 5.2, -3.5), 1.8);
+
+            // 4. Rang Mahal (Eastern Wing - Performance Stage)
+            const rangBlockGeo = new THREE.BoxGeometry(13, 4.8, 12);
+            const rangBlock = new THREE.Mesh(rangBlockGeo, palaceWhiteMaterial);
+            rangBlock.position.set(14.5, 2.4 + 2.4, 0);
+            rangBlock.castShadow = true;
+            rangBlock.receiveShadow = true;
+            palaceGroup.add(rangBlock);
+
+            // Open Colonnaded Amphitheater on East Terrace
+            const stageGeo = new THREE.BoxGeometry(9, 0.4, 7);
+            const stage = new THREE.Mesh(stageGeo, terracottaMaterial);
+            stage.position.set(14.5, 2.4 + 4.8 + 0.2, 0);
+            palaceGroup.add(stage);
+
+            createChhatriKiosk(new THREE.Vector3(14.5, 2.4 + 4.8, 3.5), 1.8);
+            createChhatriKiosk(new THREE.Vector3(14.5, 2.4 + 4.8, -3.5), 1.8);
+
+            // 5. 4 Grand Octagonal Corner Minarets / Watchtowers
+            const towerPositions = [
+                new THREE.Vector3(-23, 0, 9),
+                new THREE.Vector3(-23, 0, -9),
+                new THREE.Vector3(23, 0, 9),
+                new THREE.Vector3(23, 0, -9)
+            ];
+
+            towerPositions.forEach(pos => {
+                createCornerMinaret(pos);
+            });
+
+            // 6. Royal Water Steps & Covered Boat Dock Canal
+            createWaterGhats();
+
+            // 7. Mughal Terrace Garden & Central Water Fountain
+            createTerraceGarden();
+
+            // 8. Palace Night Floodlights & Lanterns
+            createPalaceLanterns();
+        }
+
+        // ── Corner Minaret Watchtower ───────────────────────────────────────
+        function createCornerMinaret(pos) {
+            const tower = new THREE.Group();
+            tower.position.copy(pos);
+
+            // Octagonal Tower Shaft
+            const shaftGeo = new THREE.CylinderGeometry(1.6, 2.0, 11, 8);
+            const shaft = new THREE.Mesh(shaftGeo, palaceWhiteMaterial);
+            shaft.position.y = 5.5;
+            shaft.castShadow = true;
+            shaft.receiveShadow = true;
+            tower.add(shaft);
+
+            // Terracotta Belt Trim
+            const trimGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.6, 8);
+            const trim = new THREE.Mesh(trimGeo, terracottaMaterial);
+            trim.position.y = 7.5;
+            tower.add(trim);
+
+            // Projecting Balcony with Corbels
+            const balcGeo = new THREE.CylinderGeometry(2.3, 1.8, 0.8, 8);
+            const balc = new THREE.Mesh(balcGeo, palaceWhiteMaterial);
+            balc.position.y = 11.2;
+            balc.castShadow = true;
+            tower.add(balc);
+
+            // Domed Chhatri Top Kiosk
+            const kioskColsGeo = new THREE.CylinderGeometry(0.18, 0.18, 2.2, 8);
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const col = new THREE.Mesh(kioskColsGeo, palaceWhiteMaterial);
+                col.position.set(Math.cos(angle) * 1.5, 12.5, Math.sin(angle) * 1.5);
+                tower.add(col);
+            }
+
+            // Kiosk Dome
+            const kDomeGeo = new THREE.SphereGeometry(1.7, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.6);
+            kDomeGeo.scale(1, 1.3, 1);
+            const kDome = new THREE.Mesh(kDomeGeo, palaceWhiteMaterial);
+            kDome.position.y = 13.6;
+            kDome.castShadow = true;
+            tower.add(kDome);
+
+            // Golden Finial
+            const kFinial = new THREE.Mesh(new THREE.ConeGeometry(0.15, 1.0, 8), goldKalashMaterial);
+            kFinial.position.y = 15.6;
+            tower.add(kFinial);
+
+            palaceGroup.add(tower);
+        }
+
+        // ── Jharokha (Ornate Cantilevered Balcony) ──────────────────────────
+        function createJharokhaBalcony(position, rotationY) {
+            const jharokha = new THREE.Group();
+            jharokha.position.copy(position);
+            jharokha.rotation.y = rotationY;
+
+            const baseGeo = new THREE.CylinderGeometry(1.4, 0.8, 1.2, 6, 1, false, 0, Math.PI);
+            baseGeo.rotateY(Math.PI / 2);
+            const base = new THREE.Mesh(baseGeo, terracottaMaterial);
+            base.position.y = -0.6;
+            jharokha.add(base);
+
+            const screenGeo = new THREE.CylinderGeometry(1.4, 1.4, 1.4, 6, 1, true, 0, Math.PI);
+            screenGeo.rotateY(Math.PI / 2);
+            const screen = new THREE.Mesh(screenGeo, palaceWhiteMaterial);
+            screen.position.y = 0.6;
+            jharokha.add(screen);
+
+            const canopyGeo = new THREE.ConeGeometry(1.7, 0.9, 6, 1, false, 0, Math.PI);
+            canopyGeo.rotateY(Math.PI / 2);
+            const canopy = new THREE.Mesh(canopyGeo, palaceWhiteMaterial);
+            canopy.position.y = 1.6;
+            jharokha.add(canopy);
+
+            palaceGroup.add(jharokha);
+        }
+
+        // ── Chhatri (Domed Kiosk Pavilion) ──────────────────────────────────
+        function createChhatriKiosk(position, radius = 1.8) {
+            const kiosk = new THREE.Group();
+            kiosk.position.copy(position);
+
+            const colGeo = new THREE.CylinderGeometry(0.15, 0.15, 2.2, 8);
+            for (let i = 0; i < 4; i++) {
+                const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
+                const col = new THREE.Mesh(colGeo, palaceWhiteMaterial);
+                col.position.set(Math.cos(angle) * (radius * 0.65), 1.1, Math.sin(angle) * (radius * 0.65));
+                kiosk.add(col);
+            }
+
+            const domeGeo = new THREE.SphereGeometry(radius * 0.85, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.6);
+            domeGeo.scale(1, 1.2, 1);
+            const dome = new THREE.Mesh(domeGeo, palaceWhiteMaterial);
+            dome.position.y = 2.4;
+            dome.castShadow = true;
+            kiosk.add(dome);
+
+            const finial = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.8, 8), goldKalashMaterial);
+            finial.position.y = 3.8;
+            kiosk.add(finial);
+
+            palaceGroup.add(kiosk);
+        }
+
+        // ── Water Ghats & Internal Boat Slip ────────────────────────────────
+        function createWaterGhats() {
+            const ghatsGroup = new THREE.Group();
+            ghatsGroup.position.set(0, 0, 10);
+
+            // Wide stepped stone stairs descending below water
+            const stepCount = 7;
+            for (let i = 0; i < stepCount; i++) {
+                const w = 18 - i * 0.6;
+                const stepGeo = new THREE.BoxGeometry(w, 0.35, 1.1);
+                const step = new THREE.Mesh(stepGeo, terracottaMaterial);
+                step.position.set(0, 2.4 - (i * 0.35), i * 0.9);
+                step.castShadow = true;
+                step.receiveShadow = true;
+                ghatsGroup.add(step);
+            }
+
+            // Mooring Bollards / Brass Ring Posts
+            const bollardGeo = new THREE.CylinderGeometry(0.2, 0.25, 0.8, 8);
+            const bollardL = new THREE.Mesh(bollardGeo, goldKalashMaterial);
+            bollardL.position.set(-8, 2.8, 1.2);
+            ghatsGroup.add(bollardL);
+
+            const bollardR = bollardL.clone();
+            bollardR.position.x = 8;
+            ghatsGroup.add(bollardR);
+
+            palaceGroup.add(ghatsGroup);
+        }
+
+        // ── Mughal Terrace Garden & Fountain ────────────────────────────────
+        function createTerraceGarden() {
+            const gardenGroup = new THREE.Group();
+            gardenGroup.position.set(0, 2.42, 2.5);
+
+            // Geometric Sandstone Parterre
+            const parterreL = new THREE.Mesh(new THREE.BoxGeometry(10, 0.05, 5), greenLawnMaterial);
+            parterreL.position.set(-13, 0.02, 0);
+            gardenGroup.add(parterreL);
+
+            const parterreR = new THREE.Mesh(new THREE.BoxGeometry(10, 0.05, 5), greenLawnMaterial);
+            parterreR.position.set(13, 0.02, 0);
+            gardenGroup.add(parterreR);
+
+            // Central Marble Lotus Fountain
+            const poolGeo = new THREE.CylinderGeometry(2.4, 2.6, 0.5, 16);
+            const pool = new THREE.Mesh(poolGeo, palaceWhiteMaterial);
+            pool.position.y = 0.25;
+            gardenGroup.add(pool);
+
+            const innerWaterGeo = new THREE.CircleGeometry(2.2, 16);
+            innerWaterGeo.rotateX(-Math.PI / 2);
+            const innerWater = new THREE.Mesh(innerWaterGeo, waterMaterial);
+            innerWater.position.y = 0.48;
+            gardenGroup.add(innerWater);
+
+            const centerTier = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.4, 0.9, 12), palaceWhiteMaterial);
+            centerTier.position.y = 0.7;
+            gardenGroup.add(centerTier);
+
+            // Fountain Mist Particles
+            const particleCount = 45;
+            const sprayGeo = new THREE.BufferGeometry();
+            const sprayPos = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                sprayPos[i] = (Math.random() - 0.5) * 0.4;
+                sprayPos[i + 1] = Math.random() * 2.2 + 0.8;
+                sprayPos[i + 2] = (Math.random() - 0.5) * 0.4;
+            }
+            sprayGeo.setAttribute('position', new THREE.BufferAttribute(sprayPos, 3));
+            const sprayMat = new THREE.PointsMaterial({
+                color: 0xa0e7e5,
+                size: 0.2,
+                transparent: true,
+                opacity: 0.75
+            });
+            const fountainSpray = new THREE.Points(sprayGeo, sprayMat);
+            gardenGroup.add(fountainSpray);
+            fountainParticles.push(fountainSpray);
+
+            palaceGroup.add(gardenGroup);
+        }
+
+        // ── Palace Lanterns & Warm Lighting ─────────────────────────────────
+        function createPalaceLanterns() {
+            const lanternPositions = [
+                new THREE.Vector3(-6, 3.8, 9.8),
+                new THREE.Vector3(6, 3.8, 9.8),
+                new THREE.Vector3(0, 5.8, 7.2),
+                new THREE.Vector3(-14.5, 4.5, 6.2),
+                new THREE.Vector3(14.5, 4.5, 6.2),
+                new THREE.Vector3(-22, 11.5, 9),
+                new THREE.Vector3(22, 11.5, 9)
+            ];
+
+            lanternPositions.forEach(pos => {
+                const lanternGroup = new THREE.Group();
+                lanternGroup.position.copy(pos);
+
+                const frameGeo = new THREE.CylinderGeometry(0.2, 0.15, 0.45, 6);
+                const frameMat = new THREE.MeshStandardMaterial({ color: 0x966826, metalness: 0.8 });
+                const frame = new THREE.Mesh(frameGeo, frameMat);
+                lanternGroup.add(frame);
+
+                const bulbGeo = new THREE.SphereGeometry(0.12, 8, 8);
+                const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffb733 });
+                const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+                lanternGroup.add(bulb);
+
+                const light = new THREE.PointLight(0xff9922, 1.4, 9, 2);
+                lanternGroup.add(light);
+
+                diyaObjects.push({ light, bulb, baseIntensity: 1.4 });
+                palaceGroup.add(lanternGroup);
+            });
+        }
+
+        // ── Royal Wooden Boats (Nauka / Dinghy) ──────────────────────────────
+        function buildRoyalBoats() {
+            const boat1 = createWoodenBoat(true);
+            boat1.position.set(-10, 0.15, 14);
+            boat1.rotation.y = Math.PI * 0.15;
+            boatsGroup.add(boat1);
+
+            const boat2 = createWoodenBoat(false);
+            boat2.position.set(12, 0.15, 16);
+            boat2.rotation.y = -Math.PI * 0.25;
+            boatsGroup.add(boat2);
+        }
+
+        function createWoodenBoat(hasCanopy = true) {
+            const boat = new THREE.Group();
+
+            // Boat Hull (Curved Wooden Dinghy)
+            const hullGeo = new THREE.BoxGeometry(2.4, 0.8, 6);
+            const hull = new THREE.Mesh(hullGeo, darkWoodMaterial);
+            hull.position.y = 0.3;
+            hull.castShadow = true;
+            boat.add(hull);
+
+            // Pointed Prow & Stern
+            const prowGeo = new THREE.ConeGeometry(1.2, 1.8, 4);
+            prowGeo.rotateX(Math.PI / 2);
+            prowGeo.scale(1, 0.5, 1);
+            const prow = new THREE.Mesh(prowGeo, darkWoodMaterial);
+            prow.position.set(0, 0.35, 3.8);
+            boat.add(prow);
+
+            const stern = prow.clone();
+            stern.rotation.y = Math.PI;
+            stern.position.set(0, 0.35, -3.8);
+            boat.add(stern);
+
+            // Royal Crimson Canopy
+            if (hasCanopy) {
+                const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.6, 6);
+                for (let x of [-0.9, 0.9]) {
+                    for (let z of [-1.5, 1.5]) {
+                        const pole = new THREE.Mesh(poleGeo, goldKalashMaterial);
+                        pole.position.set(x, 1.3, z);
+                        boat.add(pole);
+                    }
+                }
+
+                const canopyGeo = new THREE.BoxGeometry(2.2, 0.12, 3.4);
+                const canopyMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.6 });
+                const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+                canopy.position.set(0, 2.1, 0);
+                boat.add(canopy);
+
+                // Boat Lantern
+                const bLantern = new THREE.PointLight(0xffaa33, 1.2, 6, 2);
+                bLantern.position.set(0, 1.8, 1.6);
+                boat.add(bLantern);
+            }
+
+            return boat;
+        }
+
+        // ── Wetland Flora (Lotus Pads, Lilies) & Flying Egrets ──────────────
+        function buildWetlandFloraAndFauna() {
+            // Floating Lotus Clusters around water steps
+            const padGeo = new THREE.CircleGeometry(0.7, 12);
+            padGeo.rotateX(-Math.PI / 2);
+            const padMat = new THREE.MeshStandardMaterial({ color: 0x1f5d34, roughness: 0.8 });
+
+            const flowerGeo = new THREE.ConeGeometry(0.25, 0.4, 8);
+            const flowerMat = new THREE.MeshBasicMaterial({ color: 0xff69b4 });
+
+            for (let i = 0; i < 35; i++) {
+                const cluster = new THREE.Group();
+                const angle = Math.random() * Math.PI * 2;
+                const r = 14 + Math.random() * 22;
+                const x = Math.cos(angle) * r;
+                const z = Math.sin(angle) * r;
+
+                cluster.position.set(x, 0.04, z);
+
+                const pad = new THREE.Mesh(padGeo, padMat);
+                const pScale = 0.6 + Math.random() * 0.6;
+                pad.scale.set(pScale, 1, pScale);
+                cluster.add(pad);
+
+                if (Math.random() > 0.4) {
+                    const flower = new THREE.Mesh(flowerGeo, flowerMat);
+                    flower.position.set((Math.random() - 0.5) * 0.3, 0.2, (Math.random() - 0.5) * 0.3);
+                    cluster.add(flower);
+                }
+
+                natureGroup.add(cluster);
+            }
+
+            // Distant Palm & Bamboo Trees along Wetland Shores
+            const palmTrunkGeo = new THREE.CylinderGeometry(0.25, 0.45, 12, 6);
+            const palmTrunkMat = new THREE.MeshStandardMaterial({ color: 0x3d2718, roughness: 0.9 });
+            const palmCrownGeo = new THREE.ConeGeometry(4.5, 3.5, 6);
+            const palmCrownMat = new THREE.MeshStandardMaterial({ color: 0x13381e, roughness: 0.75, flatShading: true });
+
+            for (let i = 0; i < 48; i++) {
+                const tree = new THREE.Group();
+                const angle = (i / 48) * Math.PI * 2 + Math.random() * 0.1;
+                const radius = 70 + Math.random() * 45;
+                const tx = Math.cos(angle) * radius;
+                const tz = Math.sin(angle) * radius;
+
+                const trunk = new THREE.Mesh(palmTrunkGeo, palmTrunkMat);
+                trunk.position.y = 6;
+                trunk.rotation.z = (Math.random() - 0.5) * 0.15;
+                tree.add(trunk);
+
+                const crown = new THREE.Mesh(palmCrownGeo, palmCrownMat);
+                crown.position.y = 12;
+                tree.add(crown);
+
+                const scale = 0.7 + Math.random() * 0.6;
+                tree.scale.set(scale, scale, scale);
+                tree.position.set(tx, -0.2, tz);
+                natureGroup.add(tree);
+            }
+
+            // Migratory Egrets / White Birds Flying
+            const birdGeo = new THREE.BufferGeometry();
+            const birdVertices = new Float32Array([
+                0, 0, 0.4,
+                0.8, 0.2, -0.2,
+                0, 0, -0.4,
+                -0.8, 0.2, -0.2
+            ]);
+            const birdIndices = [0, 1, 2, 0, 2, 3];
+            birdGeo.setAttribute('position', new THREE.BufferAttribute(birdVertices, 3));
+            birdGeo.setIndex(birdIndices);
+            birdGeo.computeVertexNormals();
+
+            const birdMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+
+            for (let i = 0; i < 6; i++) {
+                const bird = new THREE.Mesh(birdGeo, birdMat);
+                const bAngle = (i / 6) * Math.PI * 2;
+                bird.position.set(Math.cos(bAngle) * 35, 18 + i * 1.5, Math.sin(bAngle) * 35);
+                scene.add(bird);
+                migratoryBirds.push({ mesh: bird, speed: 0.008 + i * 0.002, angle: bAngle, radius: 35 + i * 4, baseHeight: 18 + i * 1.5 });
+            }
+        }
+
+        // ── Lighting & Atmosphere Systems ──────────────────────────────────
+        function setupLighting() {
+            ambientLight = new THREE.AmbientLight(0x324058, 0.9);
+            scene.add(ambientLight);
+
+            hemisphereLight = new THREE.HemisphereLight(0x56789a, 0x16241a, 0.8);
+            scene.add(hemisphereLight);
+
+            dirLight = new THREE.DirectionalLight(0xffb766, 1.8);
+            dirLight.position.set(50, 40, 35);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.camera.near = 10;
+            dirLight.shadow.camera.far = 180;
+            dirLight.shadow.camera.left = -50;
+            dirLight.shadow.camera.right = 50;
+            dirLight.shadow.camera.top = 50;
+            dirLight.shadow.camera.bottom = -50;
+            dirLight.shadow.bias = -0.0005;
+            scene.add(dirLight);
+
+            waterReflectionLight = new THREE.PointLight(0xffaa44, 1.5, 45, 2);
+            waterReflectionLight.position.set(0, 1.5, 15);
+            scene.add(waterReflectionLight);
+
+            setAtmosphere('sunset');
+        }
+
+        function setAtmosphere(mode) {
+            const label = document.getElementById('atmosphere-desc');
+
+            if (mode === 'sunset') {
+                scene.background.set(0x1a0e1c);
+                scene.fog.color.set(0x1a0e1c);
+                scene.fog.density = 0.012;
+                ambientLight.color.set(0x4a3248);
+                ambientLight.intensity = 0.9;
+                dirLight.color.set(0xff9944);
+                dirLight.position.set(60, 22, 40);
+                dirLight.intensity = 2.2;
+                waterMaterial.color.set(0x0c2538);
+                renderer.toneMappingExposure = 1.25;
+                if (label) label.innerText = 'Golden Sunset (Godhuli)';
+            } else if (mode === 'day') {
+                scene.background.set(0x224870);
+                scene.fog.color.set(0x224870);
+                scene.fog.density = 0.009;
+                ambientLight.color.set(0x7898b8);
+                ambientLight.intensity = 1.3;
+                dirLight.color.set(0xfffaf0);
+                dirLight.position.set(30, 70, 30);
+                dirLight.intensity = 2.4;
+                waterMaterial.color.set(0x0a4254);
+                renderer.toneMappingExposure = 1.35;
+                if (label) label.innerText = 'Radiant Sun (Raja Pratibha)';
+            } else if (mode === 'night') {
+                scene.background.set(0x03060e);
+                scene.fog.color.set(0x03060e);
+                scene.fog.density = 0.016;
+                ambientLight.color.set(0x142036);
+                ambientLight.intensity = 0.45;
+                dirLight.color.set(0x6a8ecc);
+                dirLight.position.set(-35, 50, -35);
+                dirLight.intensity = 1.1;
+                waterMaterial.color.set(0x030d18);
+                renderer.toneMappingExposure = 1.45;
+                if (label) label.innerText = 'Moonlit Lake (Chandra Ratri)';
+            } else if (mode === 'monsoon') {
+                scene.background.set(0x142226);
+                scene.fog.color.set(0x142226);
+                scene.fog.density = 0.024;
+                ambientLight.color.set(0x284242);
+                ambientLight.intensity = 0.85;
+                dirLight.color.set(0xa0c0c0);
+                dirLight.position.set(10, 45, 10);
+                dirLight.intensity = 1.2;
+                waterMaterial.color.set(0x082628);
+                renderer.toneMappingExposure = 1.15;
+                if (label) label.innerText = 'Monsoon Mist (Barsha)';
+            }
+        }
+
+        // ── 3D Interactive Hotspots UI ──────────────────────────────────────
+        function setupHotspots() {
+            const container = document.getElementById('hotspots-container');
+            container.innerHTML = '';
+            activeHotspots = [];
+
+            HOTSPOTS_DATA.forEach(data => {
+                const tag = document.createElement('div');
+                tag.className = 'hotspot-tag';
+                tag.innerText = data.name;
+                tag.onclick = (e) => {
+                    e.stopPropagation();
+                    showLoreModal(data);
+                    focusHotspot(data.pos);
+                };
+                container.appendChild(tag);
+                activeHotspots.push({ element: tag, pos: data.pos });
+            });
+        }
+
+        function updateHotspotPositions() {
+            const tempV = new THREE.Vector3();
+            activeHotspots.forEach(item => {
+                tempV.copy(item.pos);
+                tempV.project(camera);
+
+                if (tempV.z > 1) {
+                    item.element.style.display = 'none';
+                    return;
+                }
+
+                item.element.style.display = 'flex';
+                const x = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-(tempV.y * 0.5) + 0.5) * window.innerHeight;
+                item.element.style.left = `${x}px`;
+                item.element.style.top = `${y}px`;
+            });
+        }
+
+        function focusHotspot(targetPos) {
+            if (controls) {
+                controls.target.copy(targetPos);
+            }
+        }
+
+        function showLoreModal(data) {
+            document.getElementById('lore-category').innerText = data.category;
+            document.getElementById('lore-title').innerText = data.name;
+            document.getElementById('lore-desc').innerText = data.desc;
+            document.getElementById('lore-era').innerText = data.era;
+            document.getElementById('lore-style').innerText = data.style;
+            document.getElementById('lore-sig').innerText = data.significance;
+
+            document.getElementById('lore-modal').classList.add('active');
+            playWaterChimeSound();
+        }
+
+        // ── Web Audio API Synthesizer (Royal Indian Classical Ambiance) ─────
+        function setupAudioSynth() {
+            const btnAudio = document.getElementById('btn-audio');
+            btnAudio.addEventListener('click', () => {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                isAudioPlaying = !isAudioPlaying;
+                document.getElementById('audio-icon').innerText = isAudioPlaying ? '🔊' : '🔇';
+                document.getElementById('audio-text').innerText = isAudioPlaying ? 'Ambiance ON' : 'Ambiance OFF';
+
+                if (isAudioPlaying) {
+                    startRagaDrone();
+                    playWaterChimeSound();
+                }
+            });
+        }
+
+        function startRagaDrone() {
+            if (!audioCtx || !isAudioPlaying) return;
+
+            // Tanpura & Flute harmonic resonance
+            const notes = [146.83, 220.00, 293.66, 440.00]; // D-major/Kalyani raga chord
+            notes.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+
+                osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(450, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.04 / (i + 1), audioCtx.currentTime);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+            });
+        }
+
+        function playWaterChimeSound() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const chimeNotes = [587.33, 739.99, 880.00, 1174.66];
+            chimeNotes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+
+                const duration = 2.8 - (idx * 0.4);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime + idx * 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + idx * 0.08 + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(audioCtx.currentTime + idx * 0.08);
+                osc.stop(audioCtx.currentTime + idx * 0.08 + duration);
+            });
+        }
+
+        // ── Deepotsav Floating Diya Offering Ceremony ───────────────────────
+        function triggerDeepotsavCeremony() {
+            playWaterChimeSound();
+
+            const diyaCount = 18;
+            for (let i = 0; i < diyaCount; i++) {
+                const diya = new THREE.Group();
+                const angle = Math.random() * Math.PI * 2;
+                const r = 12 + Math.random() * 20;
+
+                diya.position.set(Math.cos(angle) * r, 0.08, Math.sin(angle) * r);
+
+                // Lotus Leaf Base
+                const leaf = new THREE.Mesh(
+                    new THREE.CircleGeometry(0.35, 8),
+                    new THREE.MeshBasicMaterial({ color: 0x2d6a4f, side: THREE.DoubleSide })
+                );
+                leaf.rotation.x = -Math.PI / 2;
+                diya.add(leaf);
+
+                // Golden Diya Cup & Flame
+                const flame = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 8, 8),
+                    new THREE.MeshBasicMaterial({ color: 0xffaa00 })
+                );
+                flame.position.y = 0.12;
+                diya.add(flame);
+
+                const light = new THREE.PointLight(0xff8800, 1.2, 8, 2);
+                light.position.y = 0.2;
+                diya.add(light);
+
+                floatingDiyasGroup.add(diya);
+                diyaObjects.push({ light, flame, baseIntensity: 1.2 });
+            }
+
+            const toast = document.getElementById('help-toast');
+            if (toast) {
+                toast.innerText = '🪔 Deepotsav Offered: 18 Sacred Floating Lotus Lamps Drifting on Rudrasagar Lake';
+                toast.style.color = '#ffd580';
+                setTimeout(() => {
+                    toast.innerText = 'Drag to Orbit • Scroll to Zoom • Click Hotspots to Inspect Architecture';
+                    toast.style.color = 'var(--text-muted)';
+                }, 4500);
+            }
+        }
+
+        // ── WebXR Implementation (AR / VR Support) ──────────────────────────
+        function setupWebXR() {
+            const btnVR = document.getElementById('btn-enter-vr');
+            const btnAR = document.getElementById('btn-enter-ar');
+
+            if ('xr' in navigator) {
+                navigator.xr.isSessionSupported('immersive-vr').then(supported => {
+                    if (supported) {
+                        btnVR.addEventListener('click', () => {
+                            navigator.xr.requestSession('immersive-vr').then(session => {
+                                renderer.xr.setSession(session);
+                            });
+                        });
+                    } else {
+                        btnVR.addEventListener('click', enterCardboardVRMode);
+                    }
+                }).catch(() => {
+                    btnVR.addEventListener('click', enterCardboardVRMode);
+                });
+
+                navigator.xr.isSessionSupported('immersive-ar').then(supported => {
+                    if (supported) {
+                        btnAR.addEventListener('click', () => {
+                            navigator.xr.requestSession('immersive-ar').then(session => {
+                                renderer.xr.setSession(session);
+                            });
+                        });
+                    } else {
+                        btnAR.addEventListener('click', () => {
+                            alert('WebXR AR pass-through active for supported devices. Scaled tabletop preview loaded.');
+                            camera.position.set(0, 5, 14);
+                            controls.target.set(0, 2.5, 0);
+                        });
+                    }
+                });
+            } else {
+                btnVR.addEventListener('click', enterCardboardVRMode);
+                btnAR.addEventListener('click', () => {
+                    alert('WebXR AR requires a compatible WebXR mobile device. Tabletop inspection mode active.');
+                });
+            }
+        }
+
+        function enterCardboardVRMode() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+            camera.position.set(0, 3, 10);
+            controls.target.set(0, 3, 0);
+
+            const toast = document.getElementById('help-toast');
+            if (toast) {
+                toast.innerText = '👓 Mobile VR Mode Active: Gyroscopic orientation ready.';
+            }
+        }
+
+        // ── View Modes & Controls ───────────────────────────────────────────
+        function setupControls() {
+            const btnOrbit = document.getElementById('mode-orbit');
+            const btnBoat = document.getElementById('mode-boat');
+            const btnDrone = document.getElementById('mode-drone');
+            const btnWalk = document.getElementById('mode-walk');
+
+            btnOrbit.onclick = () => switchMode('orbit', btnOrbit);
+            btnBoat.onclick = () => switchMode('boat', btnBoat);
+            btnDrone.onclick = () => switchMode('drone', btnDrone);
+            btnWalk.onclick = () => switchMode('walk', btnWalk);
+
+            document.getElementById('btn-deepotsav').onclick = triggerDeepotsavCeremony;
+
+            document.getElementById('lore-close').onclick = () => {
+                document.getElementById('lore-modal').classList.remove('active');
+            };
+            document.getElementById('lore-modal').onclick = (e) => {
+                if (e.target.id === 'lore-modal') {
+                    document.getElementById('lore-modal').classList.remove('active');
+                }
+            };
+        }
+
+        function switchMode(mode, activeBtn) {
+            currentMode = mode;
+            document.querySelectorAll('.view-dock .btn-glass').forEach(b => b.classList.remove('active'));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (mode === 'orbit') {
+                controls.enabled = true;
+                camera.position.set(28, 16, 32);
+                controls.target.set(0, 4.5, 0);
+            } else if (mode === 'boat') {
+                controls.enabled = false;
+                boatAngle = 0;
+            } else if (mode === 'drone') {
+                controls.enabled = false;
+                droneAngle = 0;
+            } else if (mode === 'walk') {
+                controls.enabled = true;
+                camera.position.set(0, 3.2, 8.5);
+                controls.target.set(0, 4, 0);
+            }
+        }
+
+        function setupAtmosphereSwitcher() {
+            const chips = document.querySelectorAll('.chip-btn');
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    chips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    setAtmosphere(chip.dataset.time);
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // ── Main Render & Animation Loop ────────────────────────────────────
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render() {
+            const time = performance.now() * 0.001;
+
+            // 1. Water Ripple & Reflection Wave Physics
+            if (waterMesh) {
+                const pos = waterMesh.geometry.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const u = pos.getX(i);
+                    const v = pos.getZ(i);
+                    const wave = Math.sin(u * 0.12 + time * 1.5) * Math.cos(v * 0.12 + time * 1.2) * 0.14
+                        + Math.sin(u * 0.25 - time * 2) * 0.06;
+                    pos.setY(i, wave);
+                }
+                pos.needsUpdate = true;
+            }
+
+            // 2. Royal Boats Bobbing with Buoyancy
+            boatsGroup.children.forEach((boat, idx) => {
+                boat.position.y = 0.15 + Math.sin(time * 2 + idx) * 0.06;
+                boat.rotation.z = Math.sin(time * 1.5 + idx) * 0.02;
+                boat.rotation.x = Math.cos(time * 1.2 + idx) * 0.02;
+            });
+
+            // 3. Floating Diyas Drift on Waves
+            floatingDiyasGroup.children.forEach((diya, idx) => {
+                diya.position.y = 0.08 + Math.sin(time * 2.2 + idx * 0.5) * 0.05;
+                diya.rotation.y += 0.005;
+            });
+
+            // 4. Lantern & Diya Light Flickering
+            diyaObjects.forEach(d => {
+                const flicker = Math.sin(time * 14 + Math.random() * 2) * 0.25 + (Math.random() * 0.08);
+                d.light.intensity = Math.max(0.3, d.baseIntensity + flicker);
+            });
+
+            // 5. Fountain Spray Droplets Physics
+            fountainParticles.forEach(fp => {
+                const pos = fp.geometry.attributes.position;
+                for (let i = 1; i < pos.count * 3; i += 3) {
+                    pos.array[i] += 0.035;
+                    pos.array[i - 1] += (Math.random() - 0.5) * 0.02;
+                    pos.array[i + 1] += (Math.random() - 0.5) * 0.02;
+                    if (pos.array[i] > 3.2) {
+                        pos.array[i] = 0.8;
+                        pos.array[i - 1] = (Math.random() - 0.5) * 0.3;
+                        pos.array[i + 1] = (Math.random() - 0.5) * 0.3;
+                    }
+                }
+                pos.needsUpdate = true;
+            });
+
+            // 6. Flying Migratory Egrets Path
+            migratoryBirds.forEach(bird => {
+                bird.angle += bird.speed;
+                bird.mesh.position.x = Math.cos(bird.angle) * bird.radius;
+                bird.mesh.position.z = Math.sin(bird.angle) * bird.radius;
+                bird.mesh.position.y = bird.baseHeight + Math.sin(time * 3 + bird.angle) * 1.2;
+                bird.mesh.rotation.y = -bird.angle + Math.PI / 2;
+                // Wing flapping animation
+                const wing = Math.sin(time * 12 + bird.angle) * 0.3;
+                bird.mesh.rotation.z = wing;
+            });
+
+            // 7. Navigation Modes
+            if (currentMode === 'boat') {
+                boatAngle += 0.003;
+                const bRadius = 26 + Math.sin(boatAngle * 2) * 4;
+                camera.position.x = Math.cos(boatAngle) * bRadius;
+                camera.position.z = Math.sin(boatAngle) * bRadius;
+                camera.position.y = 1.8 + Math.sin(time * 2) * 0.12; // Water-level view
+                camera.lookAt(0, 5, 0);
+            } else if (currentMode === 'drone') {
+                droneAngle += 0.0035;
+                const dRadius = 38 + Math.sin(droneAngle * 2) * 6;
+                const dHeight = 22 + Math.cos(droneAngle * 1.5) * 6;
+                camera.position.x = Math.cos(droneAngle) * dRadius;
+                camera.position.z = Math.sin(droneAngle) * dRadius;
+                camera.position.y = dHeight;
+                camera.lookAt(0, 5, 0);
+            } else if (controls && controls.enabled) {
+                controls.update();
+            }
+
+            // 8. Update Hotspot UI Positions
+            updateHotspotPositions();
+
+            renderer.render(scene, camera);
+        }
+    </script>
+
+  
+  
+
+
+  
+
+
+  
+
+
+  
+  
+
+  
+  
+
+  
+  
+  </div>
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+  
+  </div>
+
+  
+  
+
+  
+
+
+  </div>
+
+  
+  </div>
+
+  
+  </div>
+
+  
+  </div>
+
+  
+  </div>
+
+  
+  <!-- ══ VOICE GUIDE TRIGGER (ICON-ONLY MICROPHONE, SAME POSITION) ══ -->
+  <button id="btn-voice-guide" class="voice-guide-fab" title="Heritage Voice Guide" aria-label="Heritage Voice Guide">
+    <i class="fa-solid fa-microphone-lines"></i>
+  </button>
+
+  <!-- ══ MULTILINGUAL VOICE GUIDE (DOCKED RIGHT-SIDE MIDDLE POSITION) ══ -->
+  <div id="voice-guide-panel" class="vg-panel" role="dialog" aria-label="Heritage Voice Guide">
+    <div class="vg-panel-inner">
+      <div class="vg-header">
+        <div class="vg-header-left">
+          <div class="vg-icon-badge">🎧</div>
+          <div class="vg-title-group">
+            <h3>Neermahal Water Palace · Audio Guide</h3>
+            <p>500+ Word Scholarly Narrative &amp; Subtitle Tracker</p>
+          </div>
+        </div>
+        <div class="vg-header-right">
+          <button type="button" class="vg-hud-toggle-btn active" id="vg-hud-toggle" title="Toggle Live Subtitle HUD">
+            <i class="fa-solid fa-closed-captioning"></i> HUD: ON
+          </button>
+          <button type="button" class="vg-close-btn" id="vg-close" aria-label="Close Voice Guide">✕</button>
+        </div>
+      </div>
+
+      <!-- Language selector pills -->
+      <div class="vg-lang-row" id="vg-lang-row"></div>
+
+      <!-- Script Box with Subtitle Tracker -->
+      <div class="vg-script-box" id="vg-script-box" aria-live="polite"></div>
+
+      <!-- Audio Controls -->
+      <div class="vg-controls">
+        <button class="vg-btn vg-play" id="vg-play">
+          <span id="vg-play-icon">▶</span>
+          <span id="vg-play-label">Play Audio Guide</span>
+        </button>
+        <button class="vg-btn vg-stop" id="vg-stop" disabled>
+          <span>⏹ Stop</span>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="vg-progress-wrap">
+        <div class="vg-progress-bar" id="vg-progress-bar"></div>
+      </div>
+
+      <!-- Speed Timeline (Noticeable Auditory Rates for English & All Languages) -->
+      <div class="vg-bottom-row">
+        <div class="vg-rate-row">
+          <span>Speed:</span>
+          <button class="vg-rate-btn" data-rate="0.75">0.75x</button>
+          <button class="vg-rate-btn active" data-rate="1.0">1.0x</button>
+          <button class="vg-rate-btn" data-rate="1.25">1.25x</button>
+          <button class="vg-rate-btn" data-rate="1.5">1.5x</button>
+          <button class="vg-rate-btn" data-rate="1.75">1.75x</button>
+        </div>
+        <div class="vg-voice-info" id="vg-voice-info">🔊 Voice Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ THEMED FLOATING CINEMA SUBTITLE HUD ON 3D VIEWPORT ══ -->
+  <div id="vg-subtitle-hud" class="vg-subtitle-hud" style="display:none;" aria-live="polite">
+    <div class="vg-hud-header">
+      <div class="vg-hud-badge">
+        <span class="vg-hud-dot"></span>
+        <span id="vg-hud-lang-label">ENGLISH</span>
+      </div>
+      <div class="vg-hud-title">Neermahal Water Palace · Synchronized Subtitles</div>
+      <button type="button" class="vg-hud-close" id="vg-hud-close" title="Hide Subtitles">✕</button>
+    </div>
+    <div class="vg-hud-content" id="vg-hud-content">
+      Click Play to start the voice guide narration with live synchronized subtitles.
+    </div>
+  </div>
+
+  <script id="vg-engine-script">
+  (function () {
+    "use strict";
+
+    var SITE_NAME = "Neermahal Water Palace";
+    var SUPPORTED_LANGS = [
+      { key: 'en', code: 'en-IN', fallback: 'en-US', label: 'English', flag: '🇬🇧' },
+      { key: 'hi', code: 'hi-IN', fallback: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+      { key: 'ta', code: 'ta-IN', fallback: 'ta', label: 'தமிழ்', flag: '🇮🇳' },
+      { key: 'te', code: 'te-IN', fallback: 'te', label: 'తెలుగు', flag: '🇮🇳' },
+      { key: 'bn', code: 'bn-IN', fallback: 'bn', label: 'বাংলা', flag: '🇮🇳' },
+      { key: 'mr', code: 'mr-IN', fallback: 'mr', label: 'मराठी', flag: '🇮🇳' },
+      { key: 'gu', code: 'gu-IN', fallback: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+      { key: 'kn', code: 'kn-IN', fallback: 'kn', label: 'ಕನ್ನಡ', flag: '🇮🇳' },
+      { key: 'ml', code: 'ml-IN', fallback: 'ml', label: 'മലയാളം', flag: '🇮🇳' },
+      { key: 'pa', code: 'pa-IN', fallback: 'pa', label: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+      { key: 'fr', code: 'fr-FR', fallback: 'fr', label: 'Français', flag: '🇫🇷' },
+      { key: 'es', code: 'es-ES', fallback: 'es', label: 'Español', flag: '🇪🇸' },
+      { key: 'de', code: 'de-DE', fallback: 'de', label: 'Deutsch', flag: '🇩🇪' },
+      { key: 'ja', code: 'ja-JP', fallback: 'ja', label: '日本語', flag: '🇯🇵' },
+      { key: 'zh', code: 'zh-CN', fallback: 'zh', label: '中文', flag: '🇨🇳' }
+    ];
+
+    var VG_SCRIPTS = {"en": "Welcome to Neermahal Water Palace, rising gracefully in the center of the vast Rudrasagar Lake in Melaghar, Tripura. Built between 1930 and 1938 CE by Maharaja Bir Bikram Kishore Manikya Bahadur, the architect of modern Tripura, Neermahal is the largest water palace in Eastern India and one of only two lake palaces in the country. Designed by the British firm Martin and Burn, the palace showcases an enchanting blend of Hindu Rajput palace architecture and Mughal ornamental pavilions. The complex is divided into the royal residential quarters (Andar Mahal) on the western side and open-air performance terraces and gardens on the east, connected by boat landings. Reflecting against the serene waters of Rudrasagar Lake, Neermahal stands as an extraordinary harmony of natural ecology and royal architectural splendour. Through YUGMA, we invite you to discover the royal elegance and scenic beauty that make Neermahal one of Tripura's most treasured heritage landmarks. Thank you for exploring the heritage of Tripura with YUGMA.", "hi": "त्रिपुरा के मेलाघर में विशाल रुद्रसागर झील के मध्य स्थित नीरमहल जल महल में आपका स्वागत है। 1930 और 1938 ईस्वी के बीच आधुनिक त्रिपुरा के निर्माता महाराजा बीर बिक्रम किशोर माणिक्य बहादुर द्वारा निर्मित नीरमहल पूर्वी भारत का सबसे बड़ा जल महल है और देश के केवल दो झील महलों में से एक है। ब्रिटिश फर्म मार्टिन एंड बर्न द्वारा डिजाइन किया गया यह महल हिंदू राजपूत और मुगल स्थापत्य शैलियों का एक मनमोहक संगम है। महल के दो मुख्य भाग हैं: पश्चिमी हिस्से में शाही निवास 'अंदर महल' और पूर्वी हिस्से में सांस्कृतिक कार्यक्रमों के लिए खुले मंच व उद्यान। युग्म (YUGMA) के माध्यम से, हम आपको नीरमहल की शाही सुंदरता और इतिहास को जानने के लिए आमंत्रित करते हैं। युग्म के साथ त्रिपुरा की मनोहारी विरासत का अनुभव करने के लिए धन्यवाद।", "ta": "திரிபுராவின் ருத்ரசாகர் ஏரியின் நடுவே கம்பீரமாக அமைந்துள்ள நீர்மஹால் அரண்மனைக்கு உங்களை வரவேற்கிறோம். கிழக்கு இந்தியாவின் மிகப்பெரிய நீர் அரண்மனை இதுவாகும். யுக்மா (YUGMA) வழியாக திரிபுராவின் அழகிய பாரம்பரியத்தை அறிந்ததற்கு நன்றி.", "te": "త్రిపురలోని రుద్రసాగర్ సరస్సు మధ్యలో ఉన్న నీర్‌మహల్ జల భవనానికి స్వాగతం. తూర్పు భారతదేశంలోనే అతిపెద్ద నీటి రాజభవనం ఇది. యుగ్మ (YUGMA) ద్వారా త్రిపుర వారసత్వాన్ని దర్శించినందుకు ధన్యవాదాలు.", "bn": "ত্রিপুরার মেলাঘরের রুদ্রসাগর হ্রদের মাঝে অবস্থিত মনোরম নীরমহল জলপ্রাসাদে আপনাকে স্বাগত। মহারাজ বীর বিক্রম কিশোর মাণিক্য বাহাদুর কর্তৃক নির্মিত এই প্রাসাদটি পূর্ব ভারতের বৃহত্তম জলমহল। যুগ্ম (YUGMA)-এর সাথে ত্রিপুরার এই অনুপম রাজপ্রাসাদ দর্শন করার জন্য ধন্যবাদ।", "mr": "त्रिपुरातील रुद्रसागर सरोवराच्या मधोमध वसलेल्या 'नीरमहल' जलमहालामध्ये आपले सहर्ष स्वागत आहे! पूर्व भारतातील हा सर्वात मोठा जलमहल असून राजपूत आणि मुघल स्थापत्यकलेचा अप्रतिम मिलाफ आहे. युग्मच्या (YUGMA) माध्यमातून त्रिपुराच्या या विलोभनीय वारशाचा अनुभव घेतल्याबद्दल मनःपूर्वक धन्यवाद!", "gu": "ત્રિપુરાના રુદ્રસાગર સરોવર વચ્ચે શોભતા નીરમહલ જલમહેલ ખાતે આપનું હાર્દિક સ્વાગત છે. પૂર્વ ભારતનો આ સૌથી મોટો જળમહેલ રાજપૂત અને મુઘલ શૈલીનું સંગમસ્થાન છે. યુગ્મ (YUGMA) સાથે ત્રિપુરાના અદભુત વારસાને જાણવા બદલ આભાર.", "kn": "ತ್ರಿಪುರಾದ ರುದ್ರಸಾಗರ ಸರೋವರದ ಮಧ್ಯದಲ್ಲಿರುವ ನೀರ್‌ಮಹಲ್ ಜಲ ಅರಮನೆಗೆ ಸುಸ್ವಾಗತ. ಇದು ಪೂರ್ವ ಭಾರತದ ಅತಿ ದೊಡ್ಡ ಜಲಮಹಲ್ ಆಗಿದೆ. ಯುಗ್ಮ (YUGMA) ಮೂಲಕ ತ್ರಿಪುರಾದ ಪರಂಪರೆಯನ್ನು ವೀಕ್ಷಿಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು.", "ml": "ത്രിപുരയിലെ രുദ്രസാഗർ തടാകത്തിന്റെ നടുവിൽ സ്ഥിതി ചെയ്യുന്ന നീർമഹൽ കൊട്ടാരത്തിലേക്ക് സ്വാഗതം. കിഴക്കേ ഇന്ത്യയിലെ ഏറ്റവും വലിയ ജല കൊട്ടാരമാണിത്. യുഗ്മ (YUGMA) യിലൂടെ ത്രിപുരയുടെ പൈതൃകം അടുത്തറിഞ്ഞതിന് നന്ദി.", "pa": "ਤ੍ਰਿਪੁਰਾ ਦੇ ਰੁਦਰਸਾਗਰ ਝੀਲ ਵਿੱਚ ਬਣੇ ਨੀਰਮਹਿਲ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ। ਪੂਰਬੀ ਭਾਰਤ ਦਾ ਇਹ ਸਭ ਤੋਂ ਵੱਡਾ ਜਲ ਮਹਿਲ ਬੇਹੱਦ ਖ਼ੂਬਸੂਰਤ ਹੈ। ਯੁਗਮ (YUGMA) ਨਾਲ ਤ੍ਰਿਪੁਰਾ ਦੀ ਵਿਰਾਸਤ ਨੂੰ ਜਾਣਨ ਲਈ ਧੰਨਵਾਦ।", "fr": "Bienvenue au Palais aquatique de Neermahal au Tripura, s'élevant majestueusement au milieu du lac Rudrasagar. Érigé dans les années 1930, il mêle avec grâce les styles rajput et moghol. À travers YUGMA, merci de découvrir le patrimoine enchanteur du Tripura.", "es": "Bienvenido al Palacio de Agua de Neermahal en Tripura, una joya flotante en el centro del lago Rudrasagar que aúna las arquitecturas rajput y mogola. A través de YUGMA, gracias por descubrir con nosotros el patrimonio de Tripura.", "de": "Willkommen im Wasserpalast Neermahal in Tripura, der sich malerisch im Rudrasagar-See erhebt und mogulische mit Rajput-Architektur verbindet. Vielen Dank, dass Sie Tripura mit YUGMA erkunden.", "ja": "トリプラ州のルドラサーガル湖に浮かぶ水上宮殿ニールマハル（Neermahal）へようこそ。東インド最大の水上宮殿であり、ヒンドゥー・ラージプート様式とムガル様式が見事に調和しています。YUGMAと共に、トリプラの美しい遺産をご体験いただき、誠にありがとうございます。", "zh": "欢迎来到特里普拉邦坐落于鲁德拉萨加尔湖中央的水上宫殿尼尔马哈尔（Neermahal）。建于20世纪30年代，是印度东部最大的水上宫殿，完美融合了拉杰普特与莫卧儿建筑艺术。感谢您通过 YUGMA 探索特里普拉邦秀丽非凡的水上文化遗产。"};
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // BULLETPROOF DUAL-ENGINE HERITAGE VOICE GUIDE
+    // Engine 1: Native Web Speech API (with Chromium cancel/resume race-condition fixes)
+    // Engine 2: High-Fidelity Cloud Audio (Authentic human pronunciation for all 15 languages)
+    // Engine 3: Offline Default Voice Fallback with 100% synchronized live subtitles
+    // ══════════════════════════════════════════════════════════════════════════
+
+    var currentLang = 'en';
+    var isPlaying = false;
+    var isPaused = false;
+    var selectedRate = 1.0;
+    var showHud = true;
+    var currentEngine = 'native'; // 'native' or 'cloud'
+    var audioSessionId = 0;
+
+    // Trackers
+    var wordSpans = [];
+    var allWords = [];
+    var activeWordIndex = 0;
+    var wordTimer = null;
+    var keepAliveTimer = null;
+    var synth = ('speechSynthesis' in window) ? window.speechSynthesis : null;
+    var currentUtterance = null;
+    var speechChunks = [];
+    var currentChunkIdx = 0;
+    var cloudChunks = [];
+    var currentAudioEl = null;
+
+    // DOM Elements
+    var playBtn = document.getElementById('vg-play');
+    var playIcon = document.getElementById('vg-play-icon');
+    var playLabel = document.getElementById('vg-play-label');
+    var stopBtn = document.getElementById('vg-stop');
+    var scriptBox = document.getElementById('vg-script-box');
+    var progressBar = document.getElementById('vg-progress-bar');
+    var voiceInfo = document.getElementById('vg-voice-info');
+    var panel = document.getElementById('voice-guide-panel');
+    var hud = document.getElementById('vg-subtitle-hud');
+    var hudContent = document.getElementById('vg-hud-content');
+    var hudLangLabel = document.getElementById('vg-hud-lang-label');
+    var hudToggleBtn = document.getElementById('vg-hud-toggle');
+    var hudCloseBtn = document.getElementById('vg-hud-close');
+    var mainTrigger = document.getElementById('btn-voice-guide');
+    var navTrigger = document.getElementById('btn-nav-voice-guide');
+    var closeBtn = document.getElementById('vg-close');
+
+    function detectLanguage() {
+      try {
+        var raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+        var code = raw.split('-')[0];
+        var match = SUPPORTED_LANGS.find(function (l) { return l.key === code; });
+        return match ? match.key : 'en';
+      } catch (e) {
+        return 'en';
+      }
+    }
+
+    function buildLangPills() {
+      var row = document.getElementById('vg-lang-row');
+      if (!row) return;
+      row.innerHTML = '';
+      SUPPORTED_LANGS.forEach(function (lang) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'vg-lang-pill' + (lang.key === currentLang ? ' active' : '');
+        btn.dataset.lang = lang.key;
+        btn.textContent = lang.flag + ' ' + lang.label;
+        btn.addEventListener('click', function () {
+          var wasPlaying = isPlaying;
+          stopGuide();
+          currentLang = lang.key;
+          document.querySelectorAll('.vg-lang-pill').forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          renderScript(currentLang);
+          updateEngineIndicator();
+          if (wasPlaying) {
+            setTimeout(function () { playGuide(0); }, 60);
+          }
+        });
+        row.appendChild(btn);
+      });
+    }
+
+    function escapeHtml(s) {
+      return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderScript(langKey) {
+      var sc = VG_SCRIPTS[langKey] || VG_SCRIPTS['en'] || '';
+      allWords = sc.trim().split(/\s+/);
+      if (scriptBox) {
+        scriptBox.innerHTML = allWords.map(function (w, i) {
+          return '<span class="vg-word" id="vg-w-' + i + '" data-idx="' + i + '">' + escapeHtml(w) + ' </span>';
+        }).join('');
+        wordSpans = allWords.map(function (_, i) {
+          return document.getElementById('vg-w-' + i);
+        });
+        scriptBox.scrollTop = 0;
+      }
+      if (hudContent && !isPlaying) {
+        hudContent.textContent = sc.substring(0, 140) + (sc.length > 140 ? '…' : '');
+      }
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      if (hudLangLabel && meta) {
+        hudLangLabel.textContent = meta.label.toUpperCase();
+      }
+      activeWordIndex = 0;
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function updateEngineIndicator(customStatus) {
+      if (!voiceInfo) return;
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      if (customStatus) {
+        voiceInfo.textContent = customStatus;
+      } else {
+        var hasNative = !!getNativeVoice(currentLang);
+        var icon = hasNative ? '🔊' : '☁️';
+        var type = hasNative ? 'Native' : 'Cloud';
+        voiceInfo.textContent = icon + ' ' + meta.label + ' (' + type + ' · ' + selectedRate + 'x)';
+      }
+    }
+
+    function updateHighlights(idx) {
+      activeWordIndex = Math.max(0, Math.min(idx, allWords.length - 1));
+
+      for (var i = 0; i < wordSpans.length; i++) {
+        var span = wordSpans[i];
+        if (!span) continue;
+        if (i < activeWordIndex) {
+          span.className = 'vg-word vg-word-spoken';
+        } else if (i === activeWordIndex) {
+          span.className = 'vg-word vg-word-active';
+          if (isPlaying && scriptBox) {
+            span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          span.className = 'vg-word';
+        }
+      }
+
+      if (hud && hudContent && showHud) {
+        var windowSize = 9;
+        var start = Math.max(0, activeWordIndex - 3);
+        var end = Math.min(allWords.length, start + windowSize);
+        if (end - start < windowSize && start > 0) {
+          start = Math.max(0, end - windowSize);
+        }
+        var hudHtml = '';
+        for (var k = start; k < end; k++) {
+          var cls = (k < activeWordIndex) ? 'vg-hud-word spoken' : (k === activeWordIndex ? 'vg-hud-word active' : 'vg-hud-word pending');
+          hudHtml += '<span class="' + cls + '">' + escapeHtml(allWords[k]) + ' </span>';
+        }
+        hudContent.innerHTML = hudHtml;
+      }
+
+      if (progressBar && allWords.length > 1) {
+        var pct = Math.min(100, Math.round((activeWordIndex / (allWords.length - 1)) * 100));
+        progressBar.style.width = pct + '%';
+      }
+    }
+
+    // ── Voice Detection ───────────────────────────────────────────────────
+    function getNativeVoice(langKey) {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      var targetCode = (meta.code || '').toLowerCase().replace('_', '-');
+      var fallbackCode = (meta.fallback || '').toLowerCase().replace('_', '-');
+      var langPrefix = meta.key.toLowerCase();
+
+      // 1. Exact match (e.g. en-IN or hi-IN)
+      var v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l === targetCode;
+      });
+      if (v) return v;
+
+      // 2. Prefix match (e.g. en or hi)
+      v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l.startsWith(langPrefix + '-') || l === langPrefix;
+      });
+      if (v) return v;
+
+      // 3. Fallback code match
+      if (fallbackCode) {
+        v = voices.find(function(item) {
+          var l = (item.lang || '').toLowerCase().replace('_', '-');
+          return l.startsWith(fallbackCode) || l === fallbackCode;
+        });
+        if (v) return v;
+      }
+      return null;
+    }
+
+    function getDefaultVoice() {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+      return voices.find(function(v) {
+        var l = (v.lang || '').toLowerCase();
+        return l.startsWith('en');
+      }) || voices[0];
+    }
+
+    // ── Chunk text for Cloud Audio (< 80 chars guarantees 200 OK) ─────────
+    function splitTextForCloud(text, maxChars) {
+      maxChars = maxChars || 80;
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var chunks = [];
+      var cur = '';
+      for (var i = 0; i < rawSentences.length; i++) {
+        var s = rawSentences[i].trim();
+        if (!s) continue;
+        if ((cur ? cur + ' ' + s : s).length <= maxChars) {
+          cur = cur ? cur + ' ' + s : s;
+        } else {
+          if (cur) chunks.push(cur.trim());
+          if (s.length > maxChars) {
+            var words = s.split(/\s+/);
+            var sub = '';
+            for (var j = 0; j < words.length; j++) {
+              var w = words[j];
+              if ((sub ? sub + ' ' + w : w).length <= maxChars) {
+                sub = sub ? sub + ' ' + w : w;
+              } else {
+                if (sub) chunks.push(sub.trim());
+                sub = w;
+              }
+            }
+            cur = sub;
+          } else {
+            cur = s;
+          }
+        }
+      }
+      if (cur && cur.trim()) chunks.push(cur.trim());
+      return chunks;
+    }
+
+    // ── Primary Play Controller ───────────────────────────────────────────
+    function playGuide(startFromWord) {
+      // Toggle Pause
+      if (isPlaying && !isPaused && arguments.length === 0) {
+        pauseGuide();
+        return;
+      }
+
+      // Toggle Resume
+      if (isPaused && arguments.length === 0) {
+        resumeGuide();
+        return;
+      }
+
+      startFromWord = typeof startFromWord === 'number' ? startFromWord : activeWordIndex;
+      startPlayback(startFromWord);
+    }
+
+    function pauseGuide() {
+      isPaused = true;
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.pause(); } catch (e) {}
+      } else if (synth) {
+        try { synth.pause(); } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      updatePlayControls(false, true);
+    }
+
+    function resumeGuide() {
+      isPaused = false;
+      isPlaying = true;
+      updatePlayControls(true, false);
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.play().catch(function(e) { console.warn('Resume notice:', e); }); } catch (e) {}
+      } else if (synth) {
+        try { synth.resume(); } catch (e) {}
+        resumeWordTicker();
+      }
+    }
+
+    function stopGuide() {
+      audioSessionId++;
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+
+      activeWordIndex = 0;
+      updatePlayControls(false, false);
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function onPlaybackFinished() {
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+      updatePlayControls(false, false);
+      if (allWords.length > 0) updateHighlights(allWords.length - 1);
+      if (progressBar) progressBar.style.width = '100%';
+      if (hudContent) {
+        hudContent.textContent = 'Voice guide narration complete. Click Play to listen again.';
+      }
+    }
+
+    function updatePlayControls(playing, paused) {
+      if (!playBtn) return;
+      if (playing) {
+        playBtn.classList.add('playing');
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playLabel) playLabel.textContent = 'Pause Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else if (paused) {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Resume Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Play Audio Guide';
+        if (stopBtn) stopBtn.disabled = true;
+      }
+    }
+
+    // ── Start Audio Playback Dispatcher ───────────────────────────────────
+    function startPlayback(startIdx) {
+      audioSessionId++;
+      var session = audioSessionId;
+
+      // Clean up previous speech
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+
+      activeWordIndex = Math.max(0, Math.min(startIdx, allWords.length - 1));
+      updateHighlights(activeWordIndex);
+
+      var remainingWords = allWords.slice(activeWordIndex);
+      var remainingText = remainingWords.join(' ');
+      if (!remainingText.trim()) {
+        onPlaybackFinished();
+        return;
+      }
+
+      isPlaying = true;
+      isPaused = false;
+      updatePlayControls(true, false);
+      if (hud && showHud) hud.style.display = 'block';
+
+      // ── Select Best Engine ──
+      var nativeVoice = getNativeVoice(currentLang);
+      if (nativeVoice) {
+        // Mode A: Native Web Speech API
+        currentEngine = 'native';
+        updateEngineIndicator();
+        playNativeStream(remainingText, activeWordIndex, nativeVoice, session);
+      } else {
+        // Mode B: High-Fidelity Cloud Audio
+        currentEngine = 'cloud';
+        updateEngineIndicator();
+        playCloudStream(remainingText, activeWordIndex, session);
+      }
+    }
+
+    // ── Engine 1: Native Speech Synthesis ─────────────────────────────────
+    function playNativeStream(text, wordOffset, voice, session) {
+      speechChunks = [];
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var curOffset = wordOffset;
+      rawSentences.forEach(function (s) {
+        var sTrim = s.trim();
+        if (!sTrim) return;
+        var count = sTrim.split(/\s+/).length;
+        speechChunks.push({
+          text: sTrim,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      startKeepAlive();
+      // 50ms delay avoids Chromium synchronous cancellation race condition
+      setTimeout(function () {
+        if (session !== audioSessionId || !isPlaying) return;
+        playNextNativeChunk(voice, session);
+      }, 50);
+    }
+
+    function playNextNativeChunk(voice, session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= speechChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = speechChunks[currentChunkIdx];
+      var utt = new SpeechSynthesisUtterance(chunk.text);
+      currentUtterance = utt; // prevent GC bug
+      utt.voice = voice;
+      utt.lang = voice.lang || 'en-US';
+      utt.rate = selectedRate;
+      utt.pitch = 1.0;
+      utt.volume = 1.0;
+
+      startWordTickerForChunk(chunk);
+
+      utt.onboundary = function (e) {
+        if (session !== audioSessionId) return;
+        if (e.name === 'word') {
+          var ratio = e.charIndex / (chunk.text.length || 1);
+          var wIdx = Math.min(chunk.wordCount - 1, Math.floor(ratio * chunk.wordCount));
+          updateHighlights(chunk.startWord + wIdx);
+        }
+      };
+
+      utt.onend = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < speechChunks.length && isPlaying) {
+          playNextNativeChunk(voice, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      utt.onerror = function (err) {
+        if (session !== audioSessionId) return;
+        if (err.error === 'canceled' || err.error === 'interrupted') return;
+        console.warn('Native speech notice:', err);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        // Fallback: If native speech encounters an error, switch to cloud audio
+        var remainingWords = allWords.slice(chunk.startWord);
+        if (remainingWords.length > 0 && isPlaying) {
+          currentEngine = 'cloud';
+          updateEngineIndicator();
+          playCloudStream(remainingWords.join(' '), chunk.startWord, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      try {
+        if (synth.paused) synth.resume();
+        synth.speak(utt);
+      } catch (e) {
+        console.warn('SpeechSynthesis speak notice:', e);
+      }
+    }
+
+    // ── Engine 2: Cloud Native Audio Stream ───────────────────────────────
+    function playCloudStream(text, wordOffset, session) {
+      var rawChunks = splitTextForCloud(text, 80);
+      cloudChunks = [];
+      var curOffset = wordOffset;
+      rawChunks.forEach(function (c) {
+        var count = c.trim().split(/\s+/).length;
+        cloudChunks.push({
+          text: c,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      playNextCloudChunk(session);
+    }
+
+    function playNextCloudChunk(session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= cloudChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = cloudChunks[currentChunkIdx];
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      var ttsLang = meta.key === 'zh' ? 'zh-CN' : meta.key;
+      var url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=' + ttsLang + '&client=tw-ob&q=' + encodeURIComponent(chunk.text);
+
+      if (!currentAudioEl) {
+        currentAudioEl = document.createElement('audio');
+        currentAudioEl.id = 'vg-cloud-audio-element';
+        currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+        currentAudioEl.style.display = 'none';
+        document.body.appendChild(currentAudioEl);
+      }
+
+      currentAudioEl.pause();
+      currentAudioEl.removeAttribute('src');
+      currentAudioEl.playbackRate = selectedRate;
+      currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+      currentAudioEl.src = url;
+
+      currentAudioEl.onplay = function () {
+        if (session !== audioSessionId) return;
+        startWordTickerForChunk(chunk);
+      };
+
+      currentAudioEl.ontimeupdate = function () {
+        if (session !== audioSessionId || !currentAudioEl.duration) return;
+        var progress = currentAudioEl.currentTime / currentAudioEl.duration;
+        var wIdx = Math.min(chunk.wordCount - 1, Math.floor(progress * chunk.wordCount));
+        updateHighlights(chunk.startWord + wIdx);
+      };
+
+      currentAudioEl.onended = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < cloudChunks.length && isPlaying) {
+          playNextCloudChunk(session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      currentAudioEl.onerror = function (e) {
+        if (session !== audioSessionId) return;
+        console.warn('Cloud audio notice, activating system voice fallback:', e);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        
+        // Mode C Fallback: If cloud audio fails (e.g. offline sandbox), use default English voice with subtitle sync
+        var defVoice = getDefaultVoice();
+        if (defVoice) {
+          currentEngine = 'native';
+          var isEnglishVoice = (defVoice.lang || '').toLowerCase().startsWith('en');
+          var textToSpeak = (isEnglishVoice && currentLang !== 'en')
+            ? (VG_SCRIPTS['en'] || '').trim()
+            : allWords.slice(chunk.startWord).join(' ');
+          
+          var metaLang = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+          var badgeText = (isEnglishVoice && currentLang !== 'en')
+            ? '🔊 English Narration (' + metaLang.label + ' Subtitles)'
+            : '🔊 System Audio (' + selectedRate + 'x)';
+          updateEngineIndicator(badgeText);
+          
+          playNativeStream(textToSpeak, (isEnglishVoice && currentLang !== 'en') ? 0 : chunk.startWord, defVoice, session);
+        } else {
+          currentChunkIdx++;
+          if (currentChunkIdx < cloudChunks.length && isPlaying) {
+            setTimeout(function() { playNextCloudChunk(session); }, 60);
+          } else {
+            onPlaybackFinished();
+          }
+        }
+      };
+
+      var p = currentAudioEl.play();
+      if (p !== undefined) {
+        p.catch(function (err) {
+          if (session !== audioSessionId) return;
+          console.warn('Audio play notice:', err);
+        });
+      }
+    }
+
+    // ── Word Ticker for Smooth Subtitle Tracking ──────────────────────────
+    function startWordTickerForChunk(chunk) {
+      if (wordTimer) clearInterval(wordTimer);
+      var wordsInChunk = chunk.wordCount;
+      var wpm = 145 * selectedRate;
+      var totalSec = (wordsInChunk / wpm) * 60;
+      var stepMs = Math.max(80, (totalSec * 1000) / Math.max(1, wordsInChunk));
+      var tick = 0;
+
+      wordTimer = setInterval(function () {
+        if (!isPlaying || isPaused) return;
+        tick++;
+        if (tick < wordsInChunk) {
+          updateHighlights(chunk.startWord + tick);
+        }
+      }, stepMs);
+    }
+
+    function resumeWordTicker() {
+      if (currentEngine === 'native' && currentChunkIdx < speechChunks.length) {
+        startWordTickerForChunk(speechChunks[currentChunkIdx]);
+      } else if (currentEngine === 'cloud' && currentChunkIdx < cloudChunks.length) {
+        startWordTickerForChunk(cloudChunks[currentChunkIdx]);
+      }
+    }
+
+    function startKeepAlive() {
+      if (keepAliveTimer) clearInterval(keepAliveTimer);
+      keepAliveTimer = setInterval(function () {
+        if (!isPlaying || isPaused || currentEngine !== 'native') return;
+        if (synth && synth.speaking) {
+          synth.pause();
+          synth.resume();
+        }
+      }, 10000);
+    }
+
+    // ── Interactive Themed HUD Toggle ─────────────────────────────────────
+    function toggleHud() {
+      showHud = !showHud;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.toggle('active', showHud);
+        hudToggleBtn.innerHTML = showHud 
+          ? '<i class="fa-solid fa-closed-captioning"></i> HUD: ON' 
+          : '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) {
+        hud.style.display = showHud ? 'block' : 'none';
+        if (showHud) {
+          updateHighlights(activeWordIndex);
+        }
+      }
+    }
+
+    // ── Open / Close Right-Side Dock Panel ────────────────────────────────
+    function openPanel() {
+      if (panel) panel.classList.add('open');
+      renderScript(currentLang);
+      updateEngineIndicator();
+    }
+
+    function closePanel() {
+      if (panel) panel.classList.remove('open');
+    }
+
+    // ── Event Bindings ────────────────────────────────────────────────────
+    if (playBtn) {
+      playBtn.addEventListener('click', function() {
+        // Unlock audio elements and speech synthesis on user interaction
+        if (!currentAudioEl) {
+          currentAudioEl = document.createElement('audio');
+          currentAudioEl.id = 'vg-cloud-audio-element';
+          currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+          currentAudioEl.style.display = 'none';
+          document.body.appendChild(currentAudioEl);
+        }
+        if (synth && synth.paused) {
+          try { synth.resume(); } catch (e) {}
+        }
+        playGuide();
+      });
+    }
+
+    if (stopBtn) stopBtn.addEventListener('click', function() { stopGuide(); });
+
+    if (mainTrigger) {
+      mainTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (navTrigger) {
+      navTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+    if (hudToggleBtn) hudToggleBtn.addEventListener('click', toggleHud);
+    if (hudCloseBtn) hudCloseBtn.addEventListener('click', function() {
+      showHud = false;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.remove('active');
+        hudToggleBtn.innerHTML = '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) hud.style.display = 'none';
+    });
+
+    // Rate button handling: IMMEDIATE audible change
+    document.querySelectorAll('.vg-rate-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.vg-rate-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedRate = parseFloat(btn.dataset.rate) || 1.0;
+        updateEngineIndicator();
+
+        if (currentEngine === 'cloud' && currentAudioEl) {
+          currentAudioEl.playbackRate = selectedRate;
+        } else if (currentEngine === 'native' && isPlaying && !isPaused) {
+          startPlayback(activeWordIndex);
+        }
+      });
+    });
+
+    // Click on words in script box to jump playback
+    if (scriptBox) {
+      scriptBox.addEventListener('click', function (e) {
+        var wordEl = e.target.closest('.vg-word');
+        if (!wordEl) return;
+        var idx = parseInt(wordEl.dataset.idx, 10);
+        if (!isNaN(idx)) {
+          updateHighlights(idx);
+          if (isPlaying) {
+            startPlayback(idx);
+          }
+        }
+      });
+    }
+
+    // Initialization
+    function init() {
+      currentLang = detectLanguage();
+      buildLangPills();
+      renderScript(currentLang);
+
+      function onVoicesLoaded() {
+        updateEngineIndicator();
+      }
+      if (synth) {
+        if (synth.getVoices().length > 0) onVoicesLoaded();
+        else if ('addEventListener' in synth) {
+          synth.addEventListener('voiceschanged', onVoicesLoaded);
+        } else {
+          synth.onvoiceschanged = onVoicesLoaded;
+        }
+      } else {
+        updateEngineIndicator();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+
+
+  })();
+  </script>
+
+</body>
+
+</html>

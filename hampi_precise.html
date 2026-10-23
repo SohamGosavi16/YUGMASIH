@@ -1,0 +1,2463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Stone Chariot in Hampi — Realistic 3D Model | YUGMA Indian Heritage</title>
+  <meta name="description" content="Standing majestically within the courtyard of the Vijaya Vittala Temple, this iconic shrine dedicated to Garuda is sculpted from interlocking granite slabs to resemble a colossal battle chariot, celebrated across the world as an emblem of Karnataka's golden age.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Sketchfab Viewer API -->
+  <script type="text/javascript" src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --gold: #dfa753;
+      --gold-bright: #ffd56b;
+      --gold-glow: rgba(223, 167, 83, 0.4);
+      --marble-white: #f5f1e8;
+      --glass-bg: rgba(9, 13, 20, 0.78);
+      --glass-border: rgba(223, 167, 83, 0.32);
+      --glass-card: rgba(14, 20, 32, 0.88);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-dark);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #f8fafc;
+    }
+
+    /* 3D Model Stage Container */
+    #viewer-stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      background: radial-gradient(circle at 50% 40%, #151d2a 0%, #080a0f 85%, #040507 100%);
+      transition: filter 0.8s ease;
+    }
+
+    #sketchfab-frame {
+      position: absolute;
+      top: -54px;
+      left: 0;
+      width: 100%;
+      height: calc(100% + 108px);
+      border: none;
+      display: block;
+    }
+
+    /* Corner Shields to eliminate owner avatar/name in top-left and Sketchfab logo in bottom-left */
+    .brand-shield-top-left {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 62px;
+      z-index: 11;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(7, 9, 14, 0.96) 0%, rgba(7, 9, 14, 0.72) 45%, transparent 100%);
+    }
+
+    .brand-shield-bottom-left {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      min-width: 210px;
+      height: 52px;
+      z-index: 12;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      padding-bottom: 4px;
+      background: linear-gradient(45deg, rgba(7, 9, 14, 0.96) 0%, rgba(7, 9, 14, 0.75) 50%, transparent 100%);
+      border-top-right-radius: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .brand-shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+      color: var(--gold-bright, #ffd56b);
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      user-select: none;
+    }
+    .brand-shield-badge i {
+      color: var(--gold, #dfa753);
+      font-size: 11px;
+    }
+
+    /* Atmosphere Lighting Overlay Filters */
+    .atmos-dawn {
+      filter: sepia(0.25) saturate(1.3) hue-rotate(-12deg) brightness(1.05) contrast(1.04);
+    }
+    .atmos-noon {
+      filter: contrast(1.06) brightness(1.08) saturate(1.02);
+    }
+    .atmos-sunset {
+      filter: sepia(0.55) saturate(1.6) hue-rotate(-22deg) contrast(1.12) brightness(0.98);
+    }
+    .atmos-moonlight {
+      filter: brightness(0.85) contrast(1.2) hue-rotate(185deg) saturate(0.65);
+    }
+
+    /* Ambient Glow behind frame */
+    #stage-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.65), inset 0 0 200px rgba(4,6,10,0.85);
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .nav-left, .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .badge-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      color: var(--marble-white);
+      text-decoration: none;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      transition: all 0.25s var(--ease);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+
+    .badge-btn:hover {
+      background: rgba(223, 167, 83, 0.2);
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(223, 167, 83, 0.25);
+    }
+
+    .badge-btn i {
+      color: var(--gold);
+      font-size: 13px;
+    }
+
+    .portal-tag {
+      display: flex;
+      flex-direction: column;
+      padding: 7px 14px;
+      background: rgba(10, 14, 22, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(223, 167, 83, 0.2);
+      border-radius: 8px;
+    }
+    .portal-tag span:first-child {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .portal-tag span:last-child {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Main Title Card */
+    #title-card {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      max-width: 380px;
+      background: var(--glass-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 22px 24px;
+      color: var(--marble-white);
+      z-index: 12;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 25px rgba(223, 167, 83, 0.12);
+      transition: all 0.35s var(--ease);
+    }
+
+    #title-card.collapsed {
+      transform: translateY(-10px);
+      padding: 12px 18px;
+    }
+    #title-card.collapsed .body-content {
+      display: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .monument-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    h1.monument-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #fff1d0 50%, #dfa753 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hindi-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: rgba(223, 167, 83, 0.85);
+      margin-left: 6px;
+      -webkit-text-fill-color: initial;
+    }
+
+    .btn-collapse {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(223, 167, 83, 0.25);
+      color: var(--gold);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-collapse:hover {
+      background: var(--gold);
+      color: #04070a;
+    }
+
+    .monument-desc {
+      font-size: 12.8px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-top: 10px;
+    }
+
+    /* Model Specs Badges */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(223, 167, 83, 0.18);
+    }
+
+    .spec-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    .spec-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--gold-bright);
+      display: block;
+    }
+    .spec-lbl {
+      font-size: 9px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .heritage-provenance {
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: rgba(223, 167, 83, 0.08);
+      border: 1px solid rgba(223, 167, 83, 0.22);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .prov-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+    }
+    .prov-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .prov-badge i {
+      color: var(--gold);
+      font-size: 10px;
+    }
+    .prov-text {
+      color: #f1f5f9;
+      text-align: right;
+      font-weight: 500;
+      font-size: 11.5px;
+    }
+    .prov-text strong {
+      color: var(--gold-bright);
+      font-weight: 600;
+    }
+
+    /* Bottom Floating Dock */
+    #dock-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 15;
+      max-width: 96vw;
+    }
+
+    /* Atmosphere Selector Pill */
+    .atmos-bar {
+      display: flex;
+      align-items: center;
+      background: rgba(12, 17, 27, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(223, 167, 83, 0.3);
+      border-radius: 30px;
+      padding: 4px 6px;
+      gap: 4px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .atmos-btn {
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s var(--ease);
+    }
+    .atmos-btn:hover {
+      color: var(--marble-white);
+      background: rgba(255,255,255,0.06);
+    }
+    .atmos-btn.active {
+      background: linear-gradient(135deg, #dfa753 0%, #c98845 100%);
+      color: #06090f;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(223, 167, 83, 0.4);
+    }
+
+    /* Viewport Navigation Dock */
+    .view-dock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--glass-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 8px 12px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.55), 0 0 20px rgba(223, 167, 83, 0.15);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .dock-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 72px;
+      height: 58px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      font-family: inherit;
+    }
+
+    .dock-btn i {
+      font-size: 16px;
+      color: var(--gold);
+      transition: transform 0.2s;
+    }
+
+    .dock-btn span {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .dock-btn:hover {
+      background: rgba(223, 167, 83, 0.15);
+      border-color: var(--gold);
+      color: var(--gold-bright);
+      transform: translateY(-2px);
+    }
+    .dock-btn:hover i {
+      transform: scale(1.15);
+    }
+
+    .dock-btn.active {
+      background: linear-gradient(135deg, #dfa753 0%, #ffd56b 100%);
+      color: #06090f;
+      border-color: #ffd56b;
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(223, 167, 83, 0.4);
+    }
+    .dock-btn.active i {
+      color: #06090f;
+    }
+
+    /* Interaction Hint */
+    #orbit-hint {
+      position: fixed;
+      bottom: 124px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11.5px;
+      letter-spacing: 0.8px;
+      color: rgba(245, 241, 232, 0.5);
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(9, 13, 20, 0.6);
+      padding: 5px 14px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      transition: opacity 0.6s;
+    }
+
+    /* Info Modal Dialog */
+    #info-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 12, 0.75);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #info-modal.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0d121c;
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      max-width: 620px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(223, 167, 83, 0.2);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(223, 167, 83, 0.3);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .modal-close:hover {
+      background: var(--gold);
+      color: #04070a;
+    }
+
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      color: var(--gold-bright);
+      margin-bottom: 6px;
+    }
+
+    .modal-subtitle {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .modal-section {
+      margin-bottom: 18px;
+    }
+    .modal-section h3 {
+      font-size: 14px;
+      color: var(--gold);
+      margin-bottom: 6px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-section p {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #cbd5e1;
+    }
+
+    /* Toast Notifications */
+    #toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass-card);
+      border: 1px solid var(--gold);
+      border-radius: 30px;
+      padding: 10px 22px;
+      color: var(--gold-bright);
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(5px);
+    }
+
+    @media (max-width: 768px) {
+      #title-card {
+        top: 72px;
+        left: 12px;
+        right: 12px;
+        max-width: none;
+        padding: 16px 18px;
+      }
+      h1.monument-title {
+        font-size: 20px;
+      }
+      .dock-btn {
+        width: 60px;
+        height: 52px;
+      }
+      .dock-btn span {
+        font-size: 8px;
+      }
+      .atmos-btn {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
+      .portal-tag {
+        display: none;
+      }
+    }
+  </style>
+<style id="vg-master-styles">
+
+    /* ════ RIGHT-SIDE DOCKED HERITAGE VOICE GUIDE SYSTEM ════ */
+
+    /* ── Floating Microphone Trigger (Icon-Only, Same Bottom-Right Position) ── */
+    .voice-guide-fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 2px solid rgba(251, 191, 36, 0.85);
+      color: #0b0f19;
+      font-size: 1.45rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.45), 0 0 22px rgba(245, 158, 11, 0.3);
+      z-index: 99990;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .voice-guide-fab:hover {
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 12px 38px rgba(245, 158, 11, 0.7), 0 0 30px rgba(245, 158, 11, 0.45);
+      color: #000;
+    }
+    .voice-guide-fab:active { transform: scale(0.94); }
+    .voice-guide-fab span { display: none !important; }
+
+    /* ── NO SUBWINDOW BACKDROP: 3D Scene Remains Fully Visible & Interactive ── */
+    .vg-backdrop {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
+    /* ── Docked on Corner of Right Side in Middle Position ────────────────── */
+    .vg-panel {
+      position: fixed;
+      top: 50%;
+      right: 24px;
+      transform: translateY(-50%) translateX(calc(100% + 40px));
+      width: min(90vw, 420px);
+      max-height: 86vh;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .vg-panel.open {
+      transform: translateY(-50%) translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .vg-panel-inner {
+      background: rgba(8, 12, 26, 0.96);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 22px;
+      padding: 20px 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(245, 158, 11, 0.2);
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      max-height: 86vh;
+    }
+
+    .vg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+    .vg-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .vg-icon-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.15));
+      border: 1px solid rgba(245, 158, 11, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+    .vg-title-group h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #fbbf24;
+      letter-spacing: -0.01em;
+    }
+    .vg-title-group p {
+      margin: 2px 0 0 0;
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+    .vg-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Themed HUD Toggle Button (Royal Gold Pill) ── */
+    .vg-hud-toggle-btn {
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #fbbf24;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .vg-hud-toggle-btn:hover {
+      background: rgba(245, 158, 11, 0.28);
+      border-color: #fbbf24;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+      transform: translateY(-1px);
+    }
+    .vg-hud-toggle-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #fde68a;
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+    }
+
+    /* ── Themed Close Button ── */
+    .vg-close-btn {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 700;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .vg-close-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+      color: #ffffff;
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
+    }
+
+    /* ── Language Row ── */
+    .vg-lang-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      scrollbar-width: thin;
+      flex-shrink: 0;
+    }
+    .vg-lang-row::-webkit-scrollbar { height: 4px; }
+    .vg-lang-row::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 2px; }
+    .vg-lang-pill {
+      flex-shrink: 0;
+      padding: 5px 11px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .vg-lang-pill:hover { background: rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.45); color: #fff; }
+    .vg-lang-pill.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #fbbf24;
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+    }
+
+    /* ── Prominent, Crisp, High-Contrast Script Box ── */
+    .vg-script-box {
+      flex: 1;
+      min-height: 180px;
+      max-height: 290px;
+      overflow-y: auto;
+      background: rgba(4, 7, 18, 0.92);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+      scrollbar-width: thin;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+      user-select: text;
+    }
+    .vg-script-box::-webkit-scrollbar { width: 5px; }
+    .vg-script-box::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 3px; }
+    .vg-word {
+      display: inline;
+      color: #e2e8f0;
+      transition: color 0.12s ease, background-color 0.12s ease;
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 1px 2px;
+    }
+    .vg-word:hover { background: rgba(245, 158, 11, 0.2); }
+    .vg-word.vg-word-active {
+      color: #0b0f19 !important;
+      background: #fbbf24 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.85);
+    }
+    .vg-word.vg-word-spoken { color: #ffd56b; opacity: 0.92; }
+
+    /* ── Controls ── */
+    .vg-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .vg-btn {
+      flex: 1;
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .vg-play {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b0f19;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    }
+    .vg-play:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
+    .vg-play.playing {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+    }
+    .vg-stop {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+    }
+    .vg-stop:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+    .vg-stop:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Progress Bar ── */
+    .vg-progress-wrap {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .vg-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      transition: width 0.15s ease;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+
+    /* ── Distinct Speed Timeline (Audibly Changes English & All Voices) ── */
+    .vg-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .vg-rate-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .vg-rate-row span {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-right: 2px;
+    }
+    .vg-rate-btn {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .vg-rate-btn:hover { color: #fff; border-color: rgba(245, 158, 11, 0.4); }
+    .vg-rate-btn.active {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: #fbbf24;
+      color: #fbbf24;
+      font-weight: 800;
+    }
+    .vg-voice-info {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    /* ── Themed Floating Cinema Subtitle HUD on 3D Viewport ── */
+    .vg-subtitle-hud {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(88vw, 680px);
+      background: rgba(6, 10, 24, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      border-radius: 18px;
+      padding: 12px 18px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(245, 158, 11, 0.25);
+      z-index: 100000;
+      pointer-events: auto;
+      font-family: system-ui, -apple-system, sans-serif;
+      transition: all 0.25s ease;
+    }
+    .vg-hud-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .vg-hud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fbbf24;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .vg-hud-dot {
+      width: 6px;
+      height: 6px;
+      background: #fbbf24;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #fbbf24;
+      animation: vgDotPulse 1.2s infinite alternate;
+    }
+    @keyframes vgDotPulse {
+      0% { opacity: 0.4; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+    .vg-hud-title {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .vg-hud-close {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .vg-hud-close:hover {
+      color: #fff;
+      background: rgba(239, 68, 68, 0.35);
+      border-color: #ef4444;
+      transform: rotate(90deg);
+    }
+    .vg-hud-content {
+      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+      line-height: 1.55;
+      text-align: center;
+      color: #e2e8f0;
+      min-height: 2.6em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .vg-hud-content .vg-hud-word {
+      display: inline;
+      transition: color 0.12s ease, text-shadow 0.12s ease;
+      padding: 0 2px;
+    }
+    .vg-hud-content .vg-hud-word.active {
+      color: #ffd56b;
+      font-weight: 800;
+      text-shadow: 0 0 14px rgba(251, 191, 36, 0.8), 0 0 24px rgba(245, 158, 11, 0.4);
+    }
+    .vg-hud-content .vg-hud-word.spoken { color: #ffffff; opacity: 0.95; }
+    .vg-hud-content .vg-hud-word.pending { color: #64748b; opacity: 0.55; }
+
+    @media (max-width: 640px) {
+      .vg-panel {
+        right: 12px;
+        width: calc(100vw - 24px);
+        max-height: 82vh;
+      }
+      .voice-guide-fab {
+        bottom: 20px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        font-size: 1.25rem;
+      }
+      .vg-subtitle-hud {
+        width: calc(100vw - 28px);
+        bottom: 84px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- 3D Model Stage Container -->
+  <div id="viewer-stage" class="atmos-noon">
+    <!-- Direct Sketchfab Responsive Embedded 3D Viewer with Model UID cb01a9df8996485692d238c64a2509df -->
+    <iframe
+      id="sketchfab-frame"
+      title="Stone Chariot in Hampi - 3D Heritage Model"
+      src="https://sketchfab.com/models/cb01a9df8996485692d238c64a2509df/embed?autostart=1&internal=1&tracking=0&ui_ar=1&ui_infos=0&ui_snapshots=1&ui_stop=0&ui_theatre=1&ui_watermark=0&ui_theme=dark&camera=0&preload=1"
+      allow="autoplay; fullscreen; xr-spatial-tracking; web-share"
+      xr-spatial-tracking="true"
+      execution-while-out-of-viewport="true"
+      execution-while-not-rendered="true"
+      web-share="true"
+      allowfullscreen
+      mozallowfullscreen="true"
+      webkitallowfullscreen="true">
+    </iframe>
+  </div>
+
+  <div id="stage-vignette"></div>
+
+  <!-- Corner Shields removing owner logo in top-left & Sketchfab watermark in bottom-left -->
+  <div class="brand-shield-top-left" aria-hidden="true"></div>
+  <div class="brand-shield-bottom-left" aria-hidden="true">
+    <div class="brand-shield-badge">
+      <i class="fa-solid fa-cube"></i>
+      <span>HERITAGE 3D</span>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <a href="index.html?guest=true" class="badge-btn" title="Return to India 3D Globe">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>3D GLOBE</span>
+      </a>
+      <div class="portal-tag">
+        <span>KARNATAKA</span>
+        <span>HAMPI (VIJAYANAGARA) · 16th CENTURY CE (KRISHNADEVARAYA)</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <a href="all_3d_models.html" class="badge-btn" style="background: rgba(223, 167, 83, 0.2); border-color: #dfa753; color: #ffd56b;" title="View all 3D models in Vault">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>ALL 3D MODELS</span>
+      </a>
+
+      <button class="badge-btn" id="btn-audio" title="Toggle Heritage Ambient Soundscape">
+        <i class="fa-solid fa-volume-high" id="audio-icon"></i>
+        <span id="audio-text">AMBIENCE</span>
+      </button>
+
+      <button class="badge-btn" id="btn-info" title="Stone Chariot in Hampi Architectural Details">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>DETAILS</span>
+      </button>
+
+      <button class="badge-btn" id="btn-fullscreen" title="Toggle Fullscreen Mode">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Left Info Card -->
+  <aside id="title-card">
+    <div class="card-header">
+      <div>
+        <span class="monument-subtitle">UNESCO World Heritage Icon of the Vijayanagara Empire & Garuda Shrine</span>
+        <h1 class="monument-title">Stone Chariot in Hampi <span class="hindi-title">(ಹಂಪಿ ಕಲ್ಲಿನ ರಥ)</span></h1>
+      </div>
+      <button class="btn-collapse" id="btn-collapse" aria-label="Toggle details panel">
+        <i class="fa-solid fa-chevron-up"></i>
+      </button>
+    </div>
+
+    <div class="body-content">
+      <p class="monument-desc">
+        Standing majestically within the courtyard of the Vijaya Vittala Temple, this iconic shrine dedicated to Garuda is sculpted from interlocking granite slabs to resemble a colossal battle chariot, celebrated across the world as an emblem of Karnataka's golden age.
+      </p>
+
+      <div class="specs-grid">
+        <div class="spec-item">
+          <span class="spec-val">Photogrammetry</span>
+          <span class="spec-lbl">Architecture</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-val">Granite PBR</span>
+          <span class="spec-lbl">Carvings</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-val">Interlocking Slabs</span>
+          <span class="spec-lbl">Textures</span>
+        </div>
+      </div>
+
+      <div class="heritage-provenance">
+        <div class="prov-row">
+          <span class="prov-badge"><i class="fa-solid fa-monument"></i> BUILT FOR</span>
+          <span class="prov-text"><strong>Garuda (Vahana of Lord Vishnu) & Vijayanagara Golden Age (King Krishnadevaraya)</strong></span>
+        </div>
+        <div class="prov-row">
+          <span class="prov-badge"><i class="fa-solid fa-location-dot"></i> PICKED FROM</span>
+          <span class="prov-text"><strong>Hampi, Vijayanagara, Karnataka (Tungabhadra Basin)</strong></span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Interaction Hint -->
+  <div id="orbit-hint">
+    <i class="fa-solid fa-arrows-spin"></i>
+    <span>Left Click / Touch to Orbit · Right Click / Two Fingers to Pan · Scroll to Zoom</span>
+  </div>
+
+  <!-- Bottom Interactive Floating Dock -->
+  <div id="dock-container">
+    <!-- Atmosphere Lighting Filter Bar -->
+    <div class="atmos-bar">
+      <button class="atmos-btn" data-atmos="atmos-dawn">
+        <i class="fa-regular fa-sun"></i> Dawn Blush
+      </button>
+      <button class="atmos-btn active" data-atmos="atmos-noon">
+        <i class="fa-solid fa-sun"></i> White Noon
+      </button>
+      <button class="atmos-btn" data-atmos="atmos-sunset">
+        <i class="fa-solid fa-cloud-sun"></i> Sunset Gold
+      </button>
+      <button class="atmos-btn" data-atmos="atmos-moonlight">
+        <i class="fa-solid fa-moon"></i> Moonlight
+      </button>
+    </div>
+
+    <!-- View & Guided Angles Dock -->
+    <div class="view-dock">
+      <button class="dock-btn active" id="view-facade" title="Iconic Garuda Chariot Profile">
+        <i class="fa-solid fa-caravan"></i>
+        <span>Chariot Profile</span>
+      </button>
+      <button class="dock-btn" id="view-wheels" title="Stone Wheels with Axis Hubs">
+        <i class="fa-solid fa-dharmachakra"></i>
+        <span>Carved Wheels</span>
+      </button>
+      <button class="dock-btn" id="view-elephants" title="Stone Elephant Sentinels">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Elephants</span>
+      </button>
+      <button class="dock-btn" id="view-courtyard" title="Vittala Temple Courtyard Vista">
+        <i class="fa-solid fa-landmark"></i>
+        <span>Vittala Court</span>
+      </button>
+      <button class="dock-btn" id="view-reset" title="Camera Reset">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>Reset 360°</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Detailed Architectural Info Modal -->
+  <div id="info-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close"><i class="fa-solid fa-xmark"></i></button>
+      <h2 class="modal-title">Stone Chariot in Hampi Heritage</h2>
+      <div class="modal-subtitle">UNESCO World Heritage Icon of the Vijayanagara Empire & Garuda Shrine</div>
+
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-dharmachakra"></i> Revolving Granite Wheels</h3>
+        <p>The four giant granite wheels are sculpted with delicate floral spokes and axle pins that once rotated freely on their stone axles before being cemented for structural preservation.</p>
+      </div>
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-crown"></i> Emperor Krishnadevaraya's Triumph</h3>
+        <p>Inspired by the Konark Sun Chariot during his military campaigns in Kalinga (Odisha), King Krishnadevaraya commissioned this shrine to recreate that cosmic glory in his capital on the Tungabhadra.</p>
+      </div>
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-music"></i> Musical Pillars of Vittala Temple</h3>
+        <p>The adjacent Ranga Mandapa features 56 musical pillars (SaReGaMa pillars) carved from resonant granite clusters that emit notes of Indian musical instruments when tapped gently.</p>
+      </div>
+
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-landmark-dome"></i> Monument Provenance & Heritage</h3>
+        <p>This interactive 3D digital model showcases the living architectural heritage of <strong>Stone Chariot in Hampi</strong>, located in <strong>Hampi, Vijayanagara, Karnataka (Tungabhadra Basin)</strong> and built for <strong>Garuda (Vahana of Lord Vishnu) & Vijayanagara Golden Age (King Krishnadevaraya)</strong>. Curated for interactive preservation and cultural learning.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Toast Message -->
+  <div id="toast">Perspective Updated</div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var stage = document.getElementById('viewer-stage');
+      var iframe = document.getElementById('sketchfab-frame');
+      var toast = document.getElementById('toast');
+      var titleCard = document.getElementById('title-card');
+      var collapseBtn = document.getElementById('btn-collapse');
+      var infoModal = document.getElementById('info-modal');
+      var infoBtn = document.getElementById('btn-info');
+      var modalClose = document.getElementById('modal-close');
+      var fullscreenBtn = document.getElementById('btn-fullscreen');
+      var audioBtn = document.getElementById('btn-audio');
+      var audioIcon = document.getElementById('audio-icon');
+      var audioText = document.getElementById('audio-text');
+      var sketchfabApi = null;
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function () {
+          toast.classList.remove('show');
+        }, 2200);
+      }
+
+      // Title Card Collapse Toggle
+      collapseBtn.addEventListener('click', function () {
+        titleCard.classList.toggle('collapsed');
+        var isCollapsed = titleCard.classList.contains('collapsed');
+        collapseBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-chevron-down"></i>' : '<i class="fa-solid fa-chevron-up"></i>';
+      });
+
+      // Info Modal Open / Close
+      infoBtn.addEventListener('click', function () {
+        infoModal.classList.add('active');
+      });
+      modalClose.addEventListener('click', function () {
+        infoModal.classList.remove('active');
+      });
+      infoModal.addEventListener('click', function (e) {
+        if (e.target === infoModal) infoModal.classList.remove('active');
+      });
+
+      // Atmosphere Lighting Filter Switching
+      var atmosBtns = document.querySelectorAll('.atmos-btn');
+      atmosBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          atmosBtns.forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var chosen = btn.getAttribute('data-atmos');
+          stage.className = chosen;
+          showToast(btn.textContent.trim() + " atmosphere activated");
+        });
+      });
+
+      // Fullscreen Toggle
+      fullscreenBtn.addEventListener('click', function () {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(function () {});
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+          showToast('Entered Fullscreen');
+        } else {
+          document.exitFullscreen().catch(function () {});
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+          showToast('Exited Fullscreen');
+        }
+      });
+
+      // Procedural Web Audio Ambient Soundscape
+      var audioCtx = null;
+      var isAudioPlaying = false;
+      var ambientNodes = [];
+
+      function startAmbience() {
+        try {
+          var AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!audioCtx) audioCtx = new AudioContext();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+
+          // Master Gain
+          var masterGain = audioCtx.createGain();
+          masterGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+          masterGain.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 2.5);
+          masterGain.connect(audioCtx.destination);
+          ambientNodes.push(masterGain);
+
+          // Warm Harmonic Drone
+          var baseFreqs = [138.59, 207.65, 277.18, 415.3];
+          baseFreqs.forEach(function (f, idx) {
+            var osc = audioCtx.createOscillator();
+            var oscGain = audioCtx.createGain();
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+
+            // Gentle LFO
+            var lfo = audioCtx.createOscillator();
+            lfo.frequency.setValueAtTime(0.2 + idx * 0.1, audioCtx.currentTime);
+            var lfoGain = audioCtx.createGain();
+            lfoGain.gain.setValueAtTime(1.5, audioCtx.currentTime);
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start();
+
+            oscGain.gain.setValueAtTime(0.04 / (idx + 1), audioCtx.currentTime);
+            osc.connect(oscGain);
+            oscGain.connect(masterGain);
+            osc.start();
+            ambientNodes.push(osc, lfo);
+          });
+
+          // Shimmer Air Filter
+          var bufferSize = audioCtx.sampleRate * 2;
+          var noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          var output = noiseBuffer.getChannelData(0);
+          for (var i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+          }
+          var whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          whiteNoise.loop = true;
+
+          var biquad = audioCtx.createBiquadFilter();
+          biquad.type = 'bandpass';
+          biquad.frequency.setValueAtTime(1100, audioCtx.currentTime);
+          biquad.Q.setValueAtTime(1.4, audioCtx.currentTime);
+
+          var noiseGain = audioCtx.createGain();
+          noiseGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+
+          whiteNoise.connect(biquad);
+          biquad.connect(noiseGain);
+          noiseGain.connect(masterGain);
+          whiteNoise.start();
+          ambientNodes.push(whiteNoise);
+
+          isAudioPlaying = true;
+          audioIcon.className = 'fa-solid fa-volume-high';
+          audioText.textContent = 'SOUND ON';
+          audioBtn.style.borderColor = 'var(--gold-bright)';
+          audioBtn.style.color = 'var(--gold-bright)';
+          showToast('Stone Chariot in Hampi Soundscape Playing');
+        } catch (e) {
+          console.warn('Audio not supported or blocked:', e);
+        }
+      }
+
+      function stopAmbience() {
+        if (ambientNodes.length) {
+          ambientNodes.forEach(function (n) {
+            try {
+              if (n.stop) n.stop();
+              if (n.disconnect) n.disconnect();
+            } catch (err) {}
+          });
+          ambientNodes = [];
+        }
+        isAudioPlaying = false;
+        audioIcon.className = 'fa-solid fa-volume-xmark';
+        audioText.textContent = 'MUTED';
+        audioBtn.style.borderColor = 'var(--glass-border)';
+        audioBtn.style.color = 'var(--marble-white)';
+        showToast('Ambience Muted');
+      }
+
+      audioBtn.addEventListener('click', function () {
+        if (!isAudioPlaying) {
+          startAmbience();
+        } else {
+          stopAmbience();
+        }
+      });
+
+      // Initialize Sketchfab Client API
+      if (window.Sketchfab) {
+        try {
+          var client = new window.Sketchfab(iframe);
+          client.init('cb01a9df8996485692d238c64a2509df', {
+            success: function onSuccess(api) {
+              sketchfabApi = api;
+              api.start();
+              api.addEventListener('viewerready', function () {
+                console.log('Sketchfab Stone Chariot in Hampi 3D Viewer Ready');
+                showToast('Stone Chariot in Hampi 3D Model Loaded');
+              });
+            },
+            error: function onError() {
+              console.warn('Sketchfab API init fallback to standard iframe embed.');
+            },
+            autostart: 1,
+            ui_controls: 1,
+            ui_infos: 0,
+            ui_watermark: 0,
+            ui_ar: 1,
+            ui_vr: 1,
+            ui_theatre: 1,
+            preload: 1
+          });
+        } catch (err) {
+          console.log('Sketchfab client initialized directly via iframe src.');
+        }
+      }
+
+      // Dock Camera Presets
+      var dockBtns = document.querySelectorAll('.dock-btn');
+      function setDockActive(btn) {
+        dockBtns.forEach(function (b) { b.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+      }
+
+      var btn_view_facade = document.getElementById('view-facade');
+      if (btn_view_facade) {
+        btn_view_facade.addEventListener('click', function () {
+          setDockActive(btn_view_facade);
+          if (sketchfabApi && sketchfabApi.setCameraLookAt) {
+            sketchfabApi.setCameraLookAt([0, -80, 25], [0, 0, 12], 1.8, function () {});
+          }
+          showToast('Iconic Garuda Chariot Profile');
+        });
+      }
+      var btn_view_wheels = document.getElementById('view-wheels');
+      if (btn_view_wheels) {
+        btn_view_wheels.addEventListener('click', function () {
+          setDockActive(btn_view_wheels);
+          if (sketchfabApi && sketchfabApi.setCameraLookAt) {
+            sketchfabApi.setCameraLookAt([25, -35, 8], [0, 0, 5], 1.8, function () {});
+          }
+          showToast('Stone Wheels with Axis Hubs');
+        });
+      }
+      var btn_view_elephants = document.getElementById('view-elephants');
+      if (btn_view_elephants) {
+        btn_view_elephants.addEventListener('click', function () {
+          setDockActive(btn_view_elephants);
+          if (sketchfabApi && sketchfabApi.setCameraLookAt) {
+            sketchfabApi.setCameraLookAt([-30, -45, 12], [0, 0, 8], 1.8, function () {});
+          }
+          showToast('Stone Elephant Sentinels');
+        });
+      }
+      var btn_view_courtyard = document.getElementById('view-courtyard');
+      if (btn_view_courtyard) {
+        btn_view_courtyard.addEventListener('click', function () {
+          setDockActive(btn_view_courtyard);
+          if (sketchfabApi && sketchfabApi.setCameraLookAt) {
+            sketchfabApi.setCameraLookAt([0, -120, 50], [0, 0, 15], 1.8, function () {});
+          }
+          showToast('Vittala Temple Courtyard Vista');
+        });
+      }
+      var btn_view_reset = document.getElementById('view-reset');
+      if (btn_view_reset) {
+        btn_view_reset.addEventListener('click', function () {
+          setDockActive(btn_view_reset);
+          if (sketchfabApi && sketchfabApi.recenterCamera) {
+            sketchfabApi.recenterCamera(function () {});
+          } else {
+            iframe.src = iframe.src;
+          }
+          showToast('Camera Reset');
+        });
+      }
+
+      // Fade out orbit hint after 8 seconds
+      setTimeout(function () {
+        var hint = document.getElementById('orbit-hint');
+        if (hint) hint.style.opacity = '0';
+      }, 8000);
+
+    })();
+  </script>
+<!-- ══ VOICE GUIDE TRIGGER (ICON-ONLY MICROPHONE, SAME POSITION) ══ -->
+  <button id="btn-voice-guide" class="voice-guide-fab" title="Heritage Voice Guide" aria-label="Heritage Voice Guide">
+    <i class="fa-solid fa-microphone-lines"></i>
+  </button>
+
+  <!-- ══ MULTILINGUAL VOICE GUIDE (DOCKED RIGHT-SIDE MIDDLE POSITION) ══ -->
+  <div id="voice-guide-panel" class="vg-panel" role="dialog" aria-label="Heritage Voice Guide">
+    <div class="vg-panel-inner">
+      <div class="vg-header">
+        <div class="vg-header-left">
+          <div class="vg-icon-badge">🎧</div>
+          <div class="vg-title-group">
+            <h3>Stone Chariot in Hampi · Audio Guide</h3>
+            <p>500+ Word Scholarly Narrative &amp; Subtitle Tracker</p>
+          </div>
+        </div>
+        <div class="vg-header-right">
+          <button type="button" class="vg-hud-toggle-btn active" id="vg-hud-toggle" title="Toggle Live Subtitle HUD">
+            <i class="fa-solid fa-closed-captioning"></i> HUD: ON
+          </button>
+          <button type="button" class="vg-close-btn" id="vg-close" aria-label="Close Voice Guide">✕</button>
+        </div>
+      </div>
+
+      <!-- Language selector pills -->
+      <div class="vg-lang-row" id="vg-lang-row"></div>
+
+      <!-- Script Box with Subtitle Tracker -->
+      <div class="vg-script-box" id="vg-script-box" aria-live="polite"></div>
+
+      <!-- Audio Controls -->
+      <div class="vg-controls">
+        <button class="vg-btn vg-play" id="vg-play">
+          <span id="vg-play-icon">▶</span>
+          <span id="vg-play-label">Play Audio Guide</span>
+        </button>
+        <button class="vg-btn vg-stop" id="vg-stop" disabled>
+          <span>⏹ Stop</span>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="vg-progress-wrap">
+        <div class="vg-progress-bar" id="vg-progress-bar"></div>
+      </div>
+
+      <!-- Speed Timeline -->
+      <div class="vg-bottom-row">
+        <div class="vg-rate-row">
+          <span>Speed:</span>
+          <button class="vg-rate-btn" data-rate="0.75">0.75x</button>
+          <button class="vg-rate-btn active" data-rate="1.0">1.0x</button>
+          <button class="vg-rate-btn" data-rate="1.25">1.25x</button>
+          <button class="vg-rate-btn" data-rate="1.5">1.5x</button>
+          <button class="vg-rate-btn" data-rate="1.75">1.75x</button>
+        </div>
+        <div class="vg-voice-info" id="vg-voice-info">🔊 Voice Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ THEMED FLOATING CINEMA SUBTITLE HUD ON 3D VIEWPORT ══ -->
+  <div id="vg-subtitle-hud" class="vg-subtitle-hud" style="display:none;" aria-live="polite">
+    <div class="vg-hud-header">
+      <div class="vg-hud-badge">
+        <span class="vg-hud-dot"></span>
+        <span id="vg-hud-lang-label">ENGLISH</span>
+      </div>
+      <div class="vg-hud-title">Stone Chariot in Hampi · Synchronized Subtitles</div>
+      <button type="button" class="vg-hud-close" id="vg-hud-close" title="Hide Subtitles">✕</button>
+    </div>
+    <div class="vg-hud-content" id="vg-hud-content">
+      Click Play to start the voice guide narration with live synchronized subtitles.
+    </div>
+  </div>
+
+  <script id="vg-engine-script">
+  (function () {
+    "use strict";
+
+    var SITE_NAME = "Stone Chariot in Hampi";
+    var SUPPORTED_LANGS = [
+      { key: 'en', code: 'en-IN', fallback: 'en-US', label: 'English', flag: '🇬🇧' },
+      { key: 'hi', code: 'hi-IN', fallback: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+      { key: 'ta', code: 'ta-IN', fallback: 'ta', label: 'தமிழ்', flag: '🇮🇳' },
+      { key: 'te', code: 'te-IN', fallback: 'te', label: 'తెలుగు', flag: '🇮🇳' },
+      { key: 'bn', code: 'bn-IN', fallback: 'bn', label: 'বাংলা', flag: '🇮🇳' },
+      { key: 'mr', code: 'mr-IN', fallback: 'mr', label: 'मराठी', flag: '🇮🇳' },
+      { key: 'gu', code: 'gu-IN', fallback: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+      { key: 'kn', code: 'kn-IN', fallback: 'kn', label: 'ಕನ್ನಡ', flag: '🇮🇳' },
+      { key: 'ml', code: 'ml-IN', fallback: 'ml', label: 'മലയാളം', flag: '🇮🇳' },
+      { key: 'pa', code: 'pa-IN', fallback: 'pa', label: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+      { key: 'fr', code: 'fr-FR', fallback: 'fr', label: 'Français', flag: '🇫🇷' },
+      { key: 'es', code: 'es-ES', fallback: 'es', label: 'Español', flag: '🇪🇸' },
+      { key: 'de', code: 'de-DE', fallback: 'de', label: 'Deutsch', flag: '🇩🇪' },
+      { key: 'ja', code: 'ja-JP', fallback: 'ja', label: '日本語', flag: '🇯🇵' },
+      { key: 'zh', code: 'zh-CN', fallback: 'zh', label: '中文', flag: '🇨🇳' }
+    ];
+
+    var VG_SCRIPTS = {"en": "Welcome to Hampi, one of the most remarkable heritage destinations in India, known for its magnificent ruins, ancient temples and extraordinary stone architecture. As you explore the landscape before you, notice the enormous granite boulders, rocky hills and scattered stone structures. The natural surroundings form a distinctive backdrop to the remains of the Vijayanagara Empire, creating a landscape where history and nature come together. As you approach the Virupaksha Temple, observe its towering entrance gopuram, decorated with multiple levels of sculpted figures and ornamental details. The gateway leads into a sacred complex where traditional worship continues, connecting the present with centuries of religious heritage. Look closely at the stone pillars and carvings inside the temple. These details depict deities, mythological figures and decorative motifs that reflect the artistic traditions of the Vijayanagara period. Another remarkable landmark is the Vittala Temple, famous for its elaborate architecture and beautifully carved stonework. As you enter its complex, notice the pillared halls, intricate sculptures and spacious courtyard, which demonstrate the extraordinary craftsmanship of the artisans who worked here. In front of the Vittala Temple stands the iconic Stone Chariot. This impressive structure resembles a traditional temple chariot and is carved primarily from stone. Its detailed wheels, decorative panels and miniature sculptural elements make it an enduring masterpiece of Vijayanagara artistry. Inscribed on the UNESCO World Heritage List in 1986, Hampi remains an eternal open-air museum. Through YUGMA, we invite you to discover the stories, stone architecture and enduring legacy of Hampi.", "hi": "भारत के सबसे उल्लेखनीय ऐतिहासिक स्थलों में से एक, हम्पी में आपका स्वागत है, जो अपने भव्य खंडहरों, प्राचीन मंदिरों और असाधारण पाषाण वास्तुकला के लिए जाना जाता है। अपने सामने फैले परिदृश्य में विशाल ग्रेनाइट शिलाखंडों, पथरीली पहाड़ियों और बिखरी हुई पाषाण संरचनाओं को देखें। यह प्राकृतिक परिवेश विजयनगर साम्राज्य के अवशेषों के लिए एक विशिष्ट पृष्ठभूमि का निर्माण करता है, जहाँ इतिहास और प्रकृति एक साथ आते हैं। जैसे ही आप विरुपाक्ष मंदिर के पास पहुंचते हैं, इसके ऊंचे प्रवेश गोपुरम को देखें, जहाँ सदियों पुरानी पूजा की परंपरा आज भी निरंतर जारी है। एक अन्य प्रसिद्ध स्थल विट्ठल मंदिर है, जो अपनी अलंकृत वास्तुकला, संगीतमय स्तंभों और नक्काशीदार पाषाण कार्य के लिए प्रसिद्ध है। विट्ठल मंदिर के सामने प्रतिष्ठित 'प्रस्तर रथ' (स्टोन चैरियట్) स्थित है। पारंपरिक मंदिर रथ जैसा दिखने वाला यह भव्य रथ ग्रेनाइट पत्थर से तराशा गया है। इसके विस्तृत पहिए, अलंकृत पैनल और सूक्ष्म मूर्तियां विजयनगर कारीगरों के बेजोड़ कौशल का प्रमाण हैं। 1986 में यूनेस्को विश्व धरोहर स्थल घोषित हम्पी एक खुला संग्रहालय है। युग्म (YUGMA) के माध्यम से, हम आपको हम्पी की अमर कहानियों और स्थापत्य वैभव का अन्वेषण करने के लिए आमंत्रित करते हैं।", "ta": "பண்டைய இடிபாடுகள், வரலாற்று சிறப்புமிக்க கோவில்கள் மற்றும் வியக்கத்தக்க கல் கட்டிடக்கலைக்கு பெயர் பெற்ற கர்நாடகாவின் ஹம்பிக்கு உங்களை வரவேற்கிறோம். துங்கபத்ரா நதிக்கரையில் அமைந்துள்ள மாபெரும் கிரானைட் பாறைகளும் குன்றுகளும் விஜயநகர பேரரசின் பொற்காலத்தை கண்முன்னே நிறுத்துகின்றன. விருபாக்ஷர் கோவிலின் கம்பீரமான கோபுரமும், விஜய விட்டலா கோவிலின் பரந்த தூண் மண்டபங்களும் நம்மை வியப்பில் ஆழ்த்துகின்றன. விட்டலா கோவிலின் முன்பாக நிற்கும் புகழ்பெற்ற 'கல் தேர்' (Stone Chariot) இந்தியாவின் தலைசிறந்த வரலாற்று அடையாளங்களில் ஒன்றாகும். கிரானைட் கற்களால் செதுக்கப்பட்ட இதன் சக்கரங்களும் நுண்ணிய வேலைப்பாடுகளும் விஜயநகர கலைஞர்களின் கைவண்ணத்தை பறைசாற்றுகின்றன. 1986 இல் யுனெஸ்கோ உலக பாரம்பரிய சின்னமாக அறிவிக்கப்பட்ட ஹம்பியின் பெருமையை யுக்மா (YUGMA) வழியாக கண்டு மகிழுங்கள்.", "te": "భారతదేశ విశిష్ట వారసత్వ ప్రదేశాలలో ఒకటైన హంపీకి స్వాగతం. తుంగభద్ర నదీ తీరాన గల భారీ గ్రానైట్ రాళ్ళు, కొండల నడుమ విజయనగర సామ్రాజ్య వైభవాన్ని చాటే శిథిలాలు మరియు ప్రాచీన ఆలయాలు అద్భుతంగా దర్శనమిస్తాయి. విరూపాక్ష స్వామి ఆలయ గోపురం శతాబ్దాల భక్తి సంప్రదాయానికి ప్రతీకగా నిలుస్తుంది. విజయ విట్టల దేవాలయ ప్రాంగణంలో గల ప్రసిద్ధ 'రాతి రథం' (స్టోన్ చారియట్) భారతీయ శిల్పకళా అద్భుతం. గ్రానైట్ రాళ్ళతో నిర్మించిన ఈ రథం చక్రాలు, సున్నితమైన నగిషీలు విజయనగర శిల్పుల అసమాన ప్రతిభకు నిదర్శనం. 1986లో యునెస్కో ప్రపంచ వారసత్వ సంపదగా గుర్తింపు పొందింది. యుగ్మ (YUGMA) ద్వారా, హంపీ అద్భుత చారిత్రక కథలను మరియు శిల్ప సంపదను వీక్షించండి.", "bn": "ভারতের অন্যতম গৌরবময় ঐতিহ্যক্ষেত্র হাম্পিতে আপনাকে স্বাগতম, যা প্রাচীন ধ্বংসাবশেষ, মন্দির এবং অনন্য পাথুরে স্থাপত্যের জন্য বিশ্বখ্যাত। বিশাল গ্রানাইট শিলা এবং পাহাড়ের পটভূমিতে গড়ে ওঠা বিজয়নগর সাম্রাজ্যের এই স্মৃতিসৌধ প্রকৃতি ও ইতিহাসের এক অপরূপ মেলবন্ধন। বিরূপাক্ষ মন্দিরের সুউচ্চ প্রবেশ তোরণ এবং বিট্টল মন্দিরের স্তম্ভযুক্ত বিশাল প্রাঙ্গণ প্রাচীন ভারতের শিল্পসমৃদ্ধির প্রতীক। বিট্টল মন্দিরের সামনে অবস্থিত কালজয়ী 'পাথরের রথ' (Stone Chariot) ভারতীয় স্থাপত্যের অন্যতম শ্রেষ্ঠ কীর্তি। গ্রানাইট পাথরে খোদাই করা এর চাকা এবং অলঙ্করণ বিজয়নগর যুগের শিল্পীদের অবিশ্বাস্য দক্ষতার পরিচয় দেয়। ১৯৮৬ সালে ইউনেস্কো বিশ্ব ঐতিহ্য তালিকায় স্থান পাওয়া হাম্পির গৌরবগাথা যুগ্ম (YUGMA)-এর মাধ্যমে আবিষ্কার করুন।", "mr": "कर्नाटकातील ऐतिहासिक हम्पीमध्ये आपले स्वागत आहे, जे भव्य अवशेष, प्राचीन मंदिरे आणि पाषाण वास्तुकलेसाठी जगभर प्रसिद्ध आहे. विशाल ग्रॅनाइट खडक आणि तुंगभद्रा नदीच्या साक्षीने विजयनगर साम्राज्याचे हे वैभव उभे आहे. विरूपाक्ष मंदिराचे भव्य गोपुरम आणि विठ्ठल मंदिर परिसरातील प्रसिद्ध 'दगडी रथ' हे भारतीय शिल्पकलेचा मुकुटमणी आहेत. हा दगडी रथ अत्यंत कुशलतेने ग्रॅनाइट पाषाणात कोरला गेला असून तो विजयनगरच्या सुवर्णकाळाची साक्ष देतो. १९८६ मध्ये युनेस्को जागतिक वारसा स्थळ म्हणून घोषित झालेले हम्पी हे एक जिवंत खुल्या आकाशाखालील संग्रहालय आहे. युग्म (YUGMA) च्या माध्यमातून हम्पीच्या या वैभवशाली ऐतिहासिक वारशाचा आनंद घ्या.", "gu": "ભારતના સૌથી પ્રખ્યાત ઐતિહાસિક સ્થળોમાંના એક હમ્પીમાં આપનું સ્વાગત છે. ગ્રેનાઇટના વિશાળ પથ્થરો અને પહાડીઓ વચ્ચે વિજયનગર સામ્રાજ્યના અવશેષો પ્રાચીન ભારતની ભવ્યતા દર્શાવે છે. વિરૂપાક્ષ મંદિરનું ઊંચું ગોપુરમ અને વિઠ્ઠલ મંદિર પરિસરમાં આવેલો પ્રખ્યાત 'પથ્થરનો રથ' અહીંનું મુખ્ય આકર્ષણ છે. ગ્રેનાઇટમાંથી કલાત્મક રીતે કંડારાયેલા આ રથના પૈડાં અને નકશીકામ વિજયનગરના કારીગરોની અજોડ કુશળતા દર્શાવે છે. ૧૯૮૬માં તેને યુનેસ્કો વર્લ્ડ હેરિટેજ જાહેર કરાયું હતું. યુગ્મ (YUGMA) સાથે, હમ્પીના પથ્થર સ્થાપત્ય અને ભવ્ય વારસાનો અનુભવ કરો.", "kn": "ಕರ್ನಾಟಕದ ಭವ್ಯ ಇತಿಹಾಸವನ್ನು ಸಾರುವ, ಪ್ರಾಚೀನ ಅವಶೇಷಗಳು ಮತ್ತು ಅದ್ಭುತ ಶಿಲಾ ವಾಸ್ತುಶಿಲ್ಪಕ್ಕೆ ಹೆಸರಾದ ಹಂಪಿಗೆ ಸುಸ್ವಾಗತ. ತುಂಗಭದ್ರಾ ತೀರದ ಬೃಹತ್ ಗ್ರಾನೈಟ್ ಬಂಡೆಗಳ ನಡುವೆ ವಿಜಯನಗರ ಸಾಮ್ರಾಜ್ಯದ ಗತವೈಭವ ಕಣ್ಣಿಗೆ ಕಟ್ಟುವಂತೆ ನಿಂತಿದೆ. ವಿರೂಪಾಕ್ಷ ದೇವಾಲಯದ ಎತ್ತರದ ಗೋಪುರ ಮತ್ತು ವಿಜಯ ವಿಠ್ಠಲ ದೇವಾಲಯದ ಸಂಗೀತ ಸ್ತಂಭಗಳು ವಿಸ್ಮಯಕಾರಿಯಾಗಿವೆ. ವಿಠ್ಠಲ ದೇವಾಲಯದ ಮುಂಭಾಗದಲ್ಲಿರುವ ಐತಿಹಾಸಿಕ 'ಕಲ್ಲಿನ ರಥ'ವು ಭಾರತೀಯ ಕಲೆಯ ಸಾರ್ವಕಾಲಿಕ ಮೇರುಕೃತಿಯಾಗಿದೆ. ಗ್ರಾನೈಟ್ ಕಲ್ಲಿನಿಂದ ಕೆತ್ತಲಾದ ಇದರ ಚಕ್ರಗಳು ಮತ್ತು ಸೂಕ್ಷ್ಮ ಕೆತ್ತನೆಗಳು ವಿಜಯನಗರದ ಶಿಲ್ಪಿಗಳ ಅಪಾರ ಕೌಶಲ್ಯವನ್ನು ತೋರುತ್ತವೆ. 1986 ರಲ್ಲಿ ಯುನೆಸ್ಕೋ ವಿಶ್ವ ಪರಂಪರೆ ತಾಣವಾದ ಹಂಪಿಯ ಪರಂಪರೆಯನ್ನು ಯುಗ್ಮ (YUGMA) ಮೂಲಕ ಅನ್ವೇಷಿಸಿ.", "ml": "പ്രാചീന അവശിഷ്ടങ്ങൾക്കും ക്ഷേത്രങ്ങൾക്കും വിസ്മയ ശില്പകലയ്ക്കും പേരുകേട്ട കർണാടകയിലെ ഹംപിയിലേക്ക് സ്വാഗതം. തുംഗഭദ്ര നദീതീരത്തെ പടുകൂറ്റൻ ഗ്രാനൈറ്റ് പാറകൾക്കിടയിൽ വിജയനഗര സാമ്രാജ്യത്തിന്റെ ചരിത്രം ഉറങ്ങുന്നു. വിരുപാക്ഷ ക്ഷേത്ര ഗോപുരവും വിറ്റല ക്ഷേത്ര സമുച്ചയവും ഭാരതീയ സംസ്കാരത്തിന്റെ പ്രതീകങ്ങളാണ്. വിറ്റല ക്ഷേത്രത്തിന് മുന്നിൽ സ്ഥിതി ചെയ്യുന്ന വിഖ്യാതമായ 'കല്ല് രഥം' (Stone Chariot) കല്ലിൽ തീർത്ത അത്ഭുതമാണ്. 1986-ൽ യുനെസ്കോ പൈതൃകമായി പ്രഖ്യാപിച്ച ഹംപിയുടെ പൈതൃക സൗന്ദര്യം യുഗ്മ (YUGMA) വഴി തൊട്ടറിയൂ.", "pa": "ਕਰਨਾਟਕ ਦੇ ਇਤਿਹਾਸਕ ਸ਼ਹਿਰ ਹੰਪੀ ਵਿੱਚ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ, ਜੋ ਪ੍ਰਾਚੀਨ ਖੰਡਰਾਂ, ਮੰਦਰਾਂ ਅਤੇ ਪੱਥਰ ਦੀ ਸ਼ਾਨਦਾਰ ਵਾਸਤੂਕਲਾ ਲਈ ਜਾਣਿਆ ਜਾਂਦਾ ਹੈ। ਵਿਜੈਨਗਰ ਸਾਮਰਾਜ ਦੀ ਰਾਜਧਾਨੀ ਰਹੀ ਇਹ ਧਰਤੀ ਕੁਦਰਤ ਅਤੇ ਇਤਿਹਾਸ ਦਾ ਅਨੋਖਾ ਸੁਮੇਲ ਹੈ। ਵਿਰੂਪਾਕਸ਼ ਮੰਦਰ ਦਾ ਉੱਚਾ ਗੋਪੁਰਮ ਅਤੇ ਵਿੱਤਲਾ ਮੰਦਰ ਵਿੱਚ ਸਥਿਤ ਮਸ਼ਹੂਰ 'ਪੱਥਰ ਦਾ ਰੱਥ' ਭਾਰਤੀ ਵਿਰਾਸਤ ਦੇ ਅਨਮੋਲ ਗਹਿਣੇ ਹਨ। ਗ੍ਰੇਨਾਈਟ ਪੱਥਰ ਨਾਲ ਉੱਕਰਿਆ ਇਹ ਰੱਥ ਵਿਜੈਨਗਰ ਦੇ ਕਾਰੀਗਰਾਂ ਦੀ ਅਦਭੁਤ ਪ੍ਰਤਿਭਾ ਨੂੰ ਦਰਸਾਉਂਦਾ ਹੈ। ਯੁਗਮਾ (YUGMA) ਰਾਹੀਂ ਹੰਪੀ ਦੀ ਸ਼ਾਨਦਾਰ ਵਿਰਾਸਤ ਦੀ ਪੜਚੋਲ ਕਰੋ।", "fr": "Bienvenue à Hampi, l'une des destinations patrimoniales les plus remarquables d'Inde, réputée pour ses ruines colossales, ses temples millénaires et son architecture de granit spectaculaire. Au milieu des chaos de blocs granitiques s'étendent les vestiges grandioses de l'Empire de Vijayanagara. Le temple de Virupaksha avec son immense gopuram perpétue des siècles de rituels sacrés, tandis que le complexe de Vittala émerveille par ses salles hypostyles sculptées. Face à lui se dresse l'emblématique Char de Pierre (Stone Chariot), un chef-d'œuvre de granit poli finement ciselé qui symbolise la virtuosité des artisans médiévaux. Inscrit au patrimoine mondial de l'UNESCO en 1986, Hampi est un véritable musée à ciel ouvert. À travers YUGMA, plongez dans l'épopée mythique et la beauté minérale de Hampi.", "es": "Bienvenidos a Hampi, uno de los destinos históricos más extraordinarios de la India, célebre por sus imponentes ruinas, antiguos templos y asombrosa arquitectura en piedra. Entre gigantescas formaciones rocosas y colinas de granito a orillas del río Tungabhadra yacen los vestigios del glorioso Imperio Vijayanagara. El Templo Virupaksha con su elevado gopuram sigue siendo un centro vivo de devoción, mientras que el Templo Vittala deslumbra por sus salones columnados. En su explanada se erige el icónico Carro de Piedra (Stone Chariot), esculpido en granito con ruedas decoradas y paneles ceremoniales. Declarado Patrimonio de la Humanidad por la UNESCO en 1986, Hampi es un testimonio inmortal de grandeza. A través de YUGMA, los invitamos a descubrir la magia y el esplendor eterno de Hampi.", "de": "Willkommen in Hampi, einer der faszinierendsten historischen Stätten Indiens, berühmt für ihre monumentalen Ruinen, alten Tempel und spektakuläre Granitarchitektur. Zwischen gewaltigen Felsformationen und Hügeln entfalten sich die Überreste des einst mächtigen Vijayanagara-Reiches. Der Virupaksha-Tempel mit seinem hoch aufragenden Gopuram bewahrt Jahrhunderte lebendiger Verehrung, während der Vittala-Tempelkomplex durch raffinierte Reliefs besticht. Vor dem Tempel steht der weltberühmte steinerne Streitwagen (Stone Chariot), ein detailreich gemeißeltes Meisterwerk der Steinmetzkunst. 1986 von der UNESCO zum Weltkulturerbe ernannt, gleicht Hampi einem ewigen Freilichtmuseum. Mit YUGMA laden wir Sie ein, die Pracht und Geschichte von Hampi zu erforschen.", "ja": "壮大な遺跡群、古代寺院、そして驚くべき石造建築で世界的に知られるインド屈指の遺産、ハンピへようこそ。巨大な花崗岩の巨石群と岩山が連なる独特の景観の中に、かつて栄華を極めたヴィジャヤナガル帝国の遺構が息づいています。今なお祈りが捧げられるヴィルパークシャ寺院の高壮なゴープラム（塔門）や、精巧な石彫で名高いヴィッタラ寺院が迎えてくれます。ヴィッタラ寺院の前に立つ象徴的な「石の戦車（ストーン・チャリオット）」は、花崗岩を精緻に刻んで造られた芸術的最高傑作です。1986年に世界遺産に登録されたハンピの永遠の歴史絵巻を、YUGMAを通じて旅してください。", "zh": "欢迎来到印度最负盛名的世界文化遗产圣地之一——亨比，这里以其壮阔的古都遗址、千年神庙与绝伦的巨石建筑举世闻名。在遍布巨大花岗岩巨石与嶙峋山峦的壮丽旷野中，昔日南印度强大的毗奢耶那伽罗帝国的辉煌遗迹与自然风光融为一体。依然香火鼎盛的维鲁帕克沙神庙高耸着华丽的入口塔门，而维塔拉神庙则以巧夺天工的石柱大厅与雕刻艺术闻名遐迩。在神庙广场中央矗立着举世闻名的标志性“石战车”（Stone Chariot），由花岗岩精心雕凿而成，是中世纪印度石雕艺术的绝世珍品。亨比于1986年被联合国教科文组织列为世界文化遗产。通过YUGMA，我们诚邀您探索亨比深沉壮美的历史印记与石筑传奇。"};
+
+    var currentLang = 'en';
+    var isPlaying = false;
+    var isPaused = false;
+    var selectedRate = 1.0;
+    var showHud = true;
+    var currentEngine = 'native'; // 'native' or 'cloud'
+    var audioSessionId = 0;
+
+    // Trackers
+    var wordSpans = [];
+    var allWords = [];
+    var activeWordIndex = 0;
+    var wordTimer = null;
+    var keepAliveTimer = null;
+    var synth = ('speechSynthesis' in window) ? window.speechSynthesis : null;
+    var currentUtterance = null;
+    var speechChunks = [];
+    var currentChunkIdx = 0;
+    var cloudChunks = [];
+    var currentAudioEl = null;
+
+    // DOM Elements
+    var playBtn = document.getElementById('vg-play');
+    var playIcon = document.getElementById('vg-play-icon');
+    var playLabel = document.getElementById('vg-play-label');
+    var stopBtn = document.getElementById('vg-stop');
+    var scriptBox = document.getElementById('vg-script-box');
+    var progressBar = document.getElementById('vg-progress-bar');
+    var voiceInfo = document.getElementById('vg-voice-info');
+    var panel = document.getElementById('voice-guide-panel');
+    var hud = document.getElementById('vg-subtitle-hud');
+    var hudContent = document.getElementById('vg-hud-content');
+    var hudLangLabel = document.getElementById('vg-hud-lang-label');
+    var hudToggleBtn = document.getElementById('vg-hud-toggle');
+    var hudCloseBtn = document.getElementById('vg-hud-close');
+    var mainTrigger = document.getElementById('btn-voice-guide');
+    var navTrigger = document.getElementById('btn-nav-voice-guide');
+    var closeBtn = document.getElementById('vg-close');
+
+    function detectLanguage() {
+      try {
+        var raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+        var code = raw.split('-')[0];
+        var match = SUPPORTED_LANGS.find(function (l) { return l.key === code; });
+        return match ? match.key : 'en';
+      } catch (e) {
+        return 'en';
+      }
+    }
+
+    function buildLangPills() {
+      var row = document.getElementById('vg-lang-row');
+      if (!row) return;
+      row.innerHTML = '';
+      SUPPORTED_LANGS.forEach(function (lang) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'vg-lang-pill' + (lang.key === currentLang ? ' active' : '');
+        btn.dataset.lang = lang.key;
+        btn.textContent = lang.flag + ' ' + lang.label;
+        btn.addEventListener('click', function () {
+          var wasPlaying = isPlaying;
+          stopGuide();
+          currentLang = lang.key;
+          document.querySelectorAll('.vg-lang-pill').forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          renderScript(currentLang);
+          updateEngineIndicator();
+          if (wasPlaying) {
+            setTimeout(function () { playGuide(0); }, 60);
+          }
+        });
+        row.appendChild(btn);
+      });
+    }
+
+    function escapeHtml(s) {
+      return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderScript(langKey) {
+      var sc = VG_SCRIPTS[langKey] || VG_SCRIPTS['en'] || '';
+      allWords = sc.trim().split(/\s+/);
+      if (scriptBox) {
+        scriptBox.innerHTML = allWords.map(function (w, i) {
+          return '<span class="vg-word" id="vg-w-' + i + '" data-idx="' + i + '">' + escapeHtml(w) + ' </span>';
+        }).join('');
+        wordSpans = allWords.map(function (_, i) {
+          return document.getElementById('vg-w-' + i);
+        });
+        scriptBox.scrollTop = 0;
+      }
+      if (hudContent && !isPlaying) {
+        hudContent.textContent = sc.substring(0, 140) + (sc.length > 140 ? '…' : '');
+      }
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      if (hudLangLabel && meta) {
+        hudLangLabel.textContent = meta.label.toUpperCase();
+      }
+      activeWordIndex = 0;
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function updateEngineIndicator(customStatus) {
+      if (!voiceInfo) return;
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      if (customStatus) {
+        voiceInfo.textContent = customStatus;
+      } else {
+        var hasNative = !!getNativeVoice(currentLang);
+        var icon = hasNative ? '🔊' : '☁️';
+        var type = hasNative ? 'Native' : 'Cloud';
+        voiceInfo.textContent = icon + ' ' + meta.label + ' (' + type + ' · ' + selectedRate + 'x)';
+      }
+    }
+
+    function updateHighlights(idx) {
+      activeWordIndex = Math.max(0, Math.min(idx, allWords.length - 1));
+
+      for (var i = 0; i < wordSpans.length; i++) {
+        var span = wordSpans[i];
+        if (!span) continue;
+        if (i < activeWordIndex) {
+          span.className = 'vg-word vg-word-spoken';
+        } else if (i === activeWordIndex) {
+          span.className = 'vg-word vg-word-active';
+          if (isPlaying && scriptBox) {
+            span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          span.className = 'vg-word';
+        }
+      }
+
+      if (hud && hudContent && showHud) {
+        var windowSize = 9;
+        var start = Math.max(0, activeWordIndex - 3);
+        var end = Math.min(allWords.length, start + windowSize);
+        if (end - start < windowSize && start > 0) {
+          start = Math.max(0, end - windowSize);
+        }
+        var hudHtml = '';
+        for (var k = start; k < end; k++) {
+          var cls = (k < activeWordIndex) ? 'vg-hud-word spoken' : (k === activeWordIndex ? 'vg-hud-word active' : 'vg-hud-word pending');
+          hudHtml += '<span class="' + cls + '">' + escapeHtml(allWords[k]) + ' </span>';
+        }
+        hudContent.innerHTML = hudHtml;
+      }
+
+      if (progressBar && allWords.length > 1) {
+        var pct = Math.min(100, Math.round((activeWordIndex / (allWords.length - 1)) * 100));
+        progressBar.style.width = pct + '%';
+      }
+    }
+
+    // ── Voice Detection ───────────────────────────────────────────────────
+    function getNativeVoice(langKey) {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      var targetCode = (meta.code || '').toLowerCase().replace('_', '-');
+      var fallbackCode = (meta.fallback || '').toLowerCase().replace('_', '-');
+      var langPrefix = meta.key.toLowerCase();
+
+      // 1. Exact match (e.g. en-IN or hi-IN)
+      var v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l === targetCode;
+      });
+      if (v) return v;
+
+      // 2. Prefix match (e.g. en or hi)
+      v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l.startsWith(langPrefix + '-') || l === langPrefix;
+      });
+      if (v) return v;
+
+      // 3. Fallback code match
+      if (fallbackCode) {
+        v = voices.find(function(item) {
+          var l = (item.lang || '').toLowerCase().replace('_', '-');
+          return l.startsWith(fallbackCode) || l === fallbackCode;
+        });
+        if (v) return v;
+      }
+      return null;
+    }
+
+    function getDefaultVoice() {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+      return voices.find(function(v) {
+        var l = (v.lang || '').toLowerCase();
+        return l.startsWith('en');
+      }) || voices[0];
+    }
+
+    // ── Chunk text for Cloud Audio (< 80 chars guarantees 200 OK) ─────────
+    function splitTextForCloud(text, maxChars) {
+      maxChars = maxChars || 80;
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var chunks = [];
+      var cur = '';
+      for (var i = 0; i < rawSentences.length; i++) {
+        var s = rawSentences[i].trim();
+        if (!s) continue;
+        if ((cur ? cur + ' ' + s : s).length <= maxChars) {
+          cur = cur ? cur + ' ' + s : s;
+        } else {
+          if (cur) chunks.push(cur.trim());
+          if (s.length > maxChars) {
+            var words = s.split(/\s+/);
+            var sub = '';
+            for (var j = 0; j < words.length; j++) {
+              var w = words[j];
+              if ((sub ? sub + ' ' + w : w).length <= maxChars) {
+                sub = sub ? sub + ' ' + w : w;
+              } else {
+                if (sub) chunks.push(sub.trim());
+                sub = w;
+              }
+            }
+            cur = sub;
+          } else {
+            cur = s;
+          }
+        }
+      }
+      if (cur && cur.trim()) chunks.push(cur.trim());
+      return chunks;
+    }
+
+    // ── Primary Play Controller ───────────────────────────────────────────
+    function playGuide(startFromWord) {
+      // Toggle Pause
+      if (isPlaying && !isPaused && arguments.length === 0) {
+        pauseGuide();
+        return;
+      }
+
+      // Toggle Resume
+      if (isPaused && arguments.length === 0) {
+        resumeGuide();
+        return;
+      }
+
+      startFromWord = typeof startFromWord === 'number' ? startFromWord : activeWordIndex;
+      startPlayback(startFromWord);
+    }
+
+    function pauseGuide() {
+      isPaused = true;
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.pause(); } catch (e) {}
+      } else if (synth) {
+        try { synth.pause(); } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      updatePlayControls(false, true);
+    }
+
+    function resumeGuide() {
+      isPaused = false;
+      isPlaying = true;
+      updatePlayControls(true, false);
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.play().catch(function(e) { console.warn('Resume notice:', e); }); } catch (e) {}
+      } else if (synth) {
+        try { synth.resume(); } catch (e) {}
+        resumeWordTicker();
+      }
+    }
+
+    function stopGuide() {
+      audioSessionId++;
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+
+      activeWordIndex = 0;
+      updatePlayControls(false, false);
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function onPlaybackFinished() {
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+      updatePlayControls(false, false);
+      if (allWords.length > 0) updateHighlights(allWords.length - 1);
+      if (progressBar) progressBar.style.width = '100%';
+      if (hudContent) {
+        hudContent.textContent = 'Voice guide narration complete. Click Play to listen again.';
+      }
+    }
+
+    function updatePlayControls(playing, paused) {
+      if (!playBtn) return;
+      if (playing) {
+        playBtn.classList.add('playing');
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playLabel) playLabel.textContent = 'Pause Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else if (paused) {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Resume Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Play Audio Guide';
+        if (stopBtn) stopBtn.disabled = true;
+      }
+    }
+
+    // ── Start Audio Playback Dispatcher ───────────────────────────────────
+    function startPlayback(startIdx) {
+      audioSessionId++;
+      var session = audioSessionId;
+
+      // Clean up previous speech
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+
+      activeWordIndex = Math.max(0, Math.min(startIdx, allWords.length - 1));
+      updateHighlights(activeWordIndex);
+
+      var remainingWords = allWords.slice(activeWordIndex);
+      var remainingText = remainingWords.join(' ');
+      if (!remainingText.trim()) {
+        onPlaybackFinished();
+        return;
+      }
+
+      isPlaying = true;
+      isPaused = false;
+      updatePlayControls(true, false);
+      if (hud && showHud) hud.style.display = 'block';
+
+      // ── Select Best Engine ──
+      var nativeVoice = getNativeVoice(currentLang);
+      if (nativeVoice) {
+        // Mode A: Native Web Speech API
+        currentEngine = 'native';
+        updateEngineIndicator();
+        playNativeStream(remainingText, activeWordIndex, nativeVoice, session);
+      } else {
+        // Mode B: High-Fidelity Cloud Audio
+        currentEngine = 'cloud';
+        updateEngineIndicator();
+        playCloudStream(remainingText, activeWordIndex, session);
+      }
+    }
+
+    // ── Engine 1: Native Speech Synthesis ─────────────────────────────────
+    function playNativeStream(text, wordOffset, voice, session) {
+      speechChunks = [];
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var curOffset = wordOffset;
+      rawSentences.forEach(function (s) {
+        var sTrim = s.trim();
+        if (!sTrim) return;
+        var count = sTrim.split(/\s+/).length;
+        speechChunks.push({
+          text: sTrim,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      startKeepAlive();
+      // 50ms delay avoids Chromium synchronous cancellation race condition
+      setTimeout(function () {
+        if (session !== audioSessionId || !isPlaying) return;
+        playNextNativeChunk(voice, session);
+      }, 50);
+    }
+
+    function playNextNativeChunk(voice, session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= speechChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = speechChunks[currentChunkIdx];
+      var utt = new SpeechSynthesisUtterance(chunk.text);
+      currentUtterance = utt; // prevent GC bug
+      utt.voice = voice;
+      utt.lang = voice.lang || 'en-US';
+      utt.rate = selectedRate;
+      utt.pitch = 1.0;
+      utt.volume = 1.0;
+
+      startWordTickerForChunk(chunk);
+
+      utt.onboundary = function (e) {
+        if (session !== audioSessionId) return;
+        if (e.name === 'word') {
+          var ratio = e.charIndex / (chunk.text.length || 1);
+          var wIdx = Math.min(chunk.wordCount - 1, Math.floor(ratio * chunk.wordCount));
+          updateHighlights(chunk.startWord + wIdx);
+        }
+      };
+
+      utt.onend = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < speechChunks.length && isPlaying) {
+          playNextNativeChunk(voice, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      utt.onerror = function (err) {
+        if (session !== audioSessionId) return;
+        if (err.error === 'canceled' || err.error === 'interrupted') return;
+        console.warn('Native speech notice:', err);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        // Fallback: If native speech encounters an error, switch to cloud audio
+        var remainingWords = allWords.slice(chunk.startWord);
+        if (remainingWords.length > 0 && isPlaying) {
+          currentEngine = 'cloud';
+          updateEngineIndicator();
+          playCloudStream(remainingWords.join(' '), chunk.startWord, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      try {
+        if (synth.paused) synth.resume();
+        synth.speak(utt);
+      } catch (e) {
+        console.warn('SpeechSynthesis speak notice:', e);
+      }
+    }
+
+    // ── Engine 2: Cloud Native Audio Stream ───────────────────────────────
+    function playCloudStream(text, wordOffset, session) {
+      var rawChunks = splitTextForCloud(text, 80);
+      cloudChunks = [];
+      var curOffset = wordOffset;
+      rawChunks.forEach(function (c) {
+        var count = c.trim().split(/\s+/).length;
+        cloudChunks.push({
+          text: c,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      playNextCloudChunk(session);
+    }
+
+    function playNextCloudChunk(session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= cloudChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = cloudChunks[currentChunkIdx];
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      var ttsLang = meta.key === 'zh' ? 'zh-CN' : meta.key;
+      var url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=' + ttsLang + '&client=tw-ob&q=' + encodeURIComponent(chunk.text);
+
+      if (!currentAudioEl) {
+        currentAudioEl = document.createElement('audio');
+        currentAudioEl.id = 'vg-cloud-audio-element';
+        currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+        currentAudioEl.style.display = 'none';
+        document.body.appendChild(currentAudioEl);
+      }
+
+      currentAudioEl.pause();
+      currentAudioEl.removeAttribute('src');
+      currentAudioEl.playbackRate = selectedRate;
+      currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+      currentAudioEl.src = url;
+
+      currentAudioEl.onplay = function () {
+        if (session !== audioSessionId) return;
+        startWordTickerForChunk(chunk);
+      };
+
+      currentAudioEl.ontimeupdate = function () {
+        if (session !== audioSessionId || !currentAudioEl.duration) return;
+        var progress = currentAudioEl.currentTime / currentAudioEl.duration;
+        var wIdx = Math.min(chunk.wordCount - 1, Math.floor(progress * chunk.wordCount));
+        updateHighlights(chunk.startWord + wIdx);
+      };
+
+      currentAudioEl.onended = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < cloudChunks.length && isPlaying) {
+          playNextCloudChunk(session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      currentAudioEl.onerror = function (e) {
+        if (session !== audioSessionId) return;
+        console.warn('Cloud audio notice, activating system voice fallback:', e);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        
+        // Mode C Fallback: If cloud audio fails (e.g. offline sandbox), use default English voice with subtitle sync
+        var defVoice = getDefaultVoice();
+        if (defVoice) {
+          currentEngine = 'native';
+          var isEnglishVoice = (defVoice.lang || '').toLowerCase().startsWith('en');
+          var textToSpeak = (isEnglishVoice && currentLang !== 'en')
+            ? (VG_SCRIPTS['en'] || '').trim()
+            : allWords.slice(chunk.startWord).join(' ');
+          
+          var metaLang = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+          var badgeText = (isEnglishVoice && currentLang !== 'en')
+            ? '🔊 English Narration (' + metaLang.label + ' Subtitles)'
+            : '🔊 System Audio (' + selectedRate + 'x)';
+          updateEngineIndicator(badgeText);
+          
+          playNativeStream(textToSpeak, (isEnglishVoice && currentLang !== 'en') ? 0 : chunk.startWord, defVoice, session);
+        } else {
+          currentChunkIdx++;
+          if (currentChunkIdx < cloudChunks.length && isPlaying) {
+            setTimeout(function() { playNextCloudChunk(session); }, 60);
+          } else {
+            onPlaybackFinished();
+          }
+        }
+      };
+
+      var p = currentAudioEl.play();
+      if (p !== undefined) {
+        p.catch(function (err) {
+          if (session !== audioSessionId) return;
+          console.warn('Audio play notice:', err);
+        });
+      }
+    }
+
+    // ── Word Ticker for Smooth Subtitle Tracking ──────────────────────────
+    function startWordTickerForChunk(chunk) {
+      if (wordTimer) clearInterval(wordTimer);
+      var wordsInChunk = chunk.wordCount;
+      var wpm = 145 * selectedRate;
+      var totalSec = (wordsInChunk / wpm) * 60;
+      var stepMs = Math.max(80, (totalSec * 1000) / Math.max(1, wordsInChunk));
+      var tick = 0;
+
+      wordTimer = setInterval(function () {
+        if (!isPlaying || isPaused) return;
+        tick++;
+        if (tick < wordsInChunk) {
+          updateHighlights(chunk.startWord + tick);
+        }
+      }, stepMs);
+    }
+
+    function resumeWordTicker() {
+      if (currentEngine === 'native' && currentChunkIdx < speechChunks.length) {
+        startWordTickerForChunk(speechChunks[currentChunkIdx]);
+      } else if (currentEngine === 'cloud' && currentChunkIdx < cloudChunks.length) {
+        startWordTickerForChunk(cloudChunks[currentChunkIdx]);
+      }
+    }
+
+    function startKeepAlive() {
+      if (keepAliveTimer) clearInterval(keepAliveTimer);
+      keepAliveTimer = setInterval(function () {
+        if (!isPlaying || isPaused || currentEngine !== 'native') return;
+        if (synth && synth.speaking) {
+          synth.pause();
+          synth.resume();
+        }
+      }, 10000);
+    }
+
+    // ── Interactive Themed HUD Toggle ─────────────────────────────────────
+    function toggleHud() {
+      showHud = !showHud;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.toggle('active', showHud);
+        hudToggleBtn.innerHTML = showHud 
+          ? '<i class="fa-solid fa-closed-captioning"></i> HUD: ON' 
+          : '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) {
+        hud.style.display = showHud ? 'block' : 'none';
+        if (showHud) {
+          updateHighlights(activeWordIndex);
+        }
+      }
+    }
+
+    // ── Open / Close Right-Side Dock Panel ────────────────────────────────
+    function openPanel() {
+      if (panel) panel.classList.add('open');
+      renderScript(currentLang);
+      updateEngineIndicator();
+    }
+
+    function closePanel() {
+      if (panel) panel.classList.remove('open');
+    }
+
+    // ── Event Bindings ────────────────────────────────────────────────────
+    if (playBtn) {
+      playBtn.addEventListener('click', function() {
+        // Unlock audio elements and speech synthesis on user interaction
+        if (!currentAudioEl) {
+          currentAudioEl = document.createElement('audio');
+          currentAudioEl.id = 'vg-cloud-audio-element';
+          currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+          currentAudioEl.style.display = 'none';
+          document.body.appendChild(currentAudioEl);
+        }
+        if (synth && synth.paused) {
+          try { synth.resume(); } catch (e) {}
+        }
+        playGuide();
+      });
+    }
+
+    if (stopBtn) stopBtn.addEventListener('click', function() { stopGuide(); });
+
+    if (mainTrigger) {
+      mainTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (navTrigger) {
+      navTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+    if (hudToggleBtn) hudToggleBtn.addEventListener('click', toggleHud);
+    if (hudCloseBtn) hudCloseBtn.addEventListener('click', function() {
+      showHud = false;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.remove('active');
+        hudToggleBtn.innerHTML = '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) hud.style.display = 'none';
+    });
+
+    // Rate button handling: IMMEDIATE audible change
+    document.querySelectorAll('.vg-rate-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.vg-rate-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedRate = parseFloat(btn.dataset.rate) || 1.0;
+        updateEngineIndicator();
+
+        if (currentEngine === 'cloud' && currentAudioEl) {
+          currentAudioEl.playbackRate = selectedRate;
+        } else if (currentEngine === 'native' && isPlaying && !isPaused) {
+          startPlayback(activeWordIndex);
+        }
+      });
+    });
+
+    // Click on words in script box to jump playback
+    if (scriptBox) {
+      scriptBox.addEventListener('click', function (e) {
+        var wordEl = e.target.closest('.vg-word');
+        if (!wordEl) return;
+        var idx = parseInt(wordEl.dataset.idx, 10);
+        if (!isNaN(idx)) {
+          updateHighlights(idx);
+          if (isPlaying) {
+            startPlayback(idx);
+          }
+        }
+      });
+    }
+
+    // Initialization
+    function init() {
+      currentLang = detectLanguage();
+      buildLangPills();
+      renderScript(currentLang);
+
+      function onVoicesLoaded() {
+        updateEngineIndicator();
+      }
+      if (synth) {
+        if (synth.getVoices().length > 0) onVoicesLoaded();
+        else if ('addEventListener' in synth) {
+          synth.addEventListener('voiceschanged', onVoicesLoaded);
+        } else {
+          synth.onvoiceschanged = onVoicesLoaded;
+        }
+      } else {
+        updateEngineIndicator();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+
+
+  })();
+  </script>
+  })();
+  </script>
+
+</body>
+</html>

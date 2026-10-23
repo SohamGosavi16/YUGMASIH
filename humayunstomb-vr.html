@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="referrer" content="no-referrer">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Humayun's Tomb — Realistic 3D Model | YUGMA Indian Heritage</title>
+  <meta name="description" content="The sublime prototype for the Taj Mahal, built by Empress Bega Begum and architect Mirak Mirza Ghiyas. Rises upon a grand arcaded terrace within a 30-acre Charbagh paradise garden with double-dome white marble culmination.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Sketchfab Viewer API -->
+  <script type="text/javascript" src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --gold: #dfa753;
+      --gold-bright: #ffd56b;
+      --gold-glow: rgba(223, 167, 83, 0.4);
+      --marble-white: #f5f1e8;
+      --glass-bg: rgba(9, 13, 20, 0.78);
+      --glass-border: rgba(223, 167, 83, 0.32);
+      --glass-card: rgba(14, 20, 32, 0.88);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-dark);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #f8fafc;
+    }
+
+    /* 3D Model Stage Container */
+    #viewer-stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      background: radial-gradient(circle at 50% 40%, #151d2a 0%, #080a0f 85%, #040507 100%);
+      transition: filter 0.8s ease;
+    }
+
+    #sketchfab-frame {
+      position: absolute;
+      top: -54px;
+      left: 0;
+      width: 100%;
+      height: calc(100% + 108px);
+      border: none;
+      display: block;
+    }
+
+    /* Corner Shields to eliminate owner avatar/name in top-left and Sketchfab logo in bottom-left */
+    .brand-shield-top-left {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 62px;
+      z-index: 11;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(7, 9, 14, 0.96) 0%, rgba(7, 9, 14, 0.72) 45%, transparent 100%);
+    }
+
+    .brand-shield-bottom-left {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      min-width: 210px;
+      height: 52px;
+      z-index: 12;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      padding-bottom: 4px;
+      background: linear-gradient(45deg, rgba(7, 9, 14, 0.96) 0%, rgba(7, 9, 14, 0.75) 50%, transparent 100%);
+      border-top-right-radius: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .brand-shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+      color: var(--gold-bright, #ffd56b);
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      user-select: none;
+    }
+    .brand-shield-badge i {
+      color: var(--gold, #dfa753);
+      font-size: 11px;
+    }
+
+    /* Atmosphere Lighting Overlay Filters */
+    .atmos-dawn {
+      filter: sepia(0.25) saturate(1.3) hue-rotate(-12deg) brightness(1.05) contrast(1.04);
+    }
+    .atmos-noon {
+      filter: contrast(1.06) brightness(1.08) saturate(1.02);
+    }
+    .atmos-sunset {
+      filter: sepia(0.55) saturate(1.6) hue-rotate(-22deg) contrast(1.12) brightness(0.98);
+    }
+    .atmos-moonlight {
+      filter: brightness(0.85) contrast(1.2) hue-rotate(185deg) saturate(0.65);
+    }
+
+    /* Ambient Glow behind frame */
+    #stage-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.65), inset 0 0 200px rgba(4,6,10,0.85);
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .nav-left, .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .badge-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      color: var(--marble-white);
+      text-decoration: none;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      transition: all 0.25s var(--ease);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+
+    .badge-btn:hover {
+      background: rgba(223, 167, 83, 0.2);
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(223, 167, 83, 0.25);
+    }
+
+    .badge-btn i {
+      color: var(--gold);
+      font-size: 13px;
+    }
+
+    .portal-tag {
+      display: flex;
+      flex-direction: column;
+      padding: 7px 14px;
+      background: rgba(10, 14, 22, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(223, 167, 83, 0.2);
+      border-radius: 8px;
+    }
+    .portal-tag span:first-child {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .portal-tag span:last-child {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Main Title Card */
+    #title-card {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      max-width: 380px;
+      background: var(--glass-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 22px 24px;
+      color: var(--marble-white);
+      z-index: 12;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 25px rgba(223, 167, 83, 0.12);
+      transition: all 0.35s var(--ease);
+    }
+
+    #title-card.collapsed {
+      transform: translateY(-10px);
+      padding: 12px 18px;
+    }
+    #title-card.collapsed .body-content {
+      display: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .monument-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--gold);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    h1.monument-title {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.15;
+      letter-spacing: 0.5px;
+    }
+    h1.monument-title span.hindi-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--gold-bright);
+      display: inline-block;
+      margin-left: 6px;
+    }
+
+    .btn-collapse {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .btn-collapse:hover {
+      color: var(--gold-bright);
+    }
+
+    .monument-desc {
+      font-size: 12px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 10px 0;
+      border-top: 1px solid rgba(223, 167, 83, 0.18);
+      border-bottom: 1px solid rgba(223, 167, 83, 0.18);
+    }
+    .spec-item {
+      text-align: center;
+    }
+    .spec-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold-bright);
+      display: block;
+    }
+    .spec-lbl {
+      font-size: 9.5px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .heritage-provenance {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(7, 10, 16, 0.65);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 8px 8px 0;
+    }
+    .prov-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .prov-badge {
+      font-size: 8.5px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .prov-text {
+      font-size: 11px;
+      color: #f1f5f9;
+      line-height: 1.4;
+    }
+
+    /* Interaction Hint */
+    #orbit-hint {
+      position: fixed;
+      bottom: 105px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(9, 13, 22, 0.85);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 8px 18px;
+      font-size: 11px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+      pointer-events: none;
+      backdrop-filter: blur(12px);
+      letter-spacing: 0.6px;
+      transition: opacity 1s;
+    }
+    #orbit-hint i {
+      color: var(--gold-bright);
+      font-size: 12px;
+    }
+
+    /* Bottom Floating Dock */
+    #dock-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 15;
+    }
+
+    .atmos-bar {
+      display: flex;
+      gap: 8px;
+      background: rgba(9, 13, 22, 0.88);
+      border: 1px solid var(--glass-border);
+      padding: 6px 12px;
+      border-radius: 30px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .atmos-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94a3b8;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s var(--ease);
+    }
+    .atmos-btn:hover {
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .atmos-btn.active {
+      background: rgba(223, 167, 83, 0.22);
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      box-shadow: 0 0 16px rgba(223, 167, 83, 0.35);
+    }
+
+    .view-dock {
+      display: flex;
+      gap: 8px;
+      background: rgba(14, 20, 32, 0.92);
+      border: 1px solid var(--gold-glow);
+      padding: 8px 14px;
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 30px rgba(223, 167, 83, 0.15);
+    }
+
+    .dock-btn {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(223, 167, 83, 0.2);
+      color: #cbd5e1;
+      width: 72px;
+      height: 60px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.25s var(--ease);
+    }
+    .dock-btn i {
+      font-size: 15px;
+      color: var(--gold);
+      transition: transform 0.25s var(--ease);
+    }
+    .dock-btn span {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .dock-btn:hover {
+      background: rgba(223, 167, 83, 0.15);
+      border-color: var(--gold-bright);
+      color: #fff;
+      transform: translateY(-3px);
+    }
+    .dock-btn:hover i {
+      transform: scale(1.15);
+      color: var(--gold-bright);
+    }
+    .dock-btn.active {
+      background: linear-gradient(135deg, rgba(223, 167, 83, 0.35), rgba(255, 213, 107, 0.15));
+      border-color: var(--gold-bright);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(223, 167, 83, 0.4);
+    }
+    .dock-btn.active i {
+      color: var(--gold-bright);
+      text-shadow: 0 0 10px rgba(255, 213, 107, 0.8);
+    }
+
+    /* Architectural Details Modal */
+    #info-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 5, 8, 0.85);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s var(--ease);
+    }
+    #info-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: rgba(14, 20, 32, 0.96);
+      border: 1px solid var(--gold);
+      border-radius: 22px;
+      max-width: 620px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 32px 36px;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 40px rgba(223, 167, 83, 0.25);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(223, 167, 83, 0.3);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    .modal-close:hover {
+      background: rgba(223, 167, 83, 0.3);
+      color: var(--gold-bright);
+      transform: rotate(90deg);
+    }
+
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gold-bright);
+      margin-bottom: 4px;
+    }
+    .modal-subtitle {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 22px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .modal-section {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(223, 167, 83, 0.14);
+    }
+    .modal-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .modal-section h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13.5px;
+      color: var(--gold-bright);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-section p {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #cbd5e1;
+    }
+
+    /* Toast Notifications */
+    #toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass-card);
+      border: 1px solid var(--gold);
+      border-radius: 30px;
+      padding: 10px 22px;
+      color: var(--gold-bright);
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(5px);
+    }
+
+    @media (max-width: 768px) {
+      #title-card {
+        top: 72px;
+        left: 12px;
+        right: 12px;
+        max-width: none;
+        padding: 16px 18px;
+      }
+      h1.monument-title {
+        font-size: 20px;
+      }
+      .dock-btn {
+        width: 60px;
+        height: 52px;
+      }
+      .dock-btn span {
+        font-size: 8px;
+      }
+      .atmos-btn {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
+      .portal-tag {
+        display: none;
+      }
+    }
+  </style>
+<style id="vg-master-styles">
+
+    /* ════ RIGHT-SIDE DOCKED HERITAGE VOICE GUIDE SYSTEM ════ */
+
+    /* ── Floating Microphone Trigger (Icon-Only, Same Bottom-Right Position) ── */
+    .voice-guide-fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 2px solid rgba(251, 191, 36, 0.85);
+      color: #0b0f19;
+      font-size: 1.45rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.45), 0 0 22px rgba(245, 158, 11, 0.3);
+      z-index: 99990;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .voice-guide-fab:hover {
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 12px 38px rgba(245, 158, 11, 0.7), 0 0 30px rgba(245, 158, 11, 0.45);
+      color: #000;
+    }
+    .voice-guide-fab:active { transform: scale(0.94); }
+    .voice-guide-fab span { display: none !important; }
+
+    /* ── NO SUBWINDOW BACKDROP: 3D Scene Remains Fully Visible & Interactive ── */
+    .vg-backdrop {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
+    /* ── Docked on Corner of Right Side in Middle Position ────────────────── */
+    .vg-panel {
+      position: fixed;
+      top: 50%;
+      right: 24px;
+      transform: translateY(-50%) translateX(calc(100% + 40px));
+      width: min(90vw, 420px);
+      max-height: 86vh;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .vg-panel.open {
+      transform: translateY(-50%) translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .vg-panel-inner {
+      background: rgba(8, 12, 26, 0.96);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 22px;
+      padding: 20px 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(245, 158, 11, 0.2);
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      max-height: 86vh;
+    }
+
+    .vg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+    .vg-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .vg-icon-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.15));
+      border: 1px solid rgba(245, 158, 11, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+    .vg-title-group h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #fbbf24;
+      letter-spacing: -0.01em;
+    }
+    .vg-title-group p {
+      margin: 2px 0 0 0;
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+    .vg-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Themed HUD Toggle Button (Royal Gold Pill) ── */
+    .vg-hud-toggle-btn {
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #fbbf24;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .vg-hud-toggle-btn:hover {
+      background: rgba(245, 158, 11, 0.28);
+      border-color: #fbbf24;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+      transform: translateY(-1px);
+    }
+    .vg-hud-toggle-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #fde68a;
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+    }
+
+    /* ── Themed Close Button ── */
+    .vg-close-btn {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 700;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .vg-close-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+      color: #ffffff;
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
+    }
+
+    /* ── Language Row ── */
+    .vg-lang-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      scrollbar-width: thin;
+      flex-shrink: 0;
+    }
+    .vg-lang-row::-webkit-scrollbar { height: 4px; }
+    .vg-lang-row::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 2px; }
+    .vg-lang-pill {
+      flex-shrink: 0;
+      padding: 5px 11px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .vg-lang-pill:hover { background: rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.45); color: #fff; }
+    .vg-lang-pill.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #fbbf24;
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+    }
+
+    /* ── Prominent, Crisp, High-Contrast Script Box ── */
+    .vg-script-box {
+      flex: 1;
+      min-height: 180px;
+      max-height: 290px;
+      overflow-y: auto;
+      background: rgba(4, 7, 18, 0.92);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+      scrollbar-width: thin;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+      user-select: text;
+    }
+    .vg-script-box::-webkit-scrollbar { width: 5px; }
+    .vg-script-box::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 3px; }
+    .vg-word {
+      display: inline;
+      color: #e2e8f0;
+      transition: color 0.12s ease, background-color 0.12s ease;
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 1px 2px;
+    }
+    .vg-word:hover { background: rgba(245, 158, 11, 0.2); }
+    .vg-word.vg-word-active {
+      color: #0b0f19 !important;
+      background: #fbbf24 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.85);
+    }
+    .vg-word.vg-word-spoken { color: #ffd56b; opacity: 0.92; }
+
+    /* ── Controls ── */
+    .vg-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .vg-btn {
+      flex: 1;
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .vg-play {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b0f19;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    }
+    .vg-play:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
+    .vg-play.playing {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+    }
+    .vg-stop {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+    }
+    .vg-stop:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+    .vg-stop:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Progress Bar ── */
+    .vg-progress-wrap {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .vg-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      transition: width 0.15s ease;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+
+    /* ── Distinct Speed Timeline (Audibly Changes English & All Voices) ── */
+    .vg-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .vg-rate-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .vg-rate-row span {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-right: 2px;
+    }
+    .vg-rate-btn {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .vg-rate-btn:hover { color: #fff; border-color: rgba(245, 158, 11, 0.4); }
+    .vg-rate-btn.active {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: #fbbf24;
+      color: #fbbf24;
+      font-weight: 800;
+    }
+    .vg-voice-info {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    /* ── Themed Floating Cinema Subtitle HUD on 3D Viewport ── */
+    .vg-subtitle-hud {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(88vw, 680px);
+      background: rgba(6, 10, 24, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      border-radius: 18px;
+      padding: 12px 18px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(245, 158, 11, 0.25);
+      z-index: 100000;
+      pointer-events: auto;
+      font-family: system-ui, -apple-system, sans-serif;
+      transition: all 0.25s ease;
+    }
+    .vg-hud-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .vg-hud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fbbf24;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .vg-hud-dot {
+      width: 6px;
+      height: 6px;
+      background: #fbbf24;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #fbbf24;
+      animation: vgDotPulse 1.2s infinite alternate;
+    }
+    @keyframes vgDotPulse {
+      0% { opacity: 0.4; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+    .vg-hud-title {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .vg-hud-close {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .vg-hud-close:hover {
+      color: #fff;
+      background: rgba(239, 68, 68, 0.35);
+      border-color: #ef4444;
+      transform: rotate(90deg);
+    }
+    .vg-hud-content {
+      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+      line-height: 1.55;
+      text-align: center;
+      color: #e2e8f0;
+      min-height: 2.6em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .vg-hud-content .vg-hud-word {
+      display: inline;
+      transition: color 0.12s ease, text-shadow 0.12s ease;
+      padding: 0 2px;
+    }
+    .vg-hud-content .vg-hud-word.active {
+      color: #ffd56b;
+      font-weight: 800;
+      text-shadow: 0 0 14px rgba(251, 191, 36, 0.8), 0 0 24px rgba(245, 158, 11, 0.4);
+    }
+    .vg-hud-content .vg-hud-word.spoken { color: #ffffff; opacity: 0.95; }
+    .vg-hud-content .vg-hud-word.pending { color: #64748b; opacity: 0.55; }
+
+    @media (max-width: 640px) {
+      .vg-panel {
+        right: 12px;
+        width: calc(100vw - 24px);
+        max-height: 82vh;
+      }
+      .voice-guide-fab {
+        bottom: 20px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        font-size: 1.25rem;
+      }
+      .vg-subtitle-hud {
+        width: calc(100vw - 28px);
+        bottom: 84px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- 3D Model Stage Container -->
+  <div id="viewer-stage" class="atmos-noon">
+    <!-- Direct Sketchfab Responsive Embedded 3D Viewer with Model UID 4315d7041d75471ba98902174a11b33d -->
+    <iframe
+      id="sketchfab-frame"
+      title="Humayun's Tomb - 3D Heritage Model"
+      src="https://sketchfab.com/models/4315d7041d75471ba98902174a11b33d/embed?autostart=1&internal=1&tracking=0&ui_ar=1&ui_infos=0&ui_snapshots=1&ui_stop=0&ui_theatre=1&ui_watermark=0&ui_theme=dark&camera=0&preload=1"
+      allow="autoplay; fullscreen; xr-spatial-tracking; web-share"
+      xr-spatial-tracking="true"
+      execution-while-out-of-viewport="true"
+      execution-while-not-rendered="true"
+      web-share="true"
+      allowfullscreen
+      mozallowfullscreen="true"
+      webkitallowfullscreen="true">
+    </iframe>
+  </div>
+
+  <div id="stage-vignette"></div>
+
+  <!-- Corner Shields removing owner logo in top-left & Sketchfab watermark in bottom-left -->
+  <div class="brand-shield-top-left" aria-hidden="true"></div>
+  <div class="brand-shield-bottom-left" aria-hidden="true">
+    <div class="brand-shield-badge">
+      <i class="fa-solid fa-cube"></i>
+      <span>HERITAGE 3D</span>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <a href="index.html?guest=true" class="badge-btn" title="Return to India 3D Globe">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>3D GLOBE</span>
+      </a>
+      <div class="portal-tag">
+        <span>DELHI</span>
+        <span>NIZAMUDDIN, DELHI · 1565–1572 CE (BEGA BEGUM)</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+        <button type="button" class="badge-btn" id="btn-nav-voice-guide" title="Heritage Voice Guide" style="background: rgba(223, 167, 83, 0.2); border: 1px solid rgba(223, 167, 83, 0.4); color: #dfa753;"><i class="fa-solid fa-microphone-lines"></i> <span>VOICE GUIDE</span></button>
+      <a href="all_3d_models.html" class="badge-btn" style="background: rgba(223, 167, 83, 0.2); border-color: #dfa753; color: #ffd56b;" title="View all 3D models in Vault">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>ALL 3D MODELS</span>
+      </a>
+
+      <button class="badge-btn" id="btn-audio" title="Toggle Heritage Ambient Soundscape">
+        <i class="fa-solid fa-volume-high" id="audio-icon"></i>
+        <span id="audio-text">AMBIENCE</span>
+      </button>
+
+      <button class="badge-btn" id="btn-info" title="Humayun's Tomb Architectural Details">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>DETAILS</span>
+      </button>
+
+      <button class="badge-btn" id="btn-fullscreen" title="Toggle Fullscreen Mode">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Left Info Card -->
+  <aside id="title-card">
+    <div class="card-header">
+      <div>
+        <span class="monument-subtitle">UNESCO World Heritage First Dynastic Mughal Garden Tomb</span>
+        <h1 class="monument-title">Humayun's Tomb <span class="hindi-title">(हुमायूँ का मक़बरा)</span></h1>
+      </div>
+      <button class="btn-collapse" id="btn-collapse" aria-label="Toggle details panel">
+        <i class="fa-solid fa-chevron-up"></i>
+      </button>
+    </div>
+
+    <div class="body-content">
+      <p class="monument-desc">
+        The sublime prototype for the Taj Mahal, built by Empress Bega Begum and architect Mirak Mirza Ghiyas. Rises upon a grand arcaded terrace within a 30-acre Charbagh paradise garden with double-dome white marble culmination.
+      </p>
+
+      <div class="specs-grid">
+        <div class="spec-item">
+          <span class="spec-val">Detailed 3D</span>
+          <span class="spec-lbl">Architecture</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-val">High Fidelity</span>
+          <span class="spec-lbl">Carvings</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-val">Red Sandstone & Marble</span>
+          <span class="spec-lbl">Textures</span>
+        </div>
+      </div>
+
+      <div class="heritage-provenance">
+        <div class="prov-row">
+          <span class="prov-badge"><i class="fa-solid fa-monument"></i> BUILT FOR</span>
+          <span class="prov-text"><strong>Mughal Empress Bega Begum for Emperor Humayun</strong></span>
+        </div>
+        <div class="prov-row">
+          <span class="prov-badge"><i class="fa-solid fa-location-dot"></i> PICKED FROM</span>
+          <span class="prov-text"><strong>Nizamuddin East, New Delhi (Yamuna Banks)</strong></span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Interaction Hint -->
+  <div id="orbit-hint">
+    <i class="fa-solid fa-arrows-spin"></i>
+    <span>Left Click / Touch to Orbit · Right Click / Two Fingers to Pan · Scroll to Zoom</span>
+  </div>
+
+  <!-- Bottom Interactive Floating Dock -->
+  <div id="dock-container">
+    <!-- Atmosphere Lighting Filter Bar -->
+    <div class="atmos-bar">
+      <button class="atmos-btn" data-atmos="atmos-dawn">
+        <i class="fa-regular fa-sun"></i> Dawn Blush
+      </button>
+      <button class="atmos-btn active" data-atmos="atmos-noon">
+        <i class="fa-solid fa-sun"></i> White Noon
+      </button>
+      <button class="atmos-btn" data-atmos="atmos-sunset">
+        <i class="fa-solid fa-cloud-sun"></i> Sunset Gold
+      </button>
+      <button class="atmos-btn" data-atmos="atmos-moonlight">
+        <i class="fa-solid fa-moon"></i> Moonlight
+      </button>
+    </div>
+
+    <!-- View & Guided Angles Dock -->
+    <div class="view-dock">
+      <button class="dock-btn active" id="view-facade" title="Central Pishtaq Arch & Iwan">
+        <i class="fa-solid fa-archway"></i>
+        <span>Grand Pishtaq</span>
+      </button>
+      <button class="dock-btn" id="view-dome" title="Double-Skin White Marble Dome">
+        <i class="fa-solid fa-mosque"></i>
+        <span>Marble Dome</span>
+      </button>
+      <button class="dock-btn" id="view-terrace" title="Elevated Arcaded Platform Plinth">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>Plinth Terrace</span>
+      </button>
+      <button class="dock-btn" id="view-charbagh" title="Charbagh Paradise Garden Vista">
+        <i class="fa-solid fa-tree"></i>
+        <span>Charbagh</span>
+      </button>
+      <button class="dock-btn" id="view-reset" title="Camera Reset">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>Reset 360°</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Detailed Architectural Info Modal -->
+  <div id="info-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close"><i class="fa-solid fa-xmark"></i></button>
+      <h2 class="modal-title">Humayun's Tomb Heritage</h2>
+      <div class="modal-subtitle">UNESCO World Heritage First Dynastic Mughal Garden Tomb</div>
+
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-tree"></i> Sublime Charbagh Paradise Garden</h3>
+        <p>Set within a 30-acre quadrilateral Persian garden divided into four main quadrants by causeways and waterways, symbolizing the lush Quranic gardens of Jannat.</p>
+      </div>
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-mosque"></i> Double Dome Architectural Feat</h3>
+        <p>The first building on the Indian subcontinent to employ the double dome—a high exterior dome for grand scale and a proportionate lower interior ceiling for the burial chamber.</p>
+      </div>
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-landmark"></i> Precursor to the Taj Mahal</h3>
+        <p>Introduced the octagonal chamber plan, monumental arched iwans, white marble inlays against red sandstone, and elevated podium later perfected at Agra in the Taj Mahal.</p>
+      </div>
+
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-landmark-dome"></i> Monument Provenance & Heritage</h3>
+        <p>This interactive 3D digital model showcases the living architectural heritage of <strong>Humayun's Tomb</strong>, located in <strong>Nizamuddin East, New Delhi (Yamuna Banks)</strong> and built for <strong>Mughal Empress Bega Begum for Emperor Humayun</strong>. Curated for interactive preservation and cultural learning.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Toast Message -->
+  <div id="toast">Perspective Updated</div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var stage = document.getElementById('viewer-stage');
+      var iframe = document.getElementById('sketchfab-frame');
+      var toast = document.getElementById('toast');
+      var titleCard = document.getElementById('title-card');
+      var collapseBtn = document.getElementById('btn-collapse');
+      var infoModal = document.getElementById('info-modal');
+      var infoBtn = document.getElementById('btn-info');
+      var modalClose = document.getElementById('modal-close');
+      var fullscreenBtn = document.getElementById('btn-fullscreen');
+      var audioBtn = document.getElementById('btn-audio');
+      var audioIcon = document.getElementById('audio-icon');
+      var audioText = document.getElementById('audio-text');
+      var sketchfabApi = null;
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function () {
+          toast.classList.remove('show');
+        }, 2200);
+      }
+
+      // Title Card Collapse Toggle
+      collapseBtn.addEventListener('click', function () {
+        titleCard.classList.toggle('collapsed');
+        var isCollapsed = titleCard.classList.contains('collapsed');
+        collapseBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-chevron-down"></i>' : '<i class="fa-solid fa-chevron-up"></i>';
+      });
+
+      // Info Modal Open / Close
+      infoBtn.addEventListener('click', function () {
+        infoModal.classList.add('active');
+      });
+      modalClose.addEventListener('click', function () {
+        infoModal.classList.remove('active');
+      });
+      infoModal.addEventListener('click', function (e) {
+        if (e.target === infoModal) infoModal.classList.remove('active');
+      });
+
+      // Atmosphere Lighting Filter Switching
+      var atmosBtns = document.querySelectorAll('.atmos-btn');
+      atmosBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          atmosBtns.forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var chosen = btn.getAttribute('data-atmos');
+          stage.className = chosen;
+          showToast(btn.textContent.trim() + " atmosphere activated");
+        });
+      });
+
+      // Fullscreen Toggle
+      fullscreenBtn.addEventListener('click', function () {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(function () {});
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+          showToast('Entered Fullscreen');
+        } else {
+          document.exitFullscreen().catch(function () {});
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+          showToast('Exited Fullscreen');
+        }
+      });
+
+      // Procedural Web Audio Ambient Soundscape
+      var audioCtx = null;
+      var isAudioPlaying = false;
+      var ambientNodes = [];
+
+      function startAmbience() {
+        try {
+          var AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!audioCtx) audioCtx = new AudioContext();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+
+          // Master Gain
+          var masterGain = audioCtx.createGain();
+          masterGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+          masterGain.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 2.5);
+          masterGain.connect(audioCtx.destination);
+          ambientNodes.push(masterGain);
+
+          // Warm Harmonic Drone
+          var baseFreqs = [138.59, 207.65, 277.18, 415.3];
+          baseFreqs.forEach(function (f, idx) {
+            var osc = audioCtx.createOscillator();
+            var oscGain = audioCtx.createGain();
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+
+            // Gentle LFO
+            var lfo = audioCtx.createOscillator();
+            lfo.frequency.setValueAtTime(0.2 + idx * 0.1, audioCtx.currentTime);
+            var lfoGain = audioCtx.createGain();
+            lfoGain.gain.setValueAtTime(1.5, audioCtx.currentTime);
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start();
+
+            oscGain.gain.setValueAtTime(0.04 / (idx + 1), audioCtx.currentTime);
+            osc.connect(oscGain);
+            oscGain.connect(masterGain);
+            osc.start();
+            ambientNodes.push(osc, lfo);
+          });
+
+          // Shimmer Air Filter
+          var bufferSize = audioCtx.sampleRate * 2;
+          var noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          var output = noiseBuffer.getChannelData(0);
+          for (var i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+          }
+          var whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          whiteNoise.loop = true;
+
+          var biquad = audioCtx.createBiquadFilter();
+          biquad.type = 'bandpass';
+          biquad.frequency.setValueAtTime(1100, audioCtx.currentTime);
+          biquad.Q.setValueAtTime(1.4, audioCtx.currentTime);
+
+          var noiseGain = audioCtx.createGain();
+          noiseGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+
+          whiteNoise.connect(biquad);
+          biquad.connect(noiseGain);
+          noiseGain.connect(masterGain);
+          whiteNoise.start();
+          ambientNodes.push(whiteNoise);
+
+          isAudioPlaying = true;
+          audioIcon.className = 'fa-solid fa-volume-high';
+          audioText.textContent = 'SOUND ON';
+          audioBtn.style.borderColor = 'var(--gold-bright)';
+          audioBtn.style.color = 'var(--gold-bright)';
+          showToast('Humayun's Tomb Soundscape Playing');
+        } catch (e) {
+          console.warn('Audio not supported or blocked:', e);
+        }
+      }
+
+      function stopAmbience() {
+        if (ambientNodes.length) {
+          ambientNodes.forEach(function (n) {
+            try {
+              if (n.stop) n.stop();
+              if (n.disconnect) n.disconnect();
+            } catch (err) {}
+          });
+          ambientNodes = [];
+        }
+        isAudioPlaying = false;
+        audioIcon.className = 'fa-solid fa-volume-xmark';
+        audioText.textContent = 'MUTED';
+        audioBtn.style.borderColor = 'var(--glass-border)';
+        audioBtn.style.color = 'var(--marble-white)';
+        showToast('Ambience Muted');
+      }
+
+      audioBtn.addEventListener('click', function () {
+        if (!isAudioPlaying) {
+          startAmbience();
+        } else {
+          stopAmbience();
+        }
+      });
+
+      // Initialize Sketchfab Client API
+      if (window.Sketchfab) {
+        try {
+          var client = new window.Sketchfab(iframe);
+          client.init('4315d7041d75471ba98902174a11b33d', {
+            success: function onSuccess(api) {
+              sketchfabApi = api;
+              api.start();
+              api.addEventListener('viewerready', function () {
+                console.log('Sketchfab Humayun's Tomb 3D Viewer Ready');
+                showToast('Humayun's Tomb 3D Model Loaded');
+              });
+            },
+            error: function onError() {
+              console.warn('Sketchfab API init fallback to standard iframe embed.');
+            },
+            autostart: 1,
+            ui_controls: 1,
+            ui_infos: 0,
+            ui_watermark: 0,
+            ui_ar: 1,
+            ui_vr: 1,
+            ui_theatre: 1,
+            preload: 1
+          });
+        } catch (err) {
+          console.log('Sketchfab client initialized directly via iframe src.');
+        }
+      }
+
+      // Dock Camera Presets
+      var dockBtns = document.querySelectorAll('.dock-btn');
+      function setDockActive(btn) {
+        dockBtns.forEach(function (b) { b.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+      }
+
+      var btn_view_facade = document.getElementById('view-facade');
+      if (btn_view_facade) {
+        btn_view_facade.addEventListener('click', function () {
+          setDockActive(btn_view_facade);
+          if (sketchfabApi && sketchfabApi.setCameraLookAt) {
+            sketchfabApi.setCameraLookAt([0, -110, 35], [0, 0, 15], 1.8, function () {});
+          }
+          showToast('Central Pishtaq Arch & Iwan');
+        });
+      }
+      var btn_view_dome = document.getElementById('view-dome');
+      if (btn_view_dome) {
+        btn_view_dome.addEventListener('click', function () {
+          setDockActive(btn_view_dome);
+          if (sketchfabApi && sketchfabApi.setCameraLookAt) {
+            sketchfabApi.setCameraLookAt([0, -50, 50], [0, 0, 25], 1.8, function () {});
+          }
+          showToast('Double-Skin White Marble Dome');
+        });
+      }
+      var btn_view_terrace = document.getElementById('view-terrace');
+      if (btn_view_terrace) {
+        btn_view_terrace.addEventListener('click', function () {
+          setDockActive(btn_view_terrace);
+          if (sketchfabApi && sketchfabApi.setCameraLookAt) {
+            sketchfabApi.setCameraLookAt([55, -60, 25], [0, 0, 12], 1.8, function () {});
+          }
+          showToast('Elevated Arcaded Platform Plinth');
+        });
+      }
+      var btn_view_charbagh = document.getElementById('view-charbagh');
+      if (btn_view_charbagh) {
+        btn_view_charbagh.addEventListener('click', function () {
+          setDockActive(btn_view_charbagh);
+          if (sketchfabApi && sketchfabApi.setCameraLookAt) {
+            sketchfabApi.setCameraLookAt([0, -140, 60], [0, 0, 10], 1.8, function () {});
+          }
+          showToast('Charbagh Paradise Garden Vista');
+        });
+      }
+      var btn_view_reset = document.getElementById('view-reset');
+      if (btn_view_reset) {
+        btn_view_reset.addEventListener('click', function () {
+          setDockActive(btn_view_reset);
+          if (sketchfabApi && sketchfabApi.recenterCamera) {
+            sketchfabApi.recenterCamera(function () {});
+          } else {
+            iframe.src = iframe.src;
+          }
+          showToast('Camera Reset');
+        });
+      }
+
+      // Fade out orbit hint after 8 seconds
+      setTimeout(function () {
+        var hint = document.getElementById('orbit-hint');
+        if (hint) hint.style.opacity = '0';
+      }, 8000);
+
+    })();
+  </script>
+
+  <!-- ══ VOICE GUIDE TRIGGER (ICON-ONLY MICROPHONE, SAME POSITION) ══ -->
+  <button id="btn-voice-guide" class="voice-guide-fab" title="Heritage Voice Guide" aria-label="Heritage Voice Guide">
+    <i class="fa-solid fa-microphone-lines"></i>
+  </button>
+
+  <!-- ══ MULTILINGUAL VOICE GUIDE (DOCKED RIGHT-SIDE MIDDLE POSITION) ══ -->
+  <div id="voice-guide-panel" class="vg-panel" role="dialog" aria-label="Heritage Voice Guide">
+    <div class="vg-panel-inner">
+      <div class="vg-header">
+        <div class="vg-header-left">
+          <div class="vg-icon-badge">🎧</div>
+          <div class="vg-title-group">
+            <h3>Humayun's Tomb · Audio Guide</h3>
+            <p>500+ Word Scholarly Narrative &amp; Subtitle Tracker</p>
+          </div>
+        </div>
+        <div class="vg-header-right">
+          <button type="button" class="vg-hud-toggle-btn active" id="vg-hud-toggle" title="Toggle Live Subtitle HUD">
+            <i class="fa-solid fa-closed-captioning"></i> HUD: ON
+          </button>
+          <button type="button" class="vg-close-btn" id="vg-close" aria-label="Close Voice Guide">✕</button>
+        </div>
+      </div>
+
+      <!-- Language selector pills -->
+      <div class="vg-lang-row" id="vg-lang-row"></div>
+
+      <!-- Script Box with Subtitle Tracker -->
+      <div class="vg-script-box" id="vg-script-box" aria-live="polite"></div>
+
+      <!-- Audio Controls -->
+      <div class="vg-controls">
+        <button class="vg-btn vg-play" id="vg-play">
+          <span id="vg-play-icon">▶</span>
+          <span id="vg-play-label">Play Audio Guide</span>
+        </button>
+        <button class="vg-btn vg-stop" id="vg-stop" disabled>
+          <span>⏹ Stop</span>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="vg-progress-wrap">
+        <div class="vg-progress-bar" id="vg-progress-bar"></div>
+      </div>
+
+      <!-- Speed Timeline -->
+      <div class="vg-bottom-row">
+        <div class="vg-rate-row">
+          <span>Speed:</span>
+          <button class="vg-rate-btn" data-rate="0.75">0.75x</button>
+          <button class="vg-rate-btn active" data-rate="1.0">1.0x</button>
+          <button class="vg-rate-btn" data-rate="1.25">1.25x</button>
+          <button class="vg-rate-btn" data-rate="1.5">1.5x</button>
+          <button class="vg-rate-btn" data-rate="1.75">1.75x</button>
+        </div>
+        <div class="vg-voice-info" id="vg-voice-info">🔊 Voice Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ THEMED FLOATING CINEMA SUBTITLE HUD ON 3D VIEWPORT ══ -->
+  <div id="vg-subtitle-hud" class="vg-subtitle-hud" style="display:none;" aria-live="polite">
+    <div class="vg-hud-header">
+      <div class="vg-hud-badge">
+        <span class="vg-hud-dot"></span>
+        <span id="vg-hud-lang-label">ENGLISH</span>
+      </div>
+      <div class="vg-hud-title">Humayun's Tomb · Synchronized Subtitles</div>
+      <button type="button" class="vg-hud-close" id="vg-hud-close" title="Hide Subtitles">✕</button>
+    </div>
+    <div class="vg-hud-content" id="vg-hud-content">
+      Click Play to start the voice guide narration with live synchronized subtitles.
+    </div>
+  </div>
+
+  <script id="vg-engine-script">
+  (function () {
+    "use strict";
+
+    var SITE_NAME = "Humayun's Tomb";
+    var SUPPORTED_LANGS = [
+      { key: 'en', code: 'en-IN', fallback: 'en-US', label: 'English', flag: '🇬🇧' },
+      { key: 'hi', code: 'hi-IN', fallback: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+      { key: 'ta', code: 'ta-IN', fallback: 'ta', label: 'தமிழ்', flag: '🇮🇳' },
+      { key: 'te', code: 'te-IN', fallback: 'te', label: 'తెలుగు', flag: '🇮🇳' },
+      { key: 'bn', code: 'bn-IN', fallback: 'bn', label: 'বাংলা', flag: '🇮🇳' },
+      { key: 'mr', code: 'mr-IN', fallback: 'mr', label: 'मराठी', flag: '🇮🇳' },
+      { key: 'gu', code: 'gu-IN', fallback: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+      { key: 'kn', code: 'kn-IN', fallback: 'kn', label: 'ಕನ್ನಡ', flag: '🇮🇳' },
+      { key: 'ml', code: 'ml-IN', fallback: 'ml', label: 'മലയാളം', flag: '🇮🇳' },
+      { key: 'pa', code: 'pa-IN', fallback: 'pa', label: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+      { key: 'fr', code: 'fr-FR', fallback: 'fr', label: 'Français', flag: '🇫🇷' },
+      { key: 'es', code: 'es-ES', fallback: 'es', label: 'Español', flag: '🇪🇸' },
+      { key: 'de', code: 'de-DE', fallback: 'de', label: 'Deutsch', flag: '🇩🇪' },
+      { key: 'ja', code: 'ja-JP', fallback: 'ja', label: '日本語', flag: '🇯🇵' },
+      { key: 'zh', code: 'zh-CN', fallback: 'zh', label: '中文', flag: '🇨🇳' }
+    ];
+
+    var VG_SCRIPTS = {"en": "Welcome to Humayun's Tomb in New Delhi, a magnificent Mughal-era monument and one of the most important landmarks in the development of garden-tomb architecture in India. As you look at the tomb before you, notice its imposing central dome, symmetrical façade, red sandstone walls and contrasting white marble details. Commissioned by Empress Bega Begum in memory of Emperor Humayun, the monument was completed in the 16th century and represents a major milestone in Mughal architecture. As you explore the complex, observe the tomb's elevated platform, arched entrances and carefully balanced proportions. The building combines Persian architectural influences with Indian craftsmanship, creating a distinctive style that would later influence the design of other Mughal monuments. One of the most striking features is the surrounding charbagh garden, divided into four principal sections by pathways and water channels. This carefully planned layout reflects the Persian concept of a garden paradise and creates a harmonious setting for the mausoleum. The wider complex contains additional tombs and historic structures, illustrating the importance of Humayun's Tomb as a royal burial site and a centre of architectural development. The monument is particularly significant because its design helped establish architectural traditions that reached their most celebrated expression in later Mughal buildings, including the Taj Mahal. In 1993, Humayun's Tomb was inscribed on the UNESCO World Heritage List, recognising its exceptional architectural and historical value. Before you leave, take a moment to appreciate how this elegant monument brings together landscape design, artistic craftsmanship and the legacy of the Mughal Empire. Through YUGMA, we invite you to discover the stories and architectural innovations that make Humayun's Tomb one of New Delhi's most treasured heritage landmarks. Thank you for exploring the heritage of Delhi with YUGMA.", "hi": "नई दिल्ली में हुमायूँ के मकबरे में आपका स्वागत है, जो मुगल काल का एक भव्य स्मारक और भारत में उद्यान-मकबरा (चारबाग) वास्तुकला के विकास का सबसे महत्वपूर्ण मील का पत्थर है। जैसे ही आप अपने सामने स्थित इस राजसी मकबरे को देखते हैं, इसके भव्य सफेद संगमरमरी दोहरे गुंबद, सममितीय मुखौटे, लाल बलुआ पत्थर की दीवारों और संगमरमर के संयोजन को देखें। 16वीं शताब्दी में महारानी बेगा बेगम द्वारा अपने पति सम्राट हुमायूँ की स्मृति में निर्मित यह स्मारक मुगल स्थापत्य कला की दिशा बदलने वाली रचना थी। परिसर का अन्वेषण करते समय, इसके ऊंचे चबूतरे, भव्य धनुषाकार मेहराबों और संतुलित अनुपातों को देखें। यह संरचना फारसी स्थापत्य प्रतिभा और भारतीय कारीगरी का अद्भुत समन्वय प्रस्तुत करती है। इसकी सबसे विशिष्ट पहचान इसके चारों ओर फैला 'चारबाग' उद्यान है, जिसे जल धाराओं और पगडंडियों द्वारा चार मुख्य भागों में विभाजित किया गया है, जो जन्नत (स्वर्ग) के बगीचे की फारसी अवधारणा का प्रतीक है। यह स्मारक इसलिए भी अत्यधिक महत्वपूर्ण है क्योंकि इसी के अभिनव स्थापत्य ने ताजमहल जैसी विश्वप्रसिद्ध इमारतों के निर्माण का मार्ग प्रशस्त किया। 1993 में हुमायूँ के मकबरे को यूनेस्को की विश्व धरोहर सूची में सम्मिलित किया गया। प्रस्थान करने से पहले, अनुभव करें कि यह सुंदर स्मारक प्राकृतिक परिदृश्य, कलात्मक शिल्प और मुगल साम्राज्य की समृद्ध विरासत को कैसे एक सूत्र में पिरोता है। युग्म (YUGMA) के माध्यम से, हम आपको हुमायूँ के मकबरे के स्थापत्य चमत्कारों को जानने के लिए आमंत्रित करते हैं। युग्म के साथ दिल्ली की ऐतिहासिक धरोहर का अनुभव करने के लिए धन्यवाद।", "ta": "புதுதில்லியில் உள்ள ஹுமாயூன் கல்லறைக்கு உங்களை அன்புடன் வரவேற்கிறோம். முகலாய தோட்டக் கல்லறை (சார்பாக்) பாணியின் முன்னோடியாகத் திகழும் இது தாஜ்மகாலின் வடிவமைப்புக்கு வழிகாட்டியாக அமைந்தது. 16 ஆம் நூற்றாண்டில் பேகா பேகம் அவர்களால் கட்டப்பட்ட இந்த இரட்டை குவிமாட சிவப்பு மணற்கல் கட்டிடம் பாரசீக மற்றும் இந்திய கட்டிடக்கலையின் உன்னத சங்கமமாகும். 1993-இல் யுனெஸ்கோ உலக பாரம்பரியத் தளமாக அறிவிக்கப்பட்டது. யுக்மா (YUGMA) வழியாக தில்லியின் ஹுமாயூன் கல்லறை பாரம்பரியத்தை அறிந்ததற்கு நன்றி.", "te": "న్యూఢిల్లీలోని హుమాయూన్ సమాధికి స్వాగతం. మొఘల్ యుగపు ఉద్యానవన సమాధి (చార్‌బాగ్) శైలికి ఆద్యమైన ఈ నిర్మాణం భావి తాజ్ మహల్ నిర్మాణానికి ప్రేరణగా నిలిచింది. 16వ శతాబ్దంలో బేగా బేగం నిర్మించిన ఈ ఎర్ర రాతి మరియు పాలరాతి కట్టడం పర్షియన్ మరియు భారతీయ నిర్మాణ శైలుల అద్భుత కలయిక. 1993 లో యునెస్కో ప్రపంచ వారసత్వ సంపదగా గుర్తింపు పొందింది. యుగ్మ (YUGMA) ద్వారా హుమాయూన్ టూంబ్ వైభవాన్ని దర్శించినందుకు ధన్యవాదాలు.", "bn": "নয়াদিল্লির হুমায়ুনের সমাধিতে আপনাকে স্বাগত। মুঘল চারবাগ শৈলীর প্রথম ও প্রধান এই স্মৃতিসৌধটি পরবর্তীতে আগ্রার তাজমহল নির্মাণের অনুপ্রেরণা জুগিয়েছিল। ১৬ শতকে সম্রাজ্ঞী বেগা বেগম কর্তৃক নির্মিত এই সমাধিসৌধ পারস্য ও ভারতীয় স্থাপত্যরীতির এক অপূর্ব মিলন। ১৯৯৩ সালে এটি ইউনেস্কো বিশ্ব ঐতিহ্যবাহী স্থান হিসেবে স্বীকৃতি লাভ করে। যুগ্ম (YUGMA)-এর সাথে হুমায়ুনের সমাধিসৌধের অনন্য স্থাপত্য দর্শন করার জন্য ধন্যবাদ।", "mr": "नवी दिल्लीतील हुमायूँच्या मकबऱ्यात आपले सहर्ष स्वागत आहे! मुघल काळातील उद्यान-मकबरा (चारबाग) स्थापत्यशैलीचा हा आद्य आणि भव्य आविष्कार आहे. १६ व्या शतकात राणी बेगा बेगम यांनी सम्राट हुमायूँच्या स्मरणार्थ बांधलेली ही वास्तू ताजमहालाची पूर्वगामी मानली जाते. लाल वालुकाश्म आणि पांढऱ्या संगमरवराचा भव्य दुहेरी घुमट आणि सभोवतालचा निसर्गरम्य चारबाग परिसर अत्यंत मनमोहक आहे. १९९३ मध्ये याला युनेस्को जागतिक वारसा घोषित करण्यात आले. युग्मच्या (YUGMA) माध्यमातून दिल्लीच्या या अद्वितीय मुघल वारशाचा अनुभव घेतल्याबद्दल मनःपूर्वक धन्यवाद!", "gu": "નવી દિલ્હીના હુમાયુના મકબરા ખાતે આપનું હાર્દિક સ્વાગત છે. મુઘલ બગીચા-મકબરા શૈલી (ચારબાગ)ની આ પ્રથમ ભવ્ય ઇમારત છે જેણે તાજમહેલના નિર્માણનો પાયો નાખ્યો હતો. ૧૬મી સદીમાં બેગા બેગમ દ્વારા નિર્મિત આ સ્થાપત્ય ઈરાની અને ભારતીય કલાનું સુંદર મિશ્રણ છે. ૧૯૯૩માં તેને યુનેસ્કો વર્લ્ડ હેરિટેજ જાહેર કરાયું હતું. યુગ્મ (YUGMA) સાથે દિલ્હીના આ ભવ્ય વારસાને માણવા બદલ આભાર.", "kn": "ನವದೆಹಲಿಯ ಹುಮಾಯೂನ್ ಸಮಾಧಿಗೆ ಸುಸ್ವಾಗತ. ಮೊಘಲ್ ಯುಗದ ಚಾರ್‌ಬಾಗ್ ಉದ್ಯಾನ ಸಮಾಧಿ ಶೈಲಿಯ ಮೊದಲ ಮೇರುಕೃತಿಯಾದ ಇದು ತಾಜ್ ಮಹಲ್ ನಿರ್ಮಾಣಕ್ಕೆ ಮಾದರಿಯಾಯಿತು. ೧೬ ನೇ ಶತಮಾನದಲ್ಲಿ ರಾಣಿ ಬೇಗಾ ಬೇಗಂ ಅವರಿಂದ ನಿರ್ಮಿಸಲ್ಪಟ್ಟ ಈ ಸುಂದರ ಕಟ್ಟಡವು ಪರ್ಷಿಯನ್ ಮತ್ತು ಭಾರತೀಯ ಕಲಾ ಶೈಲಿಯ ಅದ್ಭುತ ಸಂಗಮವಾಗಿದೆ. ೧೯೯೩ ರಲ್ಲಿ ಇದು ಯುನೆಸ್ಕೋ ವಿಶ್ವ ಪರಂಪರೆಯ ತಾಣವಾಯಿತು. ಯುಗ್ಮ (YUGMA) ಮೂಲಕ ಈ ಐತಿಹಾಸಿಕ ತಾಣವನ್ನು ವೀಕ್ಷಿಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು.", "ml": "ന്യൂഡൽഹിയിലെ ഹുമയൂണിന്റെ ശവകുടീരത്തിലേക്ക് സ്വാഗതം. മുഗൾ ചാർബാഗ് ശൈലിയിലുള്ള ആദ്യത്തെ ഉദ്യാന ശവകുടീരമായ ഇത് താജ്മഹലിന്റെ നിർമ്മാണത്തിന് പ്രചോദനമായി. 16-ാം നൂറ്റാണ്ടിൽ ബേഗാ ബീഗം പണികഴിപ്പിച്ച ഈ ഇരട്ട താഴികക്കുട നിർമ്മിതി പേർഷ്യൻ-ഇന്ത്യൻ വാസ്തുവിദ്യയുടെ വിസ്മയമാണ്. 1993-ൽ യുനെസ്കോ ലോക പൈതൃകമായി പ്രഖ്യാപിച്ചു. യുഗ്മ (YUGMA) യിലൂടെ ഹുമയൂൺ ടൂമ്പിന്റെ പൈതൃകം അനുഭവിച്ചറിഞ്ഞതിന് നന്ദി.", "pa": "ਨਵੀਂ ਦਿੱਲੀ ਦੇ ਹੁਮਾਯੂੰ ਦੇ ਮਕਬਰੇ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ। ਮੁਗ਼ਲ ਚਾਰਬਾਗ਼ ਸ਼ੈਲੀ ਦਾ ਇਹ ਪਹਿਲਾ ਸ਼ਾਹੀ ਮਕਬਰਾ ਬਾਅਦ ਵਿੱਚ ਤਾਜ ਮਹਿਲ ਦੇ ਨਿਰਮਾਣ ਦੀ ਪ੍ਰੇਰਨਾ ਬਣਿਆ। 16ਵੀਂ ਸਦੀ ਵਿੱਚ ਬੇਗਾ ਬੇਗ਼ਮ ਦੁਆਰਾ ਬਣਾਇਆ ਗਿਆ ਇਹ ਸ਼ਾਨਦਾਰ ਮਕਬਰਾ 1993 ਵਿੱਚ ਯੂਨੈਸਕੋ ਵਿਸ਼ਵ ਵਿਰਾਸਤ ਐਲਾਨਿਆ ਗਿਆ। ਯੁਗਮ (YUGMA) ਨਾਲ ਦਿੱਲੀ ਦੇ ਇਸ ਇਤਿਹਾਸਕ ਮਕਬਰੇ ਨੂੰ ਜਾਣਨ ਲਈ ਧੰਨਵਾਦ।", "fr": "Bienvenue au Tombeau de Humayun à New Delhi, un chef-d'œuvre magistral de l'architecture moghole et le tout premier exemple de tombeau-jardin (Charbagh) en Inde. Commandité au XVIe siècle par l'impératrice Bega Begum, son majestueux dôme de marbre blanc et sa symétrie parfaite ont préfiguré le chef-d'œuvre du Taj Mahal. Inscrit au patrimoine mondial de l'UNESCO en 1993. À travers YUGMA, merci de partager la découverte des trésors artistiques de Delhi.", "es": "Bienvenido a la Tumba de Humayun en Nueva Delhi, el primer gran mausoleo-jardín mogol (Charbagh) de la India y modelo directo de inspiración para el Taj Mahal. Construida en el siglo XVI bajo el mecenazgo de la emperatriz Bega Begum, combina el arte persa y la maestría india en arenisca roja y mármol blanco. Patrimonio de la Humanidad por la UNESCO desde 1993. A través de YUGMA, gracias por descubrir con nosotros esta joya de Delhi.", "de": "Willkommen beim Humayun-Mausoleum in Neu-Delhi, dem ersten monumentalen Mogul-Gartengrab (Charbagh) Indiens und der direkten architektonischen Inspiration für das Taj Mahal. Im 16. Jahrhundert von Kaiserin Bega Begum in Auftrag gegeben, vereint es persische Harmonie mit indischer Steinmetzkunst. Seit 1993 UNESCO-Weltkulturerbe. Vielen Dank, dass Sie dieses Meisterwerk mit YUGMA erkunden.", "ja": "ニューデリーのフマーユーン廟へようこそ。ムガル帝国初期の壮大な庭園墓廟（チャールバーグ様式）であり、後のタージ・マハルの直接の原型となった傑作です。16世紀に皇妃ベガ・ベーグムにより建立され、二重の白大理石ドームと赤砂岩の調和が息をのむ美しさを誇ります。1993年にユネスコ世界遺産に登録。YUGMAと共に、デリーの比類なきムガル建築遺産をご体験いただき、誠にありがとうございます。", "zh": "欢迎来到新德里的胡马雍陵（Humayun's Tomb）。这是莫卧儿帝国首座宏伟的花园陵寝（四分花园风格），也是后来举世闻名的泰姬陵的建筑灵感来源。建于16世纪，由比加·贝姆皇后为纪念胡马雍大帝而主持修建，将波斯建筑的高雅对称与印度精湛的石雕工艺完美融合。1993年被列入世界遗产名录。感谢您通过 YUGMA 探索新德里辉煌灿烂的莫卧儿建筑瑰宝。"};
+
+    var currentLang = 'en';
+    var isPlaying = false;
+    var isPaused = false;
+    var selectedRate = 1.0;
+    var showHud = true;
+    var currentEngine = 'native'; // 'native' or 'cloud'
+    var audioSessionId = 0;
+
+    // Trackers
+    var wordSpans = [];
+    var allWords = [];
+    var activeWordIndex = 0;
+    var wordTimer = null;
+    var keepAliveTimer = null;
+    var synth = ('speechSynthesis' in window) ? window.speechSynthesis : null;
+    var currentUtterance = null;
+    var speechChunks = [];
+    var currentChunkIdx = 0;
+    var cloudChunks = [];
+    var currentAudioEl = null;
+
+    // DOM Elements
+    var playBtn = document.getElementById('vg-play');
+    var playIcon = document.getElementById('vg-play-icon');
+    var playLabel = document.getElementById('vg-play-label');
+    var stopBtn = document.getElementById('vg-stop');
+    var scriptBox = document.getElementById('vg-script-box');
+    var progressBar = document.getElementById('vg-progress-bar');
+    var voiceInfo = document.getElementById('vg-voice-info');
+    var panel = document.getElementById('voice-guide-panel');
+    var hud = document.getElementById('vg-subtitle-hud');
+    var hudContent = document.getElementById('vg-hud-content');
+    var hudLangLabel = document.getElementById('vg-hud-lang-label');
+    var hudToggleBtn = document.getElementById('vg-hud-toggle');
+    var hudCloseBtn = document.getElementById('vg-hud-close');
+    var mainTrigger = document.getElementById('btn-voice-guide');
+    var navTrigger = document.getElementById('btn-nav-voice-guide');
+    var closeBtn = document.getElementById('vg-close');
+
+    function detectLanguage() {
+      try {
+        var raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+        var code = raw.split('-')[0];
+        var match = SUPPORTED_LANGS.find(function (l) { return l.key === code; });
+        return match ? match.key : 'en';
+      } catch (e) {
+        return 'en';
+      }
+    }
+
+    function buildLangPills() {
+      var row = document.getElementById('vg-lang-row');
+      if (!row) return;
+      row.innerHTML = '';
+      SUPPORTED_LANGS.forEach(function (lang) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'vg-lang-pill' + (lang.key === currentLang ? ' active' : '');
+        btn.dataset.lang = lang.key;
+        btn.textContent = lang.flag + ' ' + lang.label;
+        btn.addEventListener('click', function () {
+          var wasPlaying = isPlaying;
+          stopGuide();
+          currentLang = lang.key;
+          document.querySelectorAll('.vg-lang-pill').forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          renderScript(currentLang);
+          updateEngineIndicator();
+          if (wasPlaying) {
+            setTimeout(function () { playGuide(0); }, 60);
+          }
+        });
+        row.appendChild(btn);
+      });
+    }
+
+    function escapeHtml(s) {
+      return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderScript(langKey) {
+      var sc = VG_SCRIPTS[langKey] || VG_SCRIPTS['en'] || '';
+      allWords = sc.trim().split(/\s+/);
+      if (scriptBox) {
+        scriptBox.innerHTML = allWords.map(function (w, i) {
+          return '<span class="vg-word" id="vg-w-' + i + '" data-idx="' + i + '">' + escapeHtml(w) + ' </span>';
+        }).join('');
+        wordSpans = allWords.map(function (_, i) {
+          return document.getElementById('vg-w-' + i);
+        });
+        scriptBox.scrollTop = 0;
+      }
+      if (hudContent && !isPlaying) {
+        hudContent.textContent = sc.substring(0, 140) + (sc.length > 140 ? '…' : '');
+      }
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      if (hudLangLabel && meta) {
+        hudLangLabel.textContent = meta.label.toUpperCase();
+      }
+      activeWordIndex = 0;
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function updateEngineIndicator(customStatus) {
+      if (!voiceInfo) return;
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      if (customStatus) {
+        voiceInfo.textContent = customStatus;
+      } else {
+        var hasNative = !!getNativeVoice(currentLang);
+        var icon = hasNative ? '🔊' : '☁️';
+        var type = hasNative ? 'Native' : 'Cloud';
+        voiceInfo.textContent = icon + ' ' + meta.label + ' (' + type + ' · ' + selectedRate + 'x)';
+      }
+    }
+
+    function updateHighlights(idx) {
+      activeWordIndex = Math.max(0, Math.min(idx, allWords.length - 1));
+
+      for (var i = 0; i < wordSpans.length; i++) {
+        var span = wordSpans[i];
+        if (!span) continue;
+        if (i < activeWordIndex) {
+          span.className = 'vg-word vg-word-spoken';
+        } else if (i === activeWordIndex) {
+          span.className = 'vg-word vg-word-active';
+          if (isPlaying && scriptBox) {
+            span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          span.className = 'vg-word';
+        }
+      }
+
+      if (hud && hudContent && showHud) {
+        var windowSize = 9;
+        var start = Math.max(0, activeWordIndex - 3);
+        var end = Math.min(allWords.length, start + windowSize);
+        if (end - start < windowSize && start > 0) {
+          start = Math.max(0, end - windowSize);
+        }
+        var hudHtml = '';
+        for (var k = start; k < end; k++) {
+          var cls = (k < activeWordIndex) ? 'vg-hud-word spoken' : (k === activeWordIndex ? 'vg-hud-word active' : 'vg-hud-word pending');
+          hudHtml += '<span class="' + cls + '">' + escapeHtml(allWords[k]) + ' </span>';
+        }
+        hudContent.innerHTML = hudHtml;
+      }
+
+      if (progressBar && allWords.length > 1) {
+        var pct = Math.min(100, Math.round((activeWordIndex / (allWords.length - 1)) * 100));
+        progressBar.style.width = pct + '%';
+      }
+    }
+
+    // ── Voice Detection ───────────────────────────────────────────────────
+    function getNativeVoice(langKey) {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      var targetCode = (meta.code || '').toLowerCase().replace('_', '-');
+      var fallbackCode = (meta.fallback || '').toLowerCase().replace('_', '-');
+      var langPrefix = meta.key.toLowerCase();
+
+      // 1. Exact match (e.g. en-IN or hi-IN)
+      var v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l === targetCode;
+      });
+      if (v) return v;
+
+      // 2. Prefix match (e.g. en or hi)
+      v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l.startsWith(langPrefix + '-') || l === langPrefix;
+      });
+      if (v) return v;
+
+      // 3. Fallback code match
+      if (fallbackCode) {
+        v = voices.find(function(item) {
+          var l = (item.lang || '').toLowerCase().replace('_', '-');
+          return l.startsWith(fallbackCode) || l === fallbackCode;
+        });
+        if (v) return v;
+      }
+      return null;
+    }
+
+    function getDefaultVoice() {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+      return voices.find(function(v) {
+        var l = (v.lang || '').toLowerCase();
+        return l.startsWith('en');
+      }) || voices[0];
+    }
+
+    // ── Chunk text for Cloud Audio (< 80 chars guarantees 200 OK) ─────────
+    function splitTextForCloud(text, maxChars) {
+      maxChars = maxChars || 80;
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var chunks = [];
+      var cur = '';
+      for (var i = 0; i < rawSentences.length; i++) {
+        var s = rawSentences[i].trim();
+        if (!s) continue;
+        if ((cur ? cur + ' ' + s : s).length <= maxChars) {
+          cur = cur ? cur + ' ' + s : s;
+        } else {
+          if (cur) chunks.push(cur.trim());
+          if (s.length > maxChars) {
+            var words = s.split(/\s+/);
+            var sub = '';
+            for (var j = 0; j < words.length; j++) {
+              var w = words[j];
+              if ((sub ? sub + ' ' + w : w).length <= maxChars) {
+                sub = sub ? sub + ' ' + w : w;
+              } else {
+                if (sub) chunks.push(sub.trim());
+                sub = w;
+              }
+            }
+            cur = sub;
+          } else {
+            cur = s;
+          }
+        }
+      }
+      if (cur && cur.trim()) chunks.push(cur.trim());
+      return chunks;
+    }
+
+    // ── Primary Play Controller ───────────────────────────────────────────
+    function playGuide(startFromWord) {
+      // Toggle Pause
+      if (isPlaying && !isPaused && arguments.length === 0) {
+        pauseGuide();
+        return;
+      }
+
+      // Toggle Resume
+      if (isPaused && arguments.length === 0) {
+        resumeGuide();
+        return;
+      }
+
+      startFromWord = typeof startFromWord === 'number' ? startFromWord : activeWordIndex;
+      startPlayback(startFromWord);
+    }
+
+    function pauseGuide() {
+      isPaused = true;
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.pause(); } catch (e) {}
+      } else if (synth) {
+        try { synth.pause(); } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      updatePlayControls(false, true);
+    }
+
+    function resumeGuide() {
+      isPaused = false;
+      isPlaying = true;
+      updatePlayControls(true, false);
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.play().catch(function(e) { console.warn('Resume notice:', e); }); } catch (e) {}
+      } else if (synth) {
+        try { synth.resume(); } catch (e) {}
+        resumeWordTicker();
+      }
+    }
+
+    function stopGuide() {
+      audioSessionId++;
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+
+      activeWordIndex = 0;
+      updatePlayControls(false, false);
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function onPlaybackFinished() {
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+      updatePlayControls(false, false);
+      if (allWords.length > 0) updateHighlights(allWords.length - 1);
+      if (progressBar) progressBar.style.width = '100%';
+      if (hudContent) {
+        hudContent.textContent = 'Voice guide narration complete. Click Play to listen again.';
+      }
+    }
+
+    function updatePlayControls(playing, paused) {
+      if (!playBtn) return;
+      if (playing) {
+        playBtn.classList.add('playing');
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playLabel) playLabel.textContent = 'Pause Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else if (paused) {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Resume Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Play Audio Guide';
+        if (stopBtn) stopBtn.disabled = true;
+      }
+    }
+
+    // ── Start Audio Playback Dispatcher ───────────────────────────────────
+    function startPlayback(startIdx) {
+      audioSessionId++;
+      var session = audioSessionId;
+
+      // Clean up previous speech
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+
+      activeWordIndex = Math.max(0, Math.min(startIdx, allWords.length - 1));
+      updateHighlights(activeWordIndex);
+
+      var remainingWords = allWords.slice(activeWordIndex);
+      var remainingText = remainingWords.join(' ');
+      if (!remainingText.trim()) {
+        onPlaybackFinished();
+        return;
+      }
+
+      isPlaying = true;
+      isPaused = false;
+      updatePlayControls(true, false);
+      if (hud && showHud) hud.style.display = 'block';
+
+      // ── Select Best Engine ──
+      var nativeVoice = getNativeVoice(currentLang);
+      if (nativeVoice) {
+        // Mode A: Native Web Speech API
+        currentEngine = 'native';
+        updateEngineIndicator();
+        playNativeStream(remainingText, activeWordIndex, nativeVoice, session);
+      } else {
+        // Mode B: High-Fidelity Cloud Audio
+        currentEngine = 'cloud';
+        updateEngineIndicator();
+        playCloudStream(remainingText, activeWordIndex, session);
+      }
+    }
+
+    // ── Engine 1: Native Speech Synthesis ─────────────────────────────────
+    function playNativeStream(text, wordOffset, voice, session) {
+      speechChunks = [];
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var curOffset = wordOffset;
+      rawSentences.forEach(function (s) {
+        var sTrim = s.trim();
+        if (!sTrim) return;
+        var count = sTrim.split(/\s+/).length;
+        speechChunks.push({
+          text: sTrim,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      startKeepAlive();
+      // 50ms delay avoids Chromium synchronous cancellation race condition
+      setTimeout(function () {
+        if (session !== audioSessionId || !isPlaying) return;
+        playNextNativeChunk(voice, session);
+      }, 50);
+    }
+
+    function playNextNativeChunk(voice, session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= speechChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = speechChunks[currentChunkIdx];
+      var utt = new SpeechSynthesisUtterance(chunk.text);
+      currentUtterance = utt; // prevent GC bug
+      utt.voice = voice;
+      utt.lang = voice.lang || 'en-US';
+      utt.rate = selectedRate;
+      utt.pitch = 1.0;
+      utt.volume = 1.0;
+
+      startWordTickerForChunk(chunk);
+
+      utt.onboundary = function (e) {
+        if (session !== audioSessionId) return;
+        if (e.name === 'word') {
+          var ratio = e.charIndex / (chunk.text.length || 1);
+          var wIdx = Math.min(chunk.wordCount - 1, Math.floor(ratio * chunk.wordCount));
+          updateHighlights(chunk.startWord + wIdx);
+        }
+      };
+
+      utt.onend = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < speechChunks.length && isPlaying) {
+          playNextNativeChunk(voice, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      utt.onerror = function (err) {
+        if (session !== audioSessionId) return;
+        if (err.error === 'canceled' || err.error === 'interrupted') return;
+        console.warn('Native speech notice:', err);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        // Fallback: If native speech encounters an error, switch to cloud audio
+        var remainingWords = allWords.slice(chunk.startWord);
+        if (remainingWords.length > 0 && isPlaying) {
+          currentEngine = 'cloud';
+          updateEngineIndicator();
+          playCloudStream(remainingWords.join(' '), chunk.startWord, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      try {
+        if (synth.paused) synth.resume();
+        synth.speak(utt);
+      } catch (e) {
+        console.warn('SpeechSynthesis speak notice:', e);
+      }
+    }
+
+    // ── Engine 2: Cloud Native Audio Stream ───────────────────────────────
+    function playCloudStream(text, wordOffset, session) {
+      var rawChunks = splitTextForCloud(text, 80);
+      cloudChunks = [];
+      var curOffset = wordOffset;
+      rawChunks.forEach(function (c) {
+        var count = c.trim().split(/\s+/).length;
+        cloudChunks.push({
+          text: c,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      playNextCloudChunk(session);
+    }
+
+    function playNextCloudChunk(session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= cloudChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = cloudChunks[currentChunkIdx];
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      var ttsLang = meta.key === 'zh' ? 'zh-CN' : meta.key;
+      var url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=' + ttsLang + '&client=tw-ob&q=' + encodeURIComponent(chunk.text);
+
+      if (!currentAudioEl) {
+        currentAudioEl = document.createElement('audio');
+        currentAudioEl.id = 'vg-cloud-audio-element';
+        currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+        currentAudioEl.style.display = 'none';
+        document.body.appendChild(currentAudioEl);
+      }
+
+      currentAudioEl.pause();
+      currentAudioEl.removeAttribute('src');
+      currentAudioEl.playbackRate = selectedRate;
+      currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+      currentAudioEl.src = url;
+
+      currentAudioEl.onplay = function () {
+        if (session !== audioSessionId) return;
+        startWordTickerForChunk(chunk);
+      };
+
+      currentAudioEl.ontimeupdate = function () {
+        if (session !== audioSessionId || !currentAudioEl.duration) return;
+        var progress = currentAudioEl.currentTime / currentAudioEl.duration;
+        var wIdx = Math.min(chunk.wordCount - 1, Math.floor(progress * chunk.wordCount));
+        updateHighlights(chunk.startWord + wIdx);
+      };
+
+      currentAudioEl.onended = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < cloudChunks.length && isPlaying) {
+          playNextCloudChunk(session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      currentAudioEl.onerror = function (e) {
+        if (session !== audioSessionId) return;
+        console.warn('Cloud audio notice, activating system voice fallback:', e);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        
+        // Mode C Fallback: If cloud audio fails (e.g. offline sandbox), use default English voice with subtitle sync
+        var defVoice = getDefaultVoice();
+        if (defVoice) {
+          currentEngine = 'native';
+          var isEnglishVoice = (defVoice.lang || '').toLowerCase().startsWith('en');
+          var textToSpeak = (isEnglishVoice && currentLang !== 'en')
+            ? (VG_SCRIPTS['en'] || '').trim()
+            : allWords.slice(chunk.startWord).join(' ');
+          
+          var metaLang = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+          var badgeText = (isEnglishVoice && currentLang !== 'en')
+            ? '🔊 English Narration (' + metaLang.label + ' Subtitles)'
+            : '🔊 System Audio (' + selectedRate + 'x)';
+          updateEngineIndicator(badgeText);
+          
+          playNativeStream(textToSpeak, (isEnglishVoice && currentLang !== 'en') ? 0 : chunk.startWord, defVoice, session);
+        } else {
+          currentChunkIdx++;
+          if (currentChunkIdx < cloudChunks.length && isPlaying) {
+            setTimeout(function() { playNextCloudChunk(session); }, 60);
+          } else {
+            onPlaybackFinished();
+          }
+        }
+      };
+
+      var p = currentAudioEl.play();
+      if (p !== undefined) {
+        p.catch(function (err) {
+          if (session !== audioSessionId) return;
+          console.warn('Audio play notice:', err);
+        });
+      }
+    }
+
+    // ── Word Ticker for Smooth Subtitle Tracking ──────────────────────────
+    function startWordTickerForChunk(chunk) {
+      if (wordTimer) clearInterval(wordTimer);
+      var wordsInChunk = chunk.wordCount;
+      var wpm = 145 * selectedRate;
+      var totalSec = (wordsInChunk / wpm) * 60;
+      var stepMs = Math.max(80, (totalSec * 1000) / Math.max(1, wordsInChunk));
+      var tick = 0;
+
+      wordTimer = setInterval(function () {
+        if (!isPlaying || isPaused) return;
+        tick++;
+        if (tick < wordsInChunk) {
+          updateHighlights(chunk.startWord + tick);
+        }
+      }, stepMs);
+    }
+
+    function resumeWordTicker() {
+      if (currentEngine === 'native' && currentChunkIdx < speechChunks.length) {
+        startWordTickerForChunk(speechChunks[currentChunkIdx]);
+      } else if (currentEngine === 'cloud' && currentChunkIdx < cloudChunks.length) {
+        startWordTickerForChunk(cloudChunks[currentChunkIdx]);
+      }
+    }
+
+    function startKeepAlive() {
+      if (keepAliveTimer) clearInterval(keepAliveTimer);
+      keepAliveTimer = setInterval(function () {
+        if (!isPlaying || isPaused || currentEngine !== 'native') return;
+        if (synth && synth.speaking) {
+          synth.pause();
+          synth.resume();
+        }
+      }, 10000);
+    }
+
+    // ── Interactive Themed HUD Toggle ─────────────────────────────────────
+    function toggleHud() {
+      showHud = !showHud;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.toggle('active', showHud);
+        hudToggleBtn.innerHTML = showHud 
+          ? '<i class="fa-solid fa-closed-captioning"></i> HUD: ON' 
+          : '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) {
+        hud.style.display = showHud ? 'block' : 'none';
+        if (showHud) {
+          updateHighlights(activeWordIndex);
+        }
+      }
+    }
+
+    // ── Open / Close Right-Side Dock Panel ────────────────────────────────
+    function openPanel() {
+      if (panel) panel.classList.add('open');
+      renderScript(currentLang);
+      updateEngineIndicator();
+    }
+
+    function closePanel() {
+      if (panel) panel.classList.remove('open');
+    }
+
+    // ── Event Bindings ────────────────────────────────────────────────────
+    if (playBtn) {
+      playBtn.addEventListener('click', function() {
+        // Unlock audio elements and speech synthesis on user interaction
+        if (!currentAudioEl) {
+          currentAudioEl = document.createElement('audio');
+          currentAudioEl.id = 'vg-cloud-audio-element';
+          currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+          currentAudioEl.style.display = 'none';
+          document.body.appendChild(currentAudioEl);
+        }
+        if (synth && synth.paused) {
+          try { synth.resume(); } catch (e) {}
+        }
+        playGuide();
+      });
+    }
+
+    if (stopBtn) stopBtn.addEventListener('click', function() { stopGuide(); });
+
+    if (mainTrigger) {
+      mainTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (navTrigger) {
+      navTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+    if (hudToggleBtn) hudToggleBtn.addEventListener('click', toggleHud);
+    if (hudCloseBtn) hudCloseBtn.addEventListener('click', function() {
+      showHud = false;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.remove('active');
+        hudToggleBtn.innerHTML = '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) hud.style.display = 'none';
+    });
+
+    // Rate button handling: IMMEDIATE audible change
+    document.querySelectorAll('.vg-rate-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.vg-rate-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedRate = parseFloat(btn.dataset.rate) || 1.0;
+        updateEngineIndicator();
+
+        if (currentEngine === 'cloud' && currentAudioEl) {
+          currentAudioEl.playbackRate = selectedRate;
+        } else if (currentEngine === 'native' && isPlaying && !isPaused) {
+          startPlayback(activeWordIndex);
+        }
+      });
+    });
+
+    // Click on words in script box to jump playback
+    if (scriptBox) {
+      scriptBox.addEventListener('click', function (e) {
+        var wordEl = e.target.closest('.vg-word');
+        if (!wordEl) return;
+        var idx = parseInt(wordEl.dataset.idx, 10);
+        if (!isNaN(idx)) {
+          updateHighlights(idx);
+          if (isPlaying) {
+            startPlayback(idx);
+          }
+        }
+      });
+    }
+
+    // Initialization
+    function init() {
+      currentLang = detectLanguage();
+      buildLangPills();
+      renderScript(currentLang);
+
+      function onVoicesLoaded() {
+        updateEngineIndicator();
+      }
+      if (synth) {
+        if (synth.getVoices().length > 0) onVoicesLoaded();
+        else if ('addEventListener' in synth) {
+          synth.addEventListener('voiceschanged', onVoicesLoaded);
+        } else {
+          synth.onvoiceschanged = onVoicesLoaded;
+        }
+      } else {
+        updateEngineIndicator();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+
+
+  })();
+  </script>
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+{
+  "stateId": "karnataka",
+  "stateName": "Karnataka",
+  "stateNameHindi": "कर्नाटक",
+  "heritage": "Hampi",
+  "heritageHindi": "हम्पी (विजयनगर साम्राज्य)",
+  "tradition": "Yakshagana",
+  "traditionHindi": "यक्षगान",
+  "location": "Vijayanagara District, Tungabhadra River Basin, Karnataka",
+  "era": "1336–1565 CE (Vijayanagara Empire, Sangama to Tuluva Dynasties)",
+  "unescoYear": "1986",
+  "tagline": "The Boulder-Strewn Capital of the Vijayanagara Empire",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "HAMPI (VIJAYANAGARA)",
+      "subtitle": "City of Victory: The Monolithic Stone Chariots & Musical Colonnades",
+      "state": "Karnataka, India",
+      "dynasty": "Vijayanagara Empire (Emperor Krishnadevaraya)",
+      "summary": "Spread across 41 square kilometers of rugged granite hills along the Tungabhadra River, Hampi is the opulent capital of the Vijayanagara Empire—celebrated by medieval Persian and Portuguese travelers as one of the richest cities of the Renaissance world."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "Rise & Zenith of the Golden Empire",
+      "content": "Founded in 1336 CE by the warrior brothers Harihara I and Bukka Raya I with the blessings of sage Vidyaranya, Hampi was known as Vijayanagara (The City of Victory) and ancient Kishkindha in the Ramayana.\n\nUnder Emperor Krishnadevaraya (1509–1529 CE), the empire reached its pinnacle of political dominance, international trade, and artistic brilliance. Foreign merchants traded rubies, diamonds, and Arab horses across vast bazaar colonnades.\n\nFollowing the fateful Battle of Talikota in 1565 CE, the capital was sacked and abandoned, leaving an open-air museum of over 1,600 surviving monuments amidst timeless boulder hills."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "The Vijayanagara Architectural Style",
+      "content": "The architecture of Hampi represents a grand synthesis of Dravidian, Hoysala, Chalukyan, and Indo-Islamic building techniques, harmoniously adapting to the natural granite geology.\n\nIconic architectural monuments include:\n• The Stone Chariot (Vijaya Vittala Temple): A breathtaking monolithic granite shrine carved in the form of a ceremonial temple chariot dedicated to Garuda, featuring functional revolving stone wheels.\n• Virupaksha Temple: The sacred heart of Hampi with a soaring 50-meter gateway tower (Raja Gopuram) continuously active since the 7th century CE.\n• Lotus Mahal & Elephant Stables: Symmetrical Indo-Islamic pavilions featuring cusped arches, vaulted ceilings, and cooling ventilation channels."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "The Musical Pillars of Vittala",
+      "content": "The Ranga Mantapa of the Vijaya Vittala Temple contains 56 monolithic musical pillars (Saptaswara pillars). Each pillar consists of a central load-bearing core column surrounded by seven slender micro-pillars sculpted from single acoustic granite blocks.\n\nWhen gently tapped with the fingers, these granite columns emit the distinct musical notes of the Indian classical octave (Sa, Re, Ga, Ma, Pa, Dha, Ni) and simulate the timbre of bells, damru, and mridangam.\n\nSurrounding panels feature intricate high-relief carvings of rearing mythical Yalis (lion-elephant beasts) with loose stone balls rolled inside their open jaws."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "Yakshagana: Theater of the Gods",
+      "content": "In Karnataka, the heroic ethos and mythological grandeur of Hampi is dramatized through Yakshagana—a vibrant, 500-year-old traditional theater form characterized by elaborate towering headgear (Mundasu), vibrant face makeup, rich silk costumes, and high-energy acrobatic dance.\n\nAccompanied by the resonant Chande drum, Maddale, and the singing Bhagavatara narrator, Yakshagana brings the Mahabharata and Ramayana epics to life under nocturnal torches."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Fascinating Riddles & Geological Marvels",
+      "content": "• Pin-Hole Camera Effect: In the Virupaksha Temple, an inverted shadow of the 50-meter high Raja Gopuram is projected naturally onto the dark interior sanctum wall through a tiny aperture 60 meters away.\n• The Diamond Bazaars: Portuguese chronicler Domingo Paes documented that precious diamonds, emeralds, and pearls were sold by the kilogram on open streets in the Hampi bazaars.\n• World's Oldest Exposed Rocks: The granite boulders surrounding Hampi belong to the Dharwar Craton, dating back 3.6 billion years—among the oldest geological formations on planet Earth."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Historical Timeline & Coordinates",
+      "content": "• 1336 CE: Foundation of Vijayanagara Empire.\n• 1509–1529 CE: Golden Age under Emperor Krishnadevaraya.\n• 1565 CE: Battle of Talikota and abandonment of the city.\n• 1986 CE: Inscribed as a UNESCO World Heritage Site.\n\nGeographic Coordinates: 15.3350° N, 76.4600° E\nAltitude: 467 meters above sea level\nLocation: Bellary/Vijayanagara District, Banks of Tungabhadra, Karnataka."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Imperial Chronicles & Archival Texts",
+      "content": "• 'A Forgotten Empire: Vijayanagar' by Robert Sewell (1900).\n• 'Chronica dos Reis de Bisnaga' by Portuguese merchants Domingo Paes and Fernão Nunes (1520–1537 CE).\n• Archaeological Survey of India: 'Hampi - World Heritage Site Guide'.\n• UNESCO World Heritage Inscription Document Ref. No. 241."
+    }
+  ]
+}

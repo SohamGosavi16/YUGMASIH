@@ -1,0 +1,66 @@
+{
+  "stateId": "tamil_nadu",
+  "stateName": "Tamil Nadu",
+  "stateNameHindi": "तमिलनाडु",
+  "heritage": "Brihadisvara Temple",
+  "heritageHindi": "बृहदीश्वर मन्दिर (तंजावुर)",
+  "tradition": "Bharatanatyam",
+  "traditionHindi": "भरतनाट्यम",
+  "location": "Thanjavur (Tanjore), Cauvery River Delta, Tamil Nadu",
+  "era": "1003–1010 CE (Chola Emperor Raja Raja Chola I)",
+  "unescoYear": "1987 (Great Living Chola Temples)",
+  "tagline": "The Granitic Wonder of Chola Imperial Architecture",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "BRIHADISVARA TEMPLE",
+      "subtitle": "The Great Temple of Thanjavur: The Monolithic Tower of Raja Raja Chola",
+      "state": "Tamil Nadu, India",
+      "dynasty": "Imperial Chola Dynasty (Raja Raja Chola I)",
+      "summary": "Dedicated to Lord Shiva as Peruvudaiyar, Brihadisvara Temple in Thanjavur is an engineering wonder sculpted entirely from 130,000 tonnes of granite, featuring a soaring 66-meter Vimana topped by an 81-tonne single granite capstone."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "The Imperial Chola Consecration",
+      "content": "Commissioned by the great maritime emperor Raja Raja Chola I following a divine vision in 1003 CE and consecrated in 1010 CE (the 25th regnal year of the emperor), the temple celebrated the vast geopolitical might of the Chola Empire, which extended across Southern India, Sri Lanka, and the Maldives.\n\nMore than a house of worship, the temple served as the administrative, economic, cultural, and spiritual epicenter of the empire, employing hundreds of dancers, musicians, brass smiths, accountants, and Vedic scholars.\n\nComprehensive Tamil inscriptions carved into the temple's granite plinth record every royal donation, the names of all 400 temple dancers (devaradiyars), and the exact gold weights of all consecrated jewelry."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "Granite Engineering & The Soaring Vimana",
+      "content": "Unlike later South Indian temples where the outer gateway towers (Gopurams) dominate the skyline, Brihadisvara is distinguished by its colossal central sanctuary tower (Vimana or Dakshina Meru) soaring 66 meters in 16 stepped pyramidal tiers.\n\nStructural feats include:\n• Interlocking Dry-Masonry: Constructed entirely without binding mortar, using precision tongue-and-groove jointing in hard crystalline granite.\n• The 81-Tonne Kumbam Capstone: A monolithic octagonal granite dome hoisted atop the 66-meter tower via an inclined 6-kilometer earth and timber ramp built from the village of Sarapallam.\n• Monolithic Nandi Bull: Carved from a single massive rock at the entrance, measuring 6 meters in length and weighing over 20 tonnes."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "108 Karana Sculptures & Chola Frescoes",
+      "content": "In the upper circumambulatory passageway (sandhara) around the sanctum sanctorum, 81 of the 108 Karanas (dance postures) codified in Bharata Muni's Natya Shastra are sculpted in high relief, depicting Lord Shiva demonstrating cosmic dance movements.\n\nBetween the inner sanctum walls exist 1,000-year-old Chola frescoes executed in the wet fresco (buono) technique, depicting Raja Raja Chola standing reverently beside his spiritual preceptor Karuvur Devar, and a celestial depiction of Shiva as Tripurantaka riding a cosmic chariot."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "Bharatanatyam: Sacred Temple Rhythm",
+      "content": "Brihadisvara Temple is the historic epicenter that codified and preserved Bharatanatyam, the ancient classical dance of Tamil Nadu. Raja Raja Chola gathered the empire's greatest dancers and musicians, endowing them with residences and land grants around the temple perimeter.\n\nEvery movement in Bharatanatyam—from the crisp geometric footwork (Adavus) and expressive eye gestures (Abhinaya) to the complex hand mudras—mirrors the sculpted temple karanas, bringing the static granite iconography to pulsating spiritual life."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Astronomical Secrets & Engineering Myths",
+      "content": "• The No-Granite Mystery: The Cauvery delta around Thanjavur is composed entirely of alluvial clay with no natural stone outcrops for 60 kilometers. 130,000 tonnes of granite were transported via elephant convoys and wooden rafts along river channels.\n• The Midday Shadow: The geometry of the multi-tiered pyramid is designed such that the shadow of the central Vimana never falls outside the vast inner temple courtyard during the solar noon.\n• Hollow Tower Geometry: The 66-meter Vimana is completely hollow inside, constructed with corbelled granite tiers that concentrate weight downward into the immense 5-meter thick foundation walls."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Historical Timeline & Coordinates",
+      "content": "• 1003 CE: Construction initiated by Emperor Raja Raja Chola I.\n• 1010 CE: Consecration ceremony (Kumbhabhishekam) and installation of the golden kalasam.\n• 16th–17th Century: Nayak and Maratha rulers add outer fortifications and the Subrahmanya shrine.\n• 1987 CE: Inscribed as a UNESCO World Heritage Site.\n\nGeographic Coordinates: 10.7828° N, 79.1318° E\nAltitude: 58 meters above sea level\nLocation: Thanjavur, Cauvery River Basin, Tamil Nadu."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Epigraphical Records & Archival Sources",
+      "content": "• South Indian Inscriptions (Vol. II): 'Inscriptions of the Great Temple at Tanjore' (ASI).\n• 'The Cholas' by K. A. Nilakanta Sastri.\n• Epigraphia Indica: Inscriptions of Raja Raja I on the Southern Vimana Wall.\n• UNESCO World Heritage Inscription Document Ref. No. 250."
+    }
+  ]
+}

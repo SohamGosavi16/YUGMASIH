@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Amber Fort — Fortress with Domed Pavilions & Crenellated Sandstone Walls | YUGMA Indian Heritage</title>
+  <meta name="description" content="Rising dramatically above Maota Lake amidst the rugged Aravalli hills, Amer Fort unites martial Rajput fortification with opulent courtly elegance, featuring marble courtyards, Sheesh Mahal mirror mosaics, and the Ganesh Pol gate.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Google Model-Viewer for Photorealistic PBR 3D & WebXR AR -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --gold: #dfa753;
+      --gold-bright: #ffd56b;
+      --gold-glow: rgba(223, 167, 83, 0.4);
+      --marble-white: #f5f1e8;
+      --glass-bg: rgba(9, 13, 20, 0.78);
+      --glass-border: rgba(223, 167, 83, 0.32);
+      --glass-card: rgba(14, 20, 32, 0.88);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-dark);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #f8fafc;
+    }
+
+    /* 3D Model Stage Container */
+    #viewer-stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      background: radial-gradient(circle at 50% 40%, #151d2a 0%, #080a0f 85%, #040507 100%);
+      transition: filter 0.8s ease;
+    }
+
+    #amber-model-viewer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      border: none;
+      outline: none;
+      --poster-color: transparent;
+      --progress-bar-color: var(--gold-bright);
+      --progress-bar-height: 3px;
+    }
+
+    .model-ar-button {
+      position: fixed;
+      bottom: 110px;
+      right: 28px;
+      background: linear-gradient(135deg, rgba(223, 167, 83, 0.95), rgba(255, 90, 60, 0.95));
+      color: #07090e;
+      border: 1px solid var(--gold-bright);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(223, 167, 83, 0.45);
+      z-index: 25;
+      transition: all 0.25s var(--ease);
+    }
+    .model-ar-button:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 8px 28px rgba(223, 167, 83, 0.7);
+    }
+
+    /* Corner Shields - Top navigation protection and Tripo 3D badge in bottom-left */
+    .brand-shield-top-left {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 62px;
+      z-index: 11;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(7, 9, 14, 0.96) 0%, rgba(7, 9, 14, 0.72) 45%, transparent 100%);
+    }
+
+    .brand-shield-bottom-left {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      min-width: 210px;
+      height: 52px;
+      z-index: 12;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      padding-bottom: 4px;
+      background: linear-gradient(45deg, rgba(7, 9, 14, 0.96) 0%, rgba(7, 9, 14, 0.75) 50%, transparent 100%);
+      border-top-right-radius: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .brand-shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+      color: var(--gold-bright, #ffd56b);
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      user-select: none;
+    }
+    .brand-shield-badge i {
+      color: var(--gold, #dfa753);
+      font-size: 11px;
+    }
+
+    /* Atmosphere Lighting Overlay Filters */
+    .atmos-dawn {
+      filter: sepia(0.25) saturate(1.3) hue-rotate(-12deg) brightness(1.05) contrast(1.04);
+    }
+    .atmos-noon {
+      filter: contrast(1.06) brightness(1.08) saturate(1.02);
+    }
+    .atmos-sunset {
+      filter: sepia(0.55) saturate(1.6) hue-rotate(-22deg) contrast(1.12) brightness(0.98);
+    }
+    .atmos-moonlight {
+      filter: brightness(0.85) contrast(1.2) hue-rotate(185deg) saturate(0.65);
+    }
+
+    /* Ambient Glow behind frame */
+    #stage-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.65), inset 0 0 200px rgba(4,6,10,0.85);
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .nav-left, .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .badge-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      color: var(--marble-white);
+      text-decoration: none;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      transition: all 0.25s var(--ease);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+
+    .badge-btn:hover {
+      background: rgba(223, 167, 83, 0.2);
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(223, 167, 83, 0.25);
+    }
+
+    .badge-btn i {
+      color: var(--gold);
+      font-size: 13px;
+    }
+
+    .portal-tag {
+      display: flex;
+      flex-direction: column;
+      padding: 7px 14px;
+      background: rgba(10, 14, 22, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(223, 167, 83, 0.2);
+      border-radius: 8px;
+    }
+    .portal-tag span:first-child {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .portal-tag span:last-child {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Main Title Card */
+    #title-card {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      max-width: 380px;
+      background: var(--glass-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 22px 24px;
+      color: var(--marble-white);
+      z-index: 12;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 25px rgba(223, 167, 83, 0.12);
+      transition: all 0.35s var(--ease);
+    }
+
+    #title-card.collapsed {
+      transform: translateY(-10px);
+      padding: 12px 18px;
+    }
+    #title-card.collapsed .body-content {
+      display: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .monument-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    h1.monument-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #fff1d0 50%, #dfa753 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hindi-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: rgba(223, 167, 83, 0.85);
+      margin-left: 6px;
+      -webkit-text-fill-color: initial;
+    }
+
+    .btn-collapse {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(223, 167, 83, 0.25);
+      color: var(--gold);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-collapse:hover {
+      background: var(--gold);
+      color: #04070a;
+    }
+
+    .monument-desc {
+      font-size: 12.8px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-top: 10px;
+    }
+
+    /* Model Specs Badges */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(223, 167, 83, 0.18);
+    }
+
+    .spec-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    .spec-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--gold-bright);
+      display: block;
+    }
+    .spec-lbl {
+      font-size: 9px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .heritage-provenance {
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: rgba(223, 167, 83, 0.08);
+      border: 1px solid rgba(223, 167, 83, 0.22);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .prov-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+    }
+    .prov-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .prov-badge i {
+      color: var(--gold);
+      font-size: 10px;
+    }
+    .prov-text {
+      color: #f1f5f9;
+      text-align: right;
+      font-weight: 500;
+      font-size: 11.5px;
+    }
+    .prov-text strong {
+      color: var(--gold-bright);
+      font-weight: 600;
+    }
+
+    /* Bottom Floating Dock */
+    #dock-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 15;
+      max-width: 96vw;
+    }
+
+    /* Atmosphere Selector Pill */
+    .atmos-bar {
+      display: flex;
+      align-items: center;
+      background: rgba(12, 17, 27, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(223, 167, 83, 0.3);
+      border-radius: 30px;
+      padding: 4px 6px;
+      gap: 4px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .atmos-btn {
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s var(--ease);
+    }
+    .atmos-btn:hover {
+      color: var(--marble-white);
+      background: rgba(255,255,255,0.06);
+    }
+    .atmos-btn.active {
+      background: linear-gradient(135deg, #dfa753 0%, #c98845 100%);
+      color: #06090f;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(223, 167, 83, 0.4);
+    }
+
+    /* Viewport Navigation Dock */
+    .view-dock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--glass-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 8px 12px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.55), 0 0 20px rgba(223, 167, 83, 0.15);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .dock-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 72px;
+      height: 58px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      font-family: inherit;
+    }
+
+    .dock-btn i {
+      font-size: 16px;
+      color: var(--gold);
+      transition: transform 0.2s;
+    }
+
+    .dock-btn span {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .dock-btn:hover {
+      background: rgba(223, 167, 83, 0.15);
+      border-color: var(--gold);
+      color: var(--gold-bright);
+      transform: translateY(-2px);
+    }
+    .dock-btn:hover i {
+      transform: scale(1.15);
+    }
+
+    .dock-btn.active {
+      background: linear-gradient(135deg, #dfa753 0%, #ffd56b 100%);
+      color: #06090f;
+      border-color: #ffd56b;
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(223, 167, 83, 0.4);
+    }
+    .dock-btn.active i {
+      color: #06090f;
+    }
+
+    /* Interaction Hint */
+    #orbit-hint {
+      position: fixed;
+      bottom: 124px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11.5px;
+      letter-spacing: 0.8px;
+      color: rgba(245, 241, 232, 0.5);
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(9, 13, 20, 0.6);
+      padding: 5px 14px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      transition: opacity 0.6s;
+    }
+
+    /* Info Modal Dialog */
+    #info-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 12, 0.75);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #info-modal.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0d121c;
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      max-width: 620px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(223, 167, 83, 0.2);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(223, 167, 83, 0.3);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .modal-close:hover {
+      background: var(--gold);
+      color: #04070a;
+    }
+
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      color: var(--gold-bright);
+      margin-bottom: 6px;
+    }
+
+    .modal-subtitle {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .modal-section {
+      margin-bottom: 18px;
+    }
+    .modal-section h3 {
+      font-size: 14px;
+      color: var(--gold);
+      margin-bottom: 6px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-section p {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #cbd5e1;
+    }
+
+    /* Toast Notifications */
+    #toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass-card);
+      border: 1px solid var(--gold);
+      border-radius: 30px;
+      padding: 10px 22px;
+      color: var(--gold-bright);
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(5px);
+    }
+
+    @media (max-width: 768px) {
+      #title-card {
+        top: 72px;
+        left: 12px;
+        right: 12px;
+        max-width: none;
+        padding: 16px 18px;
+      }
+      h1.monument-title {
+        font-size: 20px;
+      }
+      .dock-btn {
+        width: 60px;
+        height: 52px;
+      }
+      .dock-btn span {
+        font-size: 8px;
+      }
+      .atmos-btn {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
+      .portal-tag {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D Model Stage Container -->
+  <div id="viewer-stage" class="atmos-noon">
+    <!-- Photorealistic Tripo3D PBR Model for Amber Fort (Model ID 0b9be45a-26e8-4b24-bc78-be0793052d6d) -->
+    <model-viewer
+      id="amber-model-viewer"
+      src="amber_fort_tripo.glb"
+      poster="amber_fort_tripo_thumb.jpg"
+      alt="Amber Fort - Photorealistic 3D Model (Tripo 3D AI)"
+      auto-rotate
+      auto-rotate-delay="1000"
+      rotation-per-second="18deg"
+      camera-controls
+      touch-action="pan-y"
+      shadow-intensity="1.6"
+      shadow-softness="0.75"
+      exposure="1.05"
+      tone-mapping="aces"
+      camera-orbit="45deg 65deg auto"
+      field-of-view="35deg"
+      min-field-of-view="15deg"
+      max-field-of-view="65deg"
+      interaction-prompt="auto"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      loading="eager"
+      reveal="auto">
+      
+      <button slot="ar-button" id="custom-ar-btn" class="model-ar-button">
+        <i class="fa-solid fa-vr-cardboard"></i> VIEW IN AR
+      </button>
+    </model-viewer>
+  </div>
+
+  <div id="stage-vignette"></div>
+
+  <!-- Corner Shields -->
+  <div class="brand-shield-top-left" aria-hidden="true"></div>
+  <div class="brand-shield-bottom-left" aria-hidden="true">
+    <a href="https://studio.tripo3d.ai/3d-model/amber-fort-fortress-with-domed-pavilions-and-crenellated-sandstone-wal-0b9be45a-26e8-4b24-bc78-be0793052d6d?invite_code=TXXJMF" target="_blank" rel="noopener noreferrer" class="brand-shield-badge" style="text-decoration:none; cursor:pointer;" title="View Source Model in Tripo3D Studio">
+      <i class="fa-solid fa-cube"></i>
+      <span>TRIPO 3D AI · AMBER FORT</span>
+      <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:9px; margin-left:3px; opacity:0.8;"></i>
+    </a>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <a href="index.html" class="badge-btn" title="Return to India 3D Globe">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>3D GLOBE</span>
+      </a>
+      <div class="portal-tag">
+        <span>RAJASTHAN</span>
+        <span>JAIPUR · 1592 CE (RAJA MAN SINGH I)</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <a href="https://studio.tripo3d.ai/3d-model/amber-fort-fortress-with-domed-pavilions-and-crenellated-sandstone-wal-0b9be45a-26e8-4b24-bc78-be0793052d6d?invite_code=TXXJMF" target="_blank" rel="noopener noreferrer" class="badge-btn" style="background: rgba(147, 51, 234, 0.2); border-color: #a855f7; color: #d8b4fe;" title="Open Model in Tripo3D Studio">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>TRIPO STUDIO</span>
+      </a>
+
+      <a href="all_3d_models.html" class="badge-btn" style="background: rgba(223, 167, 83, 0.2); border-color: #dfa753; color: #ffd56b;" title="View all 3D models in Vault">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>ALL 3D MODELS</span>
+      </a>
+
+      <button class="badge-btn" id="btn-audio" title="Toggle Heritage Ambient Soundscape">
+        <i class="fa-solid fa-volume-high" id="audio-icon"></i>
+        <span id="audio-text">AMBIENCE</span>
+      </button>
+
+            <button class="badge-btn" id="btn-voice-guide-nav" title="Launch Heritage Voice Guide" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fbbf24;">
+        <i class="fa-solid fa-microphone-lines"></i>
+        <span>VOICE GUIDE</span>
+      </button>
+
+<button class="badge-btn" id="btn-info" title="Amber Fort Architectural Details">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>DETAILS</span>
+      </button>
+
+      <button class="badge-btn" id="btn-fullscreen" title="Toggle Fullscreen Mode">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Left Info Card -->
+  <aside id="title-card">
+    <div class="card-header">
+      <div>
+        <span class="monument-subtitle">UNESCO World Heritage Rajput Hill Fort · Fortress with Domed Pavilions & Crenellated Walls</span>
+        <h1 class="monument-title">Amber Fort <span class="hindi-title">(आमेर क़िला)</span></h1>
+      </div>
+      <button class="btn-collapse" id="btn-collapse" aria-label="Toggle details panel">
+        <i class="fa-solid fa-chevron-up"></i>
+      </button>
+    </div>
+
+    <div class="body-content">
+      <p class="monument-desc">
+        Rising dramatically above Maota Lake amidst the rugged Aravalli hills, Amer Fort unites martial Rajput fortification with opulent courtly elegance, featuring marble courtyards, Sheesh Mahal mirror mosaics, and the Ganesh Pol gate.
+      </p>
+
+      <div class="specs-grid">
+        <div class="spec-item">
+          <span class="spec-val">Detailed 3D</span>
+          <span class="spec-lbl">Architecture</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-val">Sandstone PBR</span>
+          <span class="spec-lbl">Carvings</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-val">Aravalli Rocks</span>
+          <span class="spec-lbl">Textures</span>
+        </div>
+      </div>
+
+      <div class="heritage-provenance">
+        <div class="prov-row">
+          <span class="prov-badge"><i class="fa-solid fa-monument"></i> BUILT FOR</span>
+          <span class="prov-text"><strong>Rajput Kachwaha Dynasty (Built by Raja Man Singh I)</strong></span>
+        </div>
+        <div class="prov-row">
+          <span class="prov-badge"><i class="fa-solid fa-location-dot"></i> PICKED FROM</span>
+          <span class="prov-text"><strong>Amer, Jaipur, Rajasthan (Aravalli Hills)</strong></span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Interaction Hint -->
+  <div id="orbit-hint">
+    <i class="fa-solid fa-arrows-spin"></i>
+    <span>Left Click / Touch to Orbit · Right Click / Two Fingers to Pan · Scroll to Zoom</span>
+  </div>
+
+  <!-- Bottom Interactive Floating Dock -->
+  <div id="dock-container">
+    <!-- Atmosphere Lighting Filter Bar -->
+    <div class="atmos-bar">
+      <button class="atmos-btn" data-atmos="atmos-dawn">
+        <i class="fa-regular fa-sun"></i> Dawn Blush
+      </button>
+      <button class="atmos-btn active" data-atmos="atmos-noon">
+        <i class="fa-solid fa-sun"></i> White Noon
+      </button>
+      <button class="atmos-btn" data-atmos="atmos-sunset">
+        <i class="fa-solid fa-cloud-sun"></i> Sunset Gold
+      </button>
+      <button class="atmos-btn" data-atmos="atmos-moonlight">
+        <i class="fa-solid fa-moon"></i> Moonlight
+      </button>
+    </div>
+
+    <!-- View & Guided Angles Dock -->
+    <div class="view-dock">
+      <button class="dock-btn active" id="view-facade" title="Aravalli Bastion Watchtower">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Watchtower</span>
+      </button>
+      <button class="dock-btn" id="view-sheesh" title="Mirror Palace (Sheesh Mahal) Reflection">
+        <i class="fa-solid fa-gem"></i>
+        <span>Sheesh Mahal</span>
+      </button>
+      <button class="dock-btn" id="view-gate" title="Ganesh Pol Royal Entrance Gate">
+        <i class="fa-solid fa-door-open"></i>
+        <span>Ganesh Pol</span>
+      </button>
+      <button class="dock-btn" id="view-lake" title="Maota Lake & Kesar Kyari Garden View">
+        <i class="fa-solid fa-water"></i>
+        <span>Maota Lake</span>
+      </button>
+      <button class="dock-btn" id="view-reset" title="Camera Reset">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>Reset 360°</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Detailed Architectural Info Modal -->
+  <div id="info-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close"><i class="fa-solid fa-xmark"></i></button>
+      <h2 class="modal-title">Amber Fort Heritage</h2>
+      <div class="modal-subtitle">UNESCO World Heritage Rajput Hill Fort & Mirror Palace Citadel</div>
+
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-gem"></i> Sheesh Mahal (Hall of Mirrors)</h3>
+        <p>The mirror palace is covered in thousands of concave imported convex mirrors that glitter brilliantly in candlelight, reflecting a single flame into a cosmic sea of stars.</p>
+      </div>
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-archway"></i> Ganesh Pol Royal Frescoes</h3>
+        <p>The majestic entrance gate is covered in vegetable-dye frescoes and latticed marble screens (Jalis) through which royal women could observe public durbars in privacy.</p>
+      </div>
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-fort-awesome"></i> Subterranean Jaigarh Tunnels</h3>
+        <p>An extensive network of subterranean escape tunnels links Amber Fort with Jaigarh Fort on the Cheel ka Teela peak above, safeguarding the Kachwaha royal family during sieges.</p>
+      </div>
+
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-cube"></i> Tripo3D Photogrammetry Model</h3>
+        <p>This 3D reconstruction is powered by <a href="https://studio.tripo3d.ai/3d-model/amber-fort-fortress-with-domed-pavilions-and-crenellated-sandstone-wal-0b9be45a-26e8-4b24-bc78-be0793052d6d?invite_code=TXXJMF" target="_blank" rel="noopener noreferrer" style="color:var(--gold-bright); text-decoration:underline;">Tripo3D AI Studio (Model 0b9be45a)</a>, rendering high-density geometry with sandstone PBR textures to faithfully showcase the fort's battlements and pavilions.</p>
+      </div>
+
+      <div class="modal-section">
+        <h3><i class="fa-solid fa-landmark-dome"></i> Monument Provenance & Heritage</h3>
+        <p>This interactive 3D digital model showcases the living architectural heritage of <strong>Amber Fort</strong>, located in <strong>Amer, Jaipur, Rajasthan (Aravalli Hills)</strong> and built for <strong>Rajput Kachwaha Dynasty (Built by Raja Man Singh I)</strong>. Curated for interactive preservation and cultural learning.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Toast Message -->
+  <div id="toast">Perspective Updated</div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var stage = document.getElementById('viewer-stage');
+      var mv = document.getElementById('amber-model-viewer');
+      var toast = document.getElementById('toast');
+      var titleCard = document.getElementById('title-card');
+      var collapseBtn = document.getElementById('btn-collapse');
+      var infoModal = document.getElementById('info-modal');
+      var infoBtn = document.getElementById('btn-info');
+      var modalClose = document.getElementById('modal-close');
+      var fullscreenBtn = document.getElementById('btn-fullscreen');
+      var audioBtn = document.getElementById('btn-audio');
+      var audioIcon = document.getElementById('audio-icon');
+      var audioText = document.getElementById('audio-text');
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function () {
+          toast.classList.remove('show');
+        }, 2200);
+      }
+
+      // Title Card Collapse Toggle
+      collapseBtn.addEventListener('click', function () {
+        titleCard.classList.toggle('collapsed');
+        var isCollapsed = titleCard.classList.contains('collapsed');
+        collapseBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-chevron-down"></i>' : '<i class="fa-solid fa-chevron-up"></i>';
+      });
+
+      // Info Modal Open / Close
+      infoBtn.addEventListener('click', function () {
+        infoModal.classList.add('active');
+      });
+      modalClose.addEventListener('click', function () {
+        infoModal.classList.remove('active');
+      });
+      infoModal.addEventListener('click', function (e) {
+        if (e.target === infoModal) infoModal.classList.remove('active');
+      });
+
+      // Atmosphere Lighting Filter Switching
+      var atmosBtns = document.querySelectorAll('.atmos-btn');
+      atmosBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          atmosBtns.forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var chosen = btn.getAttribute('data-atmos');
+          stage.className = chosen;
+          if (mv) {
+            if (chosen === 'atmos-dawn') mv.exposure = 0.9;
+            else if (chosen === 'atmos-noon') mv.exposure = 1.05;
+            else if (chosen === 'atmos-sunset') mv.exposure = 0.95;
+            else if (chosen === 'atmos-moonlight') mv.exposure = 0.65;
+          }
+          showToast(btn.textContent.trim() + " atmosphere activated");
+        });
+      });
+
+      // Fullscreen Toggle
+      fullscreenBtn.addEventListener('click', function () {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(function () {});
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+          showToast('Entered Fullscreen');
+        } else {
+          document.exitFullscreen().catch(function () {});
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+          showToast('Exited Fullscreen');
+        }
+      });
+
+      // Procedural Web Audio Ambient Soundscape
+      var audioCtx = null;
+      var isAudioPlaying = false;
+      var ambientNodes = [];
+
+      function startAmbience() {
+        try {
+          var AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!audioCtx) audioCtx = new AudioContext();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+
+          // Master Gain
+          var masterGain = audioCtx.createGain();
+          masterGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+          masterGain.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 2.5);
+          masterGain.connect(audioCtx.destination);
+          ambientNodes.push(masterGain);
+
+          // Warm Harmonic Drone
+          var baseFreqs = [146.83, 220.0, 293.66, 440.0];
+          baseFreqs.forEach(function (f, idx) {
+            var osc = audioCtx.createOscillator();
+            var oscGain = audioCtx.createGain();
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+
+            // Gentle LFO
+            var lfo = audioCtx.createOscillator();
+            lfo.frequency.setValueAtTime(0.2 + idx * 0.1, audioCtx.currentTime);
+            var lfoGain = audioCtx.createGain();
+            lfoGain.gain.setValueAtTime(1.5, audioCtx.currentTime);
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start();
+
+            oscGain.gain.setValueAtTime(0.04 / (idx + 1), audioCtx.currentTime);
+            osc.connect(oscGain);
+            oscGain.connect(masterGain);
+            osc.start();
+            ambientNodes.push(osc, lfo);
+          });
+
+          // Shimmer Air Filter
+          var bufferSize = audioCtx.sampleRate * 2;
+          var noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          var output = noiseBuffer.getChannelData(0);
+          for (var i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+          }
+          var whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          whiteNoise.loop = true;
+
+          var biquad = audioCtx.createBiquadFilter();
+          biquad.type = 'bandpass';
+          biquad.frequency.setValueAtTime(1100, audioCtx.currentTime);
+          biquad.Q.setValueAtTime(1.4, audioCtx.currentTime);
+
+          var noiseGain = audioCtx.createGain();
+          noiseGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+
+          whiteNoise.connect(biquad);
+          biquad.connect(noiseGain);
+          noiseGain.connect(masterGain);
+          whiteNoise.start();
+          ambientNodes.push(whiteNoise);
+
+          isAudioPlaying = true;
+          audioIcon.className = 'fa-solid fa-volume-high';
+          audioText.textContent = 'SOUND ON';
+          audioBtn.style.borderColor = 'var(--gold-bright)';
+          audioBtn.style.color = 'var(--gold-bright)';
+          showToast('Amber Fort Soundscape Playing');
+        } catch (e) {
+          console.warn('Audio not supported or blocked:', e);
+        }
+      }
+
+      function stopAmbience() {
+        if (ambientNodes.length) {
+          ambientNodes.forEach(function (n) {
+            try {
+              if (n.stop) n.stop();
+              if (n.disconnect) n.disconnect();
+            } catch (err) {}
+          });
+          ambientNodes = [];
+        }
+        isAudioPlaying = false;
+        audioIcon.className = 'fa-solid fa-volume-xmark';
+        audioText.textContent = 'MUTED';
+        audioBtn.style.borderColor = 'var(--glass-border)';
+        audioBtn.style.color = 'var(--marble-white)';
+        showToast('Ambience Muted');
+      }
+
+      audioBtn.addEventListener('click', function () {
+        if (!isAudioPlaying) {
+          startAmbience();
+        } else {
+          stopAmbience();
+        }
+      });
+
+      // Model-Viewer Event Handlers
+      if (mv) {
+        mv.addEventListener('load', function () {
+          console.log('Tripo 3D Amber Fort Model Loaded successfully');
+          showToast('Amber Fort 3D Model Loaded');
+        });
+        mv.addEventListener('error', function (err) {
+          console.warn('Model loading issue:', err);
+        });
+      }
+
+      // Dock Camera Presets
+      var dockBtns = document.querySelectorAll('.dock-btn');
+      function setDockActive(btn) {
+        dockBtns.forEach(function (b) { b.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+      }
+
+      var btn_view_facade = document.getElementById('view-facade');
+      if (btn_view_facade) {
+        btn_view_facade.addEventListener('click', function () {
+          setDockActive(btn_view_facade);
+          if (mv) {
+            mv.cameraOrbit = '0deg 60deg auto';
+            mv.cameraTarget = 'auto auto auto';
+          }
+          showToast('Aravalli Bastion Watchtower');
+        });
+      }
+      var btn_view_sheesh = document.getElementById('view-sheesh');
+      if (btn_view_sheesh) {
+        btn_view_sheesh.addEventListener('click', function () {
+          setDockActive(btn_view_sheesh);
+          if (mv) {
+            mv.cameraOrbit = '90deg 70deg auto';
+            mv.cameraTarget = 'auto auto auto';
+          }
+          showToast('Mirror Palace (Sheesh Mahal) Reflection');
+        });
+      }
+      var btn_view_gate = document.getElementById('view-gate');
+      if (btn_view_gate) {
+        btn_view_gate.addEventListener('click', function () {
+          setDockActive(btn_view_gate);
+          if (mv) {
+            mv.cameraOrbit = '180deg 62deg auto';
+            mv.cameraTarget = 'auto auto auto';
+          }
+          showToast('Ganesh Pol Royal Entrance Gate');
+        });
+      }
+      var btn_view_lake = document.getElementById('view-lake');
+      if (btn_view_lake) {
+        btn_view_lake.addEventListener('click', function () {
+          setDockActive(btn_view_lake);
+          if (mv) {
+            mv.cameraOrbit = '270deg 55deg auto';
+            mv.cameraTarget = 'auto auto auto';
+          }
+          showToast('Maota Lake & Kesar Kyari Garden View');
+        });
+      }
+      var btn_view_reset = document.getElementById('view-reset');
+      if (btn_view_reset) {
+        btn_view_reset.addEventListener('click', function () {
+          setDockActive(btn_view_reset);
+          if (mv) {
+            mv.cameraOrbit = '45deg 65deg auto';
+            mv.cameraTarget = 'auto auto auto';
+            mv.fieldOfView = '35deg';
+          }
+          showToast('Camera Reset 360°');
+        });
+      }
+
+      // Fade out orbit hint after 8 seconds
+      setTimeout(function () {
+        var hint = document.getElementById('orbit-hint');
+        if (hint) hint.style.opacity = '0';
+      }, 8000);
+
+    
+      // Top nav voice guide button
+      var vgNavBtn = document.getElementById('btn-voice-guide-nav');
+      if (vgNavBtn) {
+        vgNavBtn.addEventListener('click', function() {
+          var vgFab = document.getElementById('btn-voice-guide');
+          if (vgFab) vgFab.click();
+        });
+      }
+
+    })();
+  </script>
+
+</body>
+</html>

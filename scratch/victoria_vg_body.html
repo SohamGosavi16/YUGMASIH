@@ -1,0 +1,873 @@
+<!-- ══ VOICE GUIDE TRIGGER (ICON-ONLY MICROPHONE, SAME POSITION) ══ -->
+  <button id="btn-voice-guide" class="voice-guide-fab" title="Heritage Voice Guide" aria-label="Heritage Voice Guide">
+    <i class="fa-solid fa-microphone-lines"></i>
+  </button>
+
+  <!-- ══ MULTILINGUAL VOICE GUIDE (DOCKED RIGHT-SIDE MIDDLE POSITION) ══ -->
+  <div id="voice-guide-panel" class="vg-panel" role="dialog" aria-label="Heritage Voice Guide">
+    <div class="vg-panel-inner">
+      <div class="vg-header">
+        <div class="vg-header-left">
+          <div class="vg-icon-badge">🎧</div>
+          <div class="vg-title-group">
+            <h3>Victoria Memorial · Audio Guide</h3>
+            <p>500+ Word Scholarly Narrative &amp; Subtitle Tracker</p>
+          </div>
+        </div>
+        <div class="vg-header-right">
+          <button type="button" class="vg-hud-toggle-btn active" id="vg-hud-toggle" title="Toggle Live Subtitle HUD">
+            <i class="fa-solid fa-closed-captioning"></i> HUD: ON
+          </button>
+          <button type="button" class="vg-close-btn" id="vg-close" aria-label="Close Voice Guide">✕</button>
+        </div>
+      </div>
+
+      <!-- Language selector pills -->
+      <div class="vg-lang-row" id="vg-lang-row"></div>
+
+      <!-- Script Box with Subtitle Tracker -->
+      <div class="vg-script-box" id="vg-script-box" aria-live="polite"></div>
+
+      <!-- Audio Controls -->
+      <div class="vg-controls">
+        <button class="vg-btn vg-play" id="vg-play">
+          <span id="vg-play-icon">▶</span>
+          <span id="vg-play-label">Play Audio Guide</span>
+        </button>
+        <button class="vg-btn vg-stop" id="vg-stop" disabled>
+          <span>⏹ Stop</span>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="vg-progress-wrap">
+        <div class="vg-progress-bar" id="vg-progress-bar"></div>
+      </div>
+
+      <!-- Speed Timeline (Noticeable Auditory Rates for English & All Languages) -->
+      <div class="vg-bottom-row">
+        <div class="vg-rate-row">
+          <span>Speed:</span>
+          <button class="vg-rate-btn" data-rate="0.75">0.75x</button>
+          <button class="vg-rate-btn active" data-rate="1.0">1.0x</button>
+          <button class="vg-rate-btn" data-rate="1.25">1.25x</button>
+          <button class="vg-rate-btn" data-rate="1.5">1.5x</button>
+          <button class="vg-rate-btn" data-rate="1.75">1.75x</button>
+        </div>
+        <div class="vg-voice-info" id="vg-voice-info">🔊 Voice Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ THEMED FLOATING CINEMA SUBTITLE HUD ON 3D VIEWPORT ══ -->
+  <div id="vg-subtitle-hud" class="vg-subtitle-hud" style="display:none;" aria-live="polite">
+    <div class="vg-hud-header">
+      <div class="vg-hud-badge">
+        <span class="vg-hud-dot"></span>
+        <span id="vg-hud-lang-label">ENGLISH</span>
+      </div>
+      <div class="vg-hud-title">Victoria Memorial · Synchronized Subtitles</div>
+      <button type="button" class="vg-hud-close" id="vg-hud-close" title="Hide Subtitles">✕</button>
+    </div>
+    <div class="vg-hud-content" id="vg-hud-content">
+      Click Play to start the voice guide narration with live synchronized subtitles.
+    </div>
+  </div>
+
+  <script id="vg-engine-script">
+  (function () {
+    "use strict";
+
+    var SITE_NAME = "Victoria Memorial";
+    var SUPPORTED_LANGS = [
+      { key: 'en', code: 'en-IN', fallback: 'en-US', label: 'English', flag: '🇬🇧' },
+      { key: 'hi', code: 'hi-IN', fallback: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+      { key: 'ta', code: 'ta-IN', fallback: 'ta', label: 'தமிழ்', flag: '🇮🇳' },
+      { key: 'te', code: 'te-IN', fallback: 'te', label: 'తెలుగు', flag: '🇮🇳' },
+      { key: 'bn', code: 'bn-IN', fallback: 'bn', label: 'বাংলা', flag: '🇮🇳' },
+      { key: 'mr', code: 'mr-IN', fallback: 'mr', label: 'मराठी', flag: '🇮🇳' },
+      { key: 'gu', code: 'gu-IN', fallback: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+      { key: 'kn', code: 'kn-IN', fallback: 'kn', label: 'ಕನ್ನಡ', flag: '🇮🇳' },
+      { key: 'ml', code: 'ml-IN', fallback: 'ml', label: 'മലയാളം', flag: '🇮🇳' },
+      { key: 'pa', code: 'pa-IN', fallback: 'pa', label: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+      { key: 'fr', code: 'fr-FR', fallback: 'fr', label: 'Français', flag: '🇫🇷' },
+      { key: 'es', code: 'es-ES', fallback: 'es', label: 'Español', flag: '🇪🇸' },
+      { key: 'de', code: 'de-DE', fallback: 'de', label: 'Deutsch', flag: '🇩🇪' },
+      { key: 'ja', code: 'ja-JP', fallback: 'ja', label: '日本語', flag: '🇯🇵' },
+      { key: 'zh', code: 'zh-CN', fallback: 'zh', label: '中文', flag: '🇨🇳' }
+    ];
+
+    var VG_SCRIPTS = {"en": "Welcome to the Victoria Memorial Hall, Kolkata's grandest white marble monument and an enduring architectural masterpiece nestled within 64 acres of lush heritage gardens on the historic Kolkata Maidan. Commissioned by Lord Curzon, the Viceroy of India, following the passing of Queen Victoria in 1901, and designed by Sir William Emerson, President of the Royal Institute of British Architects, alongside consulting architect Vincent Esch, the monument stands as the crowning achievement of the Indo-Saracenic architectural revival. Blending classical British Renaissance lines with Mughal domes, Venetian colonnades, and Egyptian and Islamic motifs, the memorial celebrates Kolkata's legacy as the historic capital of British India and the intellectual epicenter of the 19th-century Bengal Renaissance.\n\nConstructed with over 20,000 tonnes of pristine white Makrana marble quarried from Jodhpur, Rajasthan—the very same marble quarries that supplied Emperor Shah Jahan for the Taj Mahal three centuries prior—the monument measures 103 meters long, 69 meters wide, and rises to a height of 56 meters. Crowned atop the monumental central dome is the iconic 16-foot tall, three-tonne bronze Angel of Victory. Resting upon large ball bearings, this magnificent sculpted figure rotates smoothly with changing wind currents, acting as an elegant and functional weather vane. Four smaller corner domes, arched porticos, and grand ionic colonnades create a commanding sense of symmetry and neoclassical majesty.\n\nBeyond its palatial exterior, the Victoria Memorial houses 25 prestigious exhibition galleries preserving over 30,000 priceless artifacts, historic oil paintings by renowned British artists Thomas and William Daniell, manuscript copies of the Ain-i-Akbari, Mughal miniatures, and extensive archival records documenting the cultural, political, and literary awakening of modern India. The surrounding landscaped gardens, designed by Lord Redesdale and Sir David Prain, feature reflecting pools, sweeping lawns, and majestic royal palms that provide a serene green lung for the city of Kolkata.\n\nThrough comprehensive structural conservation by the Archaeological Survey of India and the Victoria Memorial Trust, this iconic marble edifice has been painstakingly preserved against atmospheric pollutants and weathering. You are now exploring an interactive 3D digital model of the Victoria Memorial. Orbit around its Makrana marble colonnades, inspect the central dome, and experience the cultural grandeur of Kolkata's most beloved heritage landmark.", "hi": "विक्टोरिया मेमोरियल हॉल (Victoria Memorial Hall) में आपका हार्दिक स्वागत है — कोलकाता मैदान के 64 एकड़ में फैले सुरम्य उद्यानों के बीच स्थित सफेद मकराना संगमरमर का एक भव्य स्थापत्य चमत्कार। 1901 में महारानी विक्टोरिया के निधन के बाद भारत के वायसराय लॉर्ड कर्जन द्वारा परिकल्पित और रॉयल इंस्टीट्यूट ऑफ ब्रिटिश आर्किटेक्ट्स के अध्यक्ष सर विलियम एमर्सन द्वारा विंसेंट एश के सहयोग से डिज़ाइन किया गया यह स्मारक इंडो-सारसेनिक वास्तुकला की पराकाष्ठा का प्रतिनिधित्व करता है। ब्रिटिश पुनर्जागरण, मुगल मेहराबों, वेनेशियन स्तंभों और इस्लामी ज्यामिति का यह संगम कोलकाता की उस ऐतिहासिक विरासत को दर्शाता है जब वह ब्रिटिश भारत की राजधानी और 19वीं सदी के बंगाल पुनर्जागरण का प्रमुख बौद्धिक केंद्र था।\n\nइस भव्य स्मारक के निर्माण में राजस्थान के मकराना से लाया गया 20,000 टन से अधिक उच्च कोटि का सफेद संगमरमर इस्तेमाल किया गया — यह वही खदान थी जहां से तीन शताब्दी पूर्व ताजमहल के लिए संगमरमर लाया गया था। यह विशाल भवन 103 मीटर लंबा, 69 मीटर चौड़ा और 56 मीटर ऊंचा है। इसके विशाल केंद्रीय गुंबद के शीर्ष पर 16 फीट ऊंची और तीन टन वजनी कांस्य निर्मित 'विक्ट्री एंजल' (विजय की परी) स्थापित है। बड़े बॉल-बेयरिंग पर स्थापित यह प्रतिमा हवा की दिशा के अनुसार सहजता से घूमती है और एक आकर्षक वेदर-वेन का कार्य करती है। चार कोनों पर स्थित छोटे गुंबद, आयोनिक स्तंभ और भव्य मेहराब इसे अद्वितीय समरूपता और भव्यता प्रदान करते हैं।\n\nअपने राजसी स्वरूप के साथ-साथ विक्टोरिया मेमोरियल में 25 प्रतिष्ठित दीर्घाएं हैं जिनमें 30,000 से अधिक दुर्लभ कलाकृतियां, थॉमस और विलियम डेनियल के ऐतिहासिक तैलचित्र, आईन-ए-अकबरी की पांडुलिपियां, मुगल लघुचित्र और आधुनिक भारत के सांस्कृतिक व साहित्यिक नवजागरण के दस्तावेज संरक्षित हैं। लॉर्ड रेड्सडेल और सर डेविड प्रैन द्वारा डिज़ाइन किए गए इसके सुरम्य बगीचे, जलकुंड और शाही खजूर के वृक्ष कोलकाता शहर को एक शांत व हरा-भरा वातावरण प्रदान करते हैं।\n\nभारतीय पुरातत्व सर्वेक्षण और विक्टोरिया मेमोरियल ट्रस्ट द्वारा इस धरोहर का वैज्ञानिक संरक्षण निरंतर किया जा रहा है। आप इस समय विक्टोरिया मेमोरियल के अत्यंत सटीक 3D डिजिटल मॉडल का अनुभव कर रहे हैं। इसके संगमरमरी स्तंभों, केंद्रीय गुंबद और बगीचों का अन्वेषण करें तथा लाइव ऑडियो गाइड के साथ कोलकाता के इस महान ऐतिहासिक स्थल के गौरव को महसूस करें।", "bn": "ভিক্টোরিয়া মেমোরিয়াল হল (Victoria Memorial Hall)-এ আপনাকে আন্তরিক সাদর সম্ভাষণ জানাই। কলকাতার ঐতিহাসিক ময়দানের ৬৪ একর সুদৃশ্য রাজকীয় উদ্যানের মাঝে অবস্থিত ধবধবে সাদা মাকরানা মার্বেলের এই অনন্য স্থাপত্য বিস্ময় তিলোত্তমা কলকাতার গর্ব ও শ্রেষ্ঠ নিদর্শন। ১৯০১ সালে মহারানী ভিক্টোরিয়ার প্রয়াণের পর ভারতের তৎকালীন ভাইসরয় লর্ড কার্জনের পরিকল্পনায় এবং রয়্যাল ইনস্টিটিউট অব ব্রিটিশ আর্কিটেক্টসের সভাপতি স্যার উইলিয়াম এমারসন ও পরামর্শদাতা স্থপতি ভিনসেন্ট এশের নকশায় নির্মিত এই সৌধটি ইন্দো-সারাসেনিক স্থাপত্য রীতির এক শ্রেষ্ঠ চূড়ামণি। ধ্রুপদী ব্রিটিশ রেনেসাঁস, মুঘল গম্বুজ, ভেনেশীয় স্তম্ভশ্রেণী এবং ইসলামিক অলংকরণের এক অপূর্ব সমন্বয়ে গড়ে ওঠা এই স্মারক তৎকালীন ব্রিটিশ ভারতের রাজধানী এবং উনবিংশ শতকের বাংলার নবজাগরণের স্বর্ণালী ইতিহাসের স্মৃতি বহন করে চলেছে।\n\nএই সুবিশাল সৌধটি নির্মাণে রাজস্থানের যোধপুরের মাকরানা থেকে ২০,০০০ টনেরও বেশি খাঁটি সাদা মার্বেল পাথর আনা হয়েছিল — ঠিক যে খনি থেকে তিন শতক আগে সম্রাট শাহজাহান তাজমহলের জন্য মার্বেল এনেছিলেন। সৌধটি ১০৩ মিটার দীর্ঘ, ৬৯ মিটার প্রশস্ত এবং ৫৬ মিটার উঁচু। এর কেন্দ্রীয় প্রধান গম্বুজের শীর্ষে প্রতিষ্ঠিত রয়েছে ঐতিহাসিক ১৬ ফুট উঁচু এবং ৩ টন ওজনের ব্রোঞ্জের তৈরি ঘূর্ণায়মান 'অ্যাঞ্জেল অব ভিক্টরি' বা বিজয়ের পরী। সুবিশাল বল-বেয়ারিংয়ের ওপর স্থাপিত এই ভাস্কর্যটি বাতাসের গতি অনুযায়ী স্বচ্ছন্দ্যে দিক পরিবর্তন করে একটি নিখুঁত আবহাওয়া নির্দেশক হিসেবে কাজ করে। চারটি কোণের সুষম গম্বুজ এবং প্রবেশদ্বারের সুউচ্চ স্তম্ভমালা একে দান করেছে এক রাজকীয় গাম্ভীর্য।\n\nসৌধের অভ্যন্তরে রয়েছে ২৫টি সুসজ্জিত গ্যালারি যেখানে সংরক্ষিত রয়েছে ৩০,০০০-এরও বেশি অমূল্য ঐতিহাসিক নিদর্শন, বিখ্যাত ব্রিটিশ শিল্পী টমাস ও উইলিয়াম ড্যানিয়েলের আঁকা বিরল তৈলচিত্র, আইন-ই-আকবরীর প্রাচীন পাণ্ডুলিপি, মুঘল মিনিয়েচার পেইন্টিং এবং বাংলার মনীষীদের ইতিহাসসমৃদ্ধ নথিপত্র। লর্ড রিডসডেল এবং স্যার ডেভিড প্রেনের পরিকল্পিত এর চারপাশের সুদৃশ্য উদ্যান, দিঘি এবং রাজকীয় পাম গাছগুলি কলকাতার বুকে এক প্রশান্তির মরূদ্যান সৃষ্টি করেছে।\n\nভারতীয় প্রত্নতাত্ত্বিক সর্বেক্ষণ এবং ভিক্টোরিয়া মেমোরিয়াল ট্রাস্টের সক্রিয় তত্ত্বাবধানে এই ঐতিহাসিক সৌধটি সুরক্ষিত রাখা হয়েছে। আপনি এখন এই ঐতিহ্যবাহী নিদর্শনের অত্যন্ত নিখুঁত ত্রিমাত্রিক 3D ডিজিটাল রূপ প্রত্যক্ষ করছেন। এর মার্বেল স্তম্ভ, রাজকীয় গম্বুজ এবং ভাস্কর্যগুলি প্রতিটি কোণ থেকে ঘুরে দেখুন এবং বাংলা ও ভারতের এই কালজয়ী স্মারককে অন্তর দিয়ে অনুভব করুন।", "ta": "கொல்கத்தாவின் வரலாற்று சிறப்புமிக்க விக்டோரியா மெமோரியல் ஹால் (Victoria Memorial Hall) திருத்தலத்திற்கு உங்களை அன்புடன் வரவேற்கிறோம். கொல்கத்தா மைதானத்தின் 64 ஏக்கர் பரப்பளவில் அமைந்துள்ள அழகிய தோட்டங்களின் நடுவே வெண் பளிங்கு கற்களால் கட்டப்பட்ட இந்த பிரம்மாண்ட நினைவுச்சின்னம், பிரிட்டிஷ் மற்றும் இந்திய-சாரசெனிக் கட்டிடக்கலையின் உச்சக்கட்ட சாதனையாகும். 1901-ல் விக்டோரியா மகாராணியின் மறைவுக்குப் பிறகு லார்ட் கர்சன் அவர்களால் திட்டமிடப்பட்டு, சர் வில்லியம் எமர்சன் மற்றும் வின்சென்ட் எஷ் ஆகியோரால் வடிவமைக்கப்பட்டது.\n\nராஜஸ்தானின் மக்ரானா சுரங்கங்களிலிருந்து கொண்டுவரப்பட்ட 20,000 டன்களுக்கும் அதிகமான வெண்பளிங்கு கற்களைக் கொண்டு இது கட்டப்பட்டது — தாஜ்மஹால் கட்ட பயன்படுத்தப்பட்ட அதே உயர்தர பளிங்கு இதுவாகும். இந்த கட்டிடம் 103 மீட்டர் நீளமும், 69 மீட்டர் அகலமும், 56 மீட்டர் உயரமும் கொண்டது. இதன் மையக் குவிமாடத்தின் மேல் 16 அடி உயரமும் 3 டன் எடையும் கொண்ட வெண்கல 'வெற்றியின் தேவதை' (Angel of Victory) சிலை சுழலும் வகையில் அமைக்கப்பட்டுள்ளது. இது காற்றின் திசையைக் காட்டும் கருவியாகவும் செயல்படுகிறது.\n\nஇதனுள் 25 கண்காட்சி கூடங்கள் உள்ளன, அதில் 30,000-க்கும் மேற்பட்ட அரிய கலைப்பொருட்கள், தாமஸ் மற்றும் வில்லியம் டேனியல் வரைந்த ஓவியங்கள் மற்றும் வரலாற்று ஆவணங்கள் பாதுகாக்கப்பட்டு வருகின்றன. இப்போது நீங்கள் இந்த உன்னத கலைக்கூடத்தின் 3D டிஜிட்டಲ್ மாதிரியை ஆராய்கிறீர்கள்.", "te": "కోల్‌కతాలోని చారిత్రాత్మక విక్టోరియా మెమోరియల్ హాల్ (Victoria Memorial Hall) కు మీకు స్వాగతం. కోల్‌కతా మైదాన్ లోని 64 ఎకరాల ఉద్యానవనాల మధ్య స్వచ్ఛమైన తెల్లటి మక్రానా పాలరాతితో నిర్మించబడిన ఈ అద్భుత కట్టడం ఇండో-సారాసెనిక్ వాస్తుకళకు పరాకాష్ట. 1901లో లార్డ్ కర్జన్ ప్రతిపాదనతో సర్ విలియం ఎమర్సన్ దీనిని రూపొందించారు.\n\nతాజ్ మహల్ నిర్మాణానికి వాడిన రాజస్థాన్ లోని మక్రానా గనుల నుండి 20,000 టన్నులకు పైగా తెల్లటి పాలరాయిని తెప్పించి దీనిని నిర్మించారు. ఈ భవనం 103 మీటర్ల పొడవు, 69 మీటర్ల వెడల్పు మరియు 56 మీటర్ల ఎత్తు కలిగి ఉంది. ప్రధాన గోపురం పైభాగంలో 16 అడుగుల ఎత్తు, 3 టన్నుల బరువు కలిగిన కాంస్య 'విక్టరీ ఏంజెల్' విగ్రహం అమర్చబడి ఉంది, ఇది గాలి దిశకు అనుగుణంగా తిరుగుతుంది.\n\nలోపల 25 ఆర్ట్ గ్యాలరీలు ఉన్నాయి, అందులో 30,000 కు పైగా పురాతన కళాఖండాలు మరియు అరుదైన చిత్రాలు భద్రపరచబడ్డాయి. ఇప్పుడు మీరు ఈ అద్భుత చారిత్రక సంపద యొక్క 3D డిజిటల్ నమూనాను వీక్షిస్తున్నారు.", "mr": "कोलकात्याच्या ऐतिहासिक व्हिक्टोरिया मेमोरियल हॉल (Victoria Memorial Hall) मध्ये आपले सहर्ष स्वागत आहे. कोलकाता मैदानावरील ६४ एकर निसर्गरम्य बागांमध्ये पांढऱ्याशुभ्र मकराना संगमरवराने उभारलेली ही भव्य इमारत इंडो-सारसेनिक स्थापत्यकलेचा उत्कृष्ट नमुना आहे. १९०१ मध्ये लॉर्ड कर्झन यांच्या कल्पनेतून आणि सर विल्यम इमर्सन यांच्या संकल्पनेतून हे स्मारक साकारले गेले.\n\nताजमहालासाठी वापरल्या गेलेल्या राजस्थानच्या मकराना खाणींमधून आणलेल्या २०,००০ टनांहून अधिक पांढऱ्या संगमरवराने याचे बांधकाम करण्यात आले. इमारतीच्या मध्यवर्ती घुमटावर १६ फूट उंच व ३ टन वजनाची फिरती कांस्य 'एंजल ऑफ व्हिक्टरी' बसवण्यात आली आहे जी वाऱ्याच्या दिशेने फिरते. यात २५ प्रसिद्ध कलादालने असून ३०,००० हून अधिक दुर्मिळ ऐतिहासिक वस्तू व चित्रे जतन केलेली आहेत. आपण सध्या या सुंदर वास्तूची 3D डिजिटल प्रतिकृती पाहत आहात.", "gu": "કોલકાતાના ઐતિહાસિક વિક્ટોરિયા મેમોરિયલ હોલ (Victoria Memorial Hall) માં આપનું હાર્દિક સ્વાગત છે. કોલકાતા મેદાનના 64 એકરના સુંદર બગીચાઓ વચ્ચે શ્વેત મકરાણા આરસપહાણથી બનેલું આ સ્મારક ઇન્ડો-સારાસેનિક સ્થાપત્ય કલાનું અદભુત શિખર છે. 1901માં લોર્ડ કર્ઝનની પહેલથી સર વિલિયમ એમર્સન દ્વારા તેની ડિઝાઇન તૈયાર કરવામાં આવી હતી.\n\nતાજમહાલ માટે વપરાયેલા રાજસ્થાનના મકરાણાના 20,000 ટનથી વધુ સફેદ આરસપહાણથી આ ભવ્ય સ્મારકનું નિર્માણ થયું છે. તેના મુખ્ય ગુંબજ પર 16 ફૂટ ઊંચી અને 3 ટન વજનની કાંસાની 'એન્જલ ઓફ વિક્ટરી' હવાના પ્રવાહ સાથે ગોળ ફરે છે. અંદર 25 થી વધુ આર્ટ ગેલેરીઓ છે જેમાં 30,000 થી વધુ ઐતિહાસિક કલાકૃતિઓ સચવાયેલી છે. આપ આ સ્મારકની 3D ડિજિટલ પ્રતિકૃતિ નિહાળી રહ્યા છો.", "kn": "ಕೋಲ್ಕತ್ತಾದ ಐತಿಹಾಸಿಕ ವಿಕ್ಟೋರಿಯಾ ಮೆಮೋರಿಯಲ್ ಹಾಲ್ (Victoria Memorial Hall) ಗೆ ಸ್ವಾಗತ. ಕೋಲ್ಕತ್ತಾ ಮೈದಾನದ 64 ಎಕರೆ ಹಸಿರು ಉದ್ಯಾನವನಗಳ ನಡುವೆ ಬಿಳಿ ಮಕ್ರಾನಾ ಅಮೃತಶಿಲೆಯಿಂದ ನಿರ್ಮಿಸಲಾದ ಈ ಭವ್ಯ ಸ್ಮಾರಕವು ಇಂಡೋ-ಸಾರಾಸೆನಿಕ್ ವಾಸ್ತುಶಿಲ್ಪದ ಶಿಖರವಾಗಿದೆ. 1901 ರಲ್ಲಿ ಲಾರ್ಡ್ ಕರ್ಜನ್ ಅವರ ಕಲ್ಪನೆಯಂತೆ ಸರ್ ವಿಲಿಯಂ ಎಮರ್ಸನ್ ಇದನ್ನು ವಿನ್ಯಾಸಗೊಳಿಸಿದರು.\n\nತಾಜ್ ಮಹಲ್‌ಗೆ ಬಳಸಲಾದ ರಾಜಸ್ಥಾನದ ಮಕ್ರಾನಾ ಗಣಿಗಳ 20,000 ಟನ್‌ಗೂ ಹೆಚ್ಚು ಬಿಳಿ ಅಮೃತಶಿಲೆಯಿಂದ ಇದನ್ನು ನಿರ್ಮಿಸಲಾಗಿದೆ. ಇದರ ಮುಖ್ಯ ಗುಮ್ಮಟದ ಮೇಲೆ 16 ಅಡಿ ಎತ್ತರದ ಮತ್ತು 3 ಟನ್ ತೂಕದ ಕಂಚಿನ 'ವಿಕ್ಟರಿ ಏಂಜಲ್' ಗಾಳಿಯ ದಿಕ್ಕಿಗೆ ತಿರುಗುವಂತೆ ಅಳವಡಿಸಲಾಗಿದೆ. ಒಳಗೆ 25 ಗ್ಯಾಲರಿಗಳಿದ್ದು, 30,000 ಕ್ಕೂ ಹೆಚ್ಚು ಪುರಾತನ ಕಲಾಕೃತಿಗಳನ್ನು ಸಂರಕ್ಷಿಸಲಾಗಿದೆ. ನೀವು ಈಗ ಇದರ 3D ಡಿಜಿಟಲ್ ಮಾದರಿಯನ್ನು ವೀಕ್ಷಿಸುತ್ತಿದ್ದೀರಿ.", "ml": "കൊൽക്കത്തയിലെ ചരിത്രപ്രസിദ്ധമായ വിക്ടോറിയ മെമ്മോറിയൽ ഹാളിലേക്ക് (Victoria Memorial Hall) സ്വാഗതം. കൊൽക്കത്ത മൈതാനിലെ 64 ഏക്കർ വിസ്തൃതിയുള്ള പൂന്തോട്ടങ്ങൾക്ക് നടുവിൽ സ്ഥിതി ചെയ്യുന്ന ഈ വെണ്ണക്കൽ കൊട്ടാരം ഇൻഡോ-സാരസെനിക് വാസ്തുവിദ്യയുടെ വിസ്മയമാണ്. 1901-ൽ ലോർഡ് കർസന്റെ നേതൃത്വത്തിൽ സർ വില്യം എമേഴ്സൺ ആണ് ഇത് രൂപകൽപ്പന ചെയ്തത്.\n\nതാജ്മഹലിനായി ഉപയോഗിച്ച അതേ രാജസ്ഥാനിലെ മക്രാന മാർബിളുകൾ 20,000 ടണ്ണിലധികം കൊണ്ടുവന്നാണ് ഇത് നിർമ്മിച്ചത്. പ്രധാന താഴികക്കുടത്തിന് മുകളിൽ 16 അടി ഉയരമുള്ള വെങ്കല 'വിക്ടറി ഏഞ്ചൽ' പ്രതിമ കാറ്റിന്റെ ദിശയ്ക്കനുസരിച്ച് കറങ്ങുന്ന രീതിയിൽ സ്ഥാപിച്ചിരിക്കുന്നു. 25 എക്സിബിഷൻ ഗാലറികളിലായി 30,000-ലധികം ചരിത്രശേഷിപ്പുകൾ ഇവിടെ സൂക്ഷിച്ചിരിക്കുന്നു. ഇപ്പോൾ നിങ്ങൾ ഇതിന്റെ 3D ഡിജിറ്റൽ പതിപ്പാണ് അനുഭവിക്കുന്നത്.", "pa": "ਕੋਲਕਾਤਾ ਦੇ ਇਤਿਹਾਸਕ ਵਿਕਟੋਰੀਆ ਮੈਮੋਰੀਅਲ ਹਾਲ (Victoria Memorial Hall) ਵਿਖੇ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ। ਕੋਲਕਾਤਾ ਮੈਦਾਨ ਦੇ 64 ਏਕੜ ਹਰੇ-ਭਰੇ ਬਾਗਾਂ ਵਿੱਚ ਸਫੈਦ ਮਕਰਾਨਾ ਸੰਗਮਰਮਰ ਨਾਲ ਬਣੀ ਇਹ ਸ਼ਾਨਦਾਰ ਇਮਾਰਤ ਇੰਡੋ-ਸਾਰਾਸੇਨਿਕ ਆਰਕੀਟੈਕਚਰ ਦਾ ਇੱਕ ਸ਼ਾਹਕਾਰ ਹੈ। 1901 ਵਿੱਚ ਲਾਰਡ ਕਰਜ਼ਨ ਦੀ ਅਗਵਾਈ ਵਿੱਚ ਸਰ ਵਿਲੀਅਮ ਐਮਰਸਨ ਵੱਲੋਂ ਇਸ ਦਾ ਨਕਸ਼ਾ ਤਿਆਰ ਕੀਤਾ ਗਿਆ ਸੀ।\n\nਤਾਜ ਮਹਿਲ ਲਈ ਵਰਤੇ ਗਏ ਰਾਜਸਥਾਨ ਦੇ ਮਕਰਾਨਾ ਸੰਗਮਰਮਰ ਦੇ 20,000 ਟਨ ਤੋਂ ਵੱਧ ਪੱਥਰ ਨਾਲ ਇਹ ਸਮਾਰਕ ਤਿਆਰ ਹੋਇਆ। ਇਸ ਦੇ ਮੁੱਖ ਗੁੰਬਦ ਉੱਤੇ 16 ਫੁੱਟ ਉੱਚੀ ਅਤੇ 3 ਟਨ ਵਜ਼ਨੀ ਕਾਂਸੀ ਦੀ 'ਵਿਕਟਰੀ ਏਂਜਲ' ਹਵਾ ਦੀ ਦਿਸ਼ਾ ਅਨੁਸਾਰ ਘੁੰਮਦੀ ਹੈ। ਇਸ ਵਿੱਚ 25 ਗੈਲਰੀਆਂ ਹਨ ਜਿਨ੍ਹਾਂ ਵਿੱਚ 30,000 ਤੋਂ ਵੱਧ ਇਤਿਹਾਸਕ ਵਸਤੂਆਂ ਸੁਰੱਖਿਅਤ ਹਨ। ਤੁਸੀਂ ਇਸ ਸਮੇਂ ਇਸ ਦਾ 3D ਮਾਡਲ ਦੇਖ ਰਹੇ ਹੋ।", "fr": "Bienvenue au Victoria Memorial Hall de Kolkata, le plus somptueux monument de marbre blanc de la ville, niché au cœur de 64 acres de jardins sur le Maidan de Kolkata. Commandé par Lord Curzon et conçu par Sir William Emerson, ce chef-d'œuvre illustre la renaissance architecturale indo-sarrasine, fusionnant les lignes de la Renaissance britannique et les dômes moghols.\n\nConstruit avec plus de 20 000 tonnes de marbre immaculé de Makrana (provenant des mêmes carrières que celles du Taj Mahal), l'édifice mesure 103 mètres de long et 56 mètres de haut. Au sommet du dôme central trône l'Ange de la Victoire en bronze de 5 mètres, pivotant avec les vents. Il abrite 25 galeries et plus de 30 000 œuvres et peintures rares des artistes Thomas et William Daniell. Explorez son jumeau numérique 3D.", "es": "Bienvenido al Victoria Memorial Hall de Calcuta, el monumento de mármol blanco más impresionante de la ciudad, situado en 64 acres de jardines en el Maidan de Calcuta. Encargado por Lord Curzon y diseñado por Sir William Emerson, representa la cima del estilo indo-sarraceno, fusionando arquitectura renacentista británica con cúpulas mogolas.\n\nConstruido con más de 20.000 toneladas de mármol blanco de Makrana (las mismas canteras del Taj Mahal), mide 103 metros de largo y 56 de alto. Coronando su cúpula central gira una estatua de bronce del Ángel de la Victoria de 3 toneladas como veleta. Alberga 25 galerías con más de 30.000 artefactos y pinturas históricas de Thomas y William Daniell. Disfrute de su modelo interactivo en 3D.", "de": "Willkommen in der Victoria Memorial Hall in Kolkata, dem prächtigsten weißen Marmordenkmal der Stadt, eingebettet in 64 Hektar Gärten auf dem Maidan von Kolkata. In Auftrag gegeben von Lord Curzon und entworfen von Sir William Emerson, verkörpert es den Höhepunkt des indo-sarazenischen Stils, der britische Renaissance mit Mogulkuppeln verbindet.\n\nErbaut aus über 20.000 Tonnen weißem Makrana-Marmor (aus denselben Steinbrüchen wie das Taj Mahal), misst das Gebäude 103 Meter in der Länge und 56 Meter in der Höhe. Auf der Hauptkuppel dreht sich der 3 Tonnen schwere 'Engel des Sieges' aus Bronze als Wetterfahne. Es beherbergt 25 Kunstgalerien mit über 30.000 unbezahlbaren Artefakten und Gemälden von Thomas und William Daniell. Erkunden Sie diesen interaktiven 3D-Zwilling.", "ja": "コルカタのヴィクトリア・メモリアル・ホール（Victoria Memorial Hall）へようこそ。コルカタ・マイダンの64エーカーの庭園に囲まれたこの壮大な白大理石の記念碑は、英国ルネサンス様式とムガル様式のドームが融合したインド・サラセン様式の最高傑作です。カーゾン卿の提唱により、サー・ウィリアム・エマーソンによって設計されました。\n\nタージ・マハルと同じラージャスターン州マクラナ産の大理石2万トン以上を使用し、長さ103メートル、高さ56メートルを誇ります。中央ドームの頂上には風向きに合わせて回転する重さ3トンのブロンズ製「勝利の天使」が設置されています。館内には25の展示室があり、3万点以上の貴重な歴史的絵画や文化財が保存されています。高精度3Dモデルをお楽しみください。", "zh": "热烈欢迎参观加尔各答的维多利亚纪念堂（Victoria Memorial Hall）。这座坐落于加尔各答广场64英亩开阔花园中的纯白大理石建筑是印度撒拉逊复兴风格的巅峰之作。由印度总督寇松勋爵发起倡议，英国皇家建筑师学会会长威廉·埃默森爵士主持设计，完美融合了英国古典文艺复兴风格与莫卧儿穹顶。\n\n该建筑使用了2万多吨来自拉贾斯坦邦马克拉纳的顶级白大理石（与泰姬陵同源），长103米，高56米。中央巨大穹顶之上矗立着一座高16英尺、重达3吨的青铜“胜利天使”雕像，随风自由旋转充当风向标。馆内设有25个展厅，珍藏着3万多件珍贵历史文物以及托马斯与威廉·丹尼尔创作的历史油画。欢迎探索这一高精度的三维数字模型。"};
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // BULLETPROOF DUAL-ENGINE HERITAGE VOICE GUIDE
+    // Engine 1: Native Web Speech API (with Chromium cancel/resume race-condition fixes)
+    // Engine 2: High-Fidelity Cloud Audio (Authentic human pronunciation for all 15 languages)
+    // Engine 3: Offline Default Voice Fallback with 100% synchronized live subtitles
+    // ══════════════════════════════════════════════════════════════════════════
+
+    var currentLang = 'en';
+    var isPlaying = false;
+    var isPaused = false;
+    var selectedRate = 1.0;
+    var showHud = true;
+    var currentEngine = 'native'; // 'native' or 'cloud'
+    var audioSessionId = 0;
+
+    // Trackers
+    var wordSpans = [];
+    var allWords = [];
+    var activeWordIndex = 0;
+    var wordTimer = null;
+    var keepAliveTimer = null;
+    var synth = ('speechSynthesis' in window) ? window.speechSynthesis : null;
+    var currentUtterance = null;
+    var speechChunks = [];
+    var currentChunkIdx = 0;
+    var cloudChunks = [];
+    var currentAudioEl = null;
+
+    // DOM Elements
+    var playBtn = document.getElementById('vg-play');
+    var playIcon = document.getElementById('vg-play-icon');
+    var playLabel = document.getElementById('vg-play-label');
+    var stopBtn = document.getElementById('vg-stop');
+    var scriptBox = document.getElementById('vg-script-box');
+    var progressBar = document.getElementById('vg-progress-bar');
+    var voiceInfo = document.getElementById('vg-voice-info');
+    var panel = document.getElementById('voice-guide-panel');
+    var hud = document.getElementById('vg-subtitle-hud');
+    var hudContent = document.getElementById('vg-hud-content');
+    var hudLangLabel = document.getElementById('vg-hud-lang-label');
+    var hudToggleBtn = document.getElementById('vg-hud-toggle');
+    var hudCloseBtn = document.getElementById('vg-hud-close');
+    var mainTrigger = document.getElementById('btn-voice-guide');
+    var navTrigger = document.getElementById('btn-nav-voice-guide');
+    var closeBtn = document.getElementById('vg-close');
+
+    function detectLanguage() {
+      try {
+        var raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+        var code = raw.split('-')[0];
+        var match = SUPPORTED_LANGS.find(function (l) { return l.key === code; });
+        return match ? match.key : 'en';
+      } catch (e) {
+        return 'en';
+      }
+    }
+
+    function buildLangPills() {
+      var row = document.getElementById('vg-lang-row');
+      if (!row) return;
+      row.innerHTML = '';
+      SUPPORTED_LANGS.forEach(function (lang) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'vg-lang-pill' + (lang.key === currentLang ? ' active' : '');
+        btn.dataset.lang = lang.key;
+        btn.textContent = lang.flag + ' ' + lang.label;
+        btn.addEventListener('click', function () {
+          var wasPlaying = isPlaying;
+          stopGuide();
+          currentLang = lang.key;
+          document.querySelectorAll('.vg-lang-pill').forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          renderScript(currentLang);
+          updateEngineIndicator();
+          if (wasPlaying) {
+            setTimeout(function () { playGuide(0); }, 60);
+          }
+        });
+        row.appendChild(btn);
+      });
+    }
+
+    function escapeHtml(s) {
+      return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderScript(langKey) {
+      var sc = VG_SCRIPTS[langKey] || VG_SCRIPTS['en'] || '';
+      allWords = sc.trim().split(/\s+/);
+      if (scriptBox) {
+        scriptBox.innerHTML = allWords.map(function (w, i) {
+          return '<span class="vg-word" id="vg-w-' + i + '" data-idx="' + i + '">' + escapeHtml(w) + ' </span>';
+        }).join('');
+        wordSpans = allWords.map(function (_, i) {
+          return document.getElementById('vg-w-' + i);
+        });
+        scriptBox.scrollTop = 0;
+      }
+      if (hudContent && !isPlaying) {
+        hudContent.textContent = sc.substring(0, 140) + (sc.length > 140 ? '…' : '');
+      }
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      if (hudLangLabel && meta) {
+        hudLangLabel.textContent = meta.label.toUpperCase();
+      }
+      activeWordIndex = 0;
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function updateEngineIndicator(customStatus) {
+      if (!voiceInfo) return;
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      if (customStatus) {
+        voiceInfo.textContent = customStatus;
+      } else {
+        var hasNative = !!getNativeVoice(currentLang);
+        var icon = hasNative ? '🔊' : '☁️';
+        var type = hasNative ? 'Native' : 'Cloud';
+        voiceInfo.textContent = icon + ' ' + meta.label + ' (' + type + ' · ' + selectedRate + 'x)';
+      }
+    }
+
+    function updateHighlights(idx) {
+      activeWordIndex = Math.max(0, Math.min(idx, allWords.length - 1));
+
+      for (var i = 0; i < wordSpans.length; i++) {
+        var span = wordSpans[i];
+        if (!span) continue;
+        if (i < activeWordIndex) {
+          span.className = 'vg-word vg-word-spoken';
+        } else if (i === activeWordIndex) {
+          span.className = 'vg-word vg-word-active';
+          if (isPlaying && scriptBox) {
+            span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          span.className = 'vg-word';
+        }
+      }
+
+      if (hud && hudContent && showHud) {
+        var windowSize = 9;
+        var start = Math.max(0, activeWordIndex - 3);
+        var end = Math.min(allWords.length, start + windowSize);
+        if (end - start < windowSize && start > 0) {
+          start = Math.max(0, end - windowSize);
+        }
+        var hudHtml = '';
+        for (var k = start; k < end; k++) {
+          var cls = (k < activeWordIndex) ? 'vg-hud-word spoken' : (k === activeWordIndex ? 'vg-hud-word active' : 'vg-hud-word pending');
+          hudHtml += '<span class="' + cls + '">' + escapeHtml(allWords[k]) + ' </span>';
+        }
+        hudContent.innerHTML = hudHtml;
+      }
+
+      if (progressBar && allWords.length > 1) {
+        var pct = Math.min(100, Math.round((activeWordIndex / (allWords.length - 1)) * 100));
+        progressBar.style.width = pct + '%';
+      }
+    }
+
+    // ── Voice Detection ───────────────────────────────────────────────────
+    function getNativeVoice(langKey) {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      var targetCode = (meta.code || '').toLowerCase().replace('_', '-');
+      var fallbackCode = (meta.fallback || '').toLowerCase().replace('_', '-');
+      var langPrefix = meta.key.toLowerCase();
+
+      // 1. Exact match (e.g. en-IN or hi-IN)
+      var v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l === targetCode;
+      });
+      if (v) return v;
+
+      // 2. Prefix match (e.g. en or hi)
+      v = voices.find(function(item) {
+        var l = (item.lang || '').toLowerCase().replace('_', '-');
+        return l.startsWith(langPrefix + '-') || l === langPrefix;
+      });
+      if (v) return v;
+
+      // 3. Fallback code match
+      if (fallbackCode) {
+        v = voices.find(function(item) {
+          var l = (item.lang || '').toLowerCase().replace('_', '-');
+          return l.startsWith(fallbackCode) || l === fallbackCode;
+        });
+        if (v) return v;
+      }
+      return null;
+    }
+
+    function getDefaultVoice() {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+      return voices.find(function(v) {
+        var l = (v.lang || '').toLowerCase();
+        return l.startsWith('en');
+      }) || voices[0];
+    }
+
+    // ── Chunk text for Cloud Audio (< 80 chars guarantees 200 OK) ─────────
+    function splitTextForCloud(text, maxChars) {
+      maxChars = maxChars || 80;
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var chunks = [];
+      var cur = '';
+      for (var i = 0; i < rawSentences.length; i++) {
+        var s = rawSentences[i].trim();
+        if (!s) continue;
+        if ((cur ? cur + ' ' + s : s).length <= maxChars) {
+          cur = cur ? cur + ' ' + s : s;
+        } else {
+          if (cur) chunks.push(cur.trim());
+          if (s.length > maxChars) {
+            var words = s.split(/\s+/);
+            var sub = '';
+            for (var j = 0; j < words.length; j++) {
+              var w = words[j];
+              if ((sub ? sub + ' ' + w : w).length <= maxChars) {
+                sub = sub ? sub + ' ' + w : w;
+              } else {
+                if (sub) chunks.push(sub.trim());
+                sub = w;
+              }
+            }
+            cur = sub;
+          } else {
+            cur = s;
+          }
+        }
+      }
+      if (cur && cur.trim()) chunks.push(cur.trim());
+      return chunks;
+    }
+
+    // ── Primary Play Controller ───────────────────────────────────────────
+    function playGuide(startFromWord) {
+      // Toggle Pause
+      if (isPlaying && !isPaused && arguments.length === 0) {
+        pauseGuide();
+        return;
+      }
+
+      // Toggle Resume
+      if (isPaused && arguments.length === 0) {
+        resumeGuide();
+        return;
+      }
+
+      startFromWord = typeof startFromWord === 'number' ? startFromWord : activeWordIndex;
+      startPlayback(startFromWord);
+    }
+
+    function pauseGuide() {
+      isPaused = true;
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.pause(); } catch (e) {}
+      } else if (synth) {
+        try { synth.pause(); } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      updatePlayControls(false, true);
+    }
+
+    function resumeGuide() {
+      isPaused = false;
+      isPlaying = true;
+      updatePlayControls(true, false);
+      if (currentEngine === 'cloud' && currentAudioEl) {
+        try { currentAudioEl.play().catch(function(e) { console.warn('Resume notice:', e); }); } catch (e) {}
+      } else if (synth) {
+        try { synth.resume(); } catch (e) {}
+        resumeWordTicker();
+      }
+    }
+
+    function stopGuide() {
+      audioSessionId++;
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+
+      activeWordIndex = 0;
+      updatePlayControls(false, false);
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function onPlaybackFinished() {
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+      updatePlayControls(false, false);
+      if (allWords.length > 0) updateHighlights(allWords.length - 1);
+      if (progressBar) progressBar.style.width = '100%';
+      if (hudContent) {
+        hudContent.textContent = 'Voice guide narration complete. Click Play to listen again.';
+      }
+    }
+
+    function updatePlayControls(playing, paused) {
+      if (!playBtn) return;
+      if (playing) {
+        playBtn.classList.add('playing');
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playLabel) playLabel.textContent = 'Pause Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else if (paused) {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Resume Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Play Audio Guide';
+        if (stopBtn) stopBtn.disabled = true;
+      }
+    }
+
+    // ── Start Audio Playback Dispatcher ───────────────────────────────────
+    function startPlayback(startIdx) {
+      audioSessionId++;
+      var session = audioSessionId;
+
+      // Clean up previous speech
+      if (synth) {
+        try {
+          synth.cancel();
+          if (synth.paused) synth.resume();
+        } catch (e) {}
+      }
+      if (currentAudioEl) {
+        try {
+          currentAudioEl.pause();
+          currentAudioEl.removeAttribute('src');
+          currentAudioEl.onplay = null;
+          currentAudioEl.ontimeupdate = null;
+          currentAudioEl.onended = null;
+          currentAudioEl.onerror = null;
+        } catch (e) {}
+      }
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+
+      activeWordIndex = Math.max(0, Math.min(startIdx, allWords.length - 1));
+      updateHighlights(activeWordIndex);
+
+      var remainingWords = allWords.slice(activeWordIndex);
+      var remainingText = remainingWords.join(' ');
+      if (!remainingText.trim()) {
+        onPlaybackFinished();
+        return;
+      }
+
+      isPlaying = true;
+      isPaused = false;
+      updatePlayControls(true, false);
+      if (hud && showHud) hud.style.display = 'block';
+
+      // ── Select Best Engine ──
+      var nativeVoice = getNativeVoice(currentLang);
+      if (nativeVoice) {
+        // Mode A: Native Web Speech API
+        currentEngine = 'native';
+        updateEngineIndicator();
+        playNativeStream(remainingText, activeWordIndex, nativeVoice, session);
+      } else {
+        // Mode B: High-Fidelity Cloud Audio
+        currentEngine = 'cloud';
+        updateEngineIndicator();
+        playCloudStream(remainingText, activeWordIndex, session);
+      }
+    }
+
+    // ── Engine 1: Native Speech Synthesis ─────────────────────────────────
+    function playNativeStream(text, wordOffset, voice, session) {
+      speechChunks = [];
+      var rawSentences = text.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [text];
+      var curOffset = wordOffset;
+      rawSentences.forEach(function (s) {
+        var sTrim = s.trim();
+        if (!sTrim) return;
+        var count = sTrim.split(/\s+/).length;
+        speechChunks.push({
+          text: sTrim,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      startKeepAlive();
+      // 50ms delay avoids Chromium synchronous cancellation race condition
+      setTimeout(function () {
+        if (session !== audioSessionId || !isPlaying) return;
+        playNextNativeChunk(voice, session);
+      }, 50);
+    }
+
+    function playNextNativeChunk(voice, session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= speechChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = speechChunks[currentChunkIdx];
+      var utt = new SpeechSynthesisUtterance(chunk.text);
+      currentUtterance = utt; // prevent GC bug
+      utt.voice = voice;
+      utt.lang = voice.lang || 'en-US';
+      utt.rate = selectedRate;
+      utt.pitch = 1.0;
+      utt.volume = 1.0;
+
+      startWordTickerForChunk(chunk);
+
+      utt.onboundary = function (e) {
+        if (session !== audioSessionId) return;
+        if (e.name === 'word') {
+          var ratio = e.charIndex / (chunk.text.length || 1);
+          var wIdx = Math.min(chunk.wordCount - 1, Math.floor(ratio * chunk.wordCount));
+          updateHighlights(chunk.startWord + wIdx);
+        }
+      };
+
+      utt.onend = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < speechChunks.length && isPlaying) {
+          playNextNativeChunk(voice, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      utt.onerror = function (err) {
+        if (session !== audioSessionId) return;
+        if (err.error === 'canceled' || err.error === 'interrupted') return;
+        console.warn('Native speech notice:', err);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        // Fallback: If native speech encounters an error, switch to cloud audio
+        var remainingWords = allWords.slice(chunk.startWord);
+        if (remainingWords.length > 0 && isPlaying) {
+          currentEngine = 'cloud';
+          updateEngineIndicator();
+          playCloudStream(remainingWords.join(' '), chunk.startWord, session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      try {
+        if (synth.paused) synth.resume();
+        synth.speak(utt);
+      } catch (e) {
+        console.warn('SpeechSynthesis speak notice:', e);
+      }
+    }
+
+    // ── Engine 2: Cloud Native Audio Stream ───────────────────────────────
+    function playCloudStream(text, wordOffset, session) {
+      var rawChunks = splitTextForCloud(text, 80);
+      cloudChunks = [];
+      var curOffset = wordOffset;
+      rawChunks.forEach(function (c) {
+        var count = c.trim().split(/\s+/).length;
+        cloudChunks.push({
+          text: c,
+          startWord: curOffset,
+          wordCount: count
+        });
+        curOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      playNextCloudChunk(session);
+    }
+
+    function playNextCloudChunk(session) {
+      if (session !== audioSessionId || !isPlaying || currentChunkIdx >= cloudChunks.length) {
+        if (session === audioSessionId) onPlaybackFinished();
+        return;
+      }
+
+      var chunk = cloudChunks[currentChunkIdx];
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      var ttsLang = meta.key === 'zh' ? 'zh-CN' : meta.key;
+      var url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=' + ttsLang + '&client=tw-ob&q=' + encodeURIComponent(chunk.text);
+
+      if (!currentAudioEl) {
+        currentAudioEl = document.createElement('audio');
+        currentAudioEl.id = 'vg-cloud-audio-element';
+        currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+        currentAudioEl.style.display = 'none';
+        document.body.appendChild(currentAudioEl);
+      }
+
+      currentAudioEl.pause();
+      currentAudioEl.removeAttribute('src');
+      currentAudioEl.playbackRate = selectedRate;
+      currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+      currentAudioEl.src = url;
+
+      currentAudioEl.onplay = function () {
+        if (session !== audioSessionId) return;
+        startWordTickerForChunk(chunk);
+      };
+
+      currentAudioEl.ontimeupdate = function () {
+        if (session !== audioSessionId || !currentAudioEl.duration) return;
+        var progress = currentAudioEl.currentTime / currentAudioEl.duration;
+        var wIdx = Math.min(chunk.wordCount - 1, Math.floor(progress * chunk.wordCount));
+        updateHighlights(chunk.startWord + wIdx);
+      };
+
+      currentAudioEl.onended = function () {
+        if (session !== audioSessionId) return;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < cloudChunks.length && isPlaying) {
+          playNextCloudChunk(session);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      currentAudioEl.onerror = function (e) {
+        if (session !== audioSessionId) return;
+        console.warn('Cloud audio notice, activating system voice fallback:', e);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        
+        // Mode C Fallback: If cloud audio fails (e.g. offline sandbox), use default English voice with subtitle sync
+        var defVoice = getDefaultVoice();
+        if (defVoice) {
+          currentEngine = 'native';
+          var isEnglishVoice = (defVoice.lang || '').toLowerCase().startsWith('en');
+          var textToSpeak = (isEnglishVoice && currentLang !== 'en')
+            ? (VG_SCRIPTS['en'] || '').trim()
+            : allWords.slice(chunk.startWord).join(' ');
+          
+          var metaLang = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+          var badgeText = (isEnglishVoice && currentLang !== 'en')
+            ? '🔊 English Narration (' + metaLang.label + ' Subtitles)'
+            : '🔊 System Audio (' + selectedRate + 'x)';
+          updateEngineIndicator(badgeText);
+          
+          playNativeStream(textToSpeak, (isEnglishVoice && currentLang !== 'en') ? 0 : chunk.startWord, defVoice, session);
+        } else {
+          currentChunkIdx++;
+          if (currentChunkIdx < cloudChunks.length && isPlaying) {
+            setTimeout(function() { playNextCloudChunk(session); }, 60);
+          } else {
+            onPlaybackFinished();
+          }
+        }
+      };
+
+      var p = currentAudioEl.play();
+      if (p !== undefined) {
+        p.catch(function (err) {
+          if (session !== audioSessionId) return;
+          console.warn('Audio play notice:', err);
+        });
+      }
+    }
+
+    // ── Word Ticker for Smooth Subtitle Tracking ──────────────────────────
+    function startWordTickerForChunk(chunk) {
+      if (wordTimer) clearInterval(wordTimer);
+      var wordsInChunk = chunk.wordCount;
+      var wpm = 145 * selectedRate;
+      var totalSec = (wordsInChunk / wpm) * 60;
+      var stepMs = Math.max(80, (totalSec * 1000) / Math.max(1, wordsInChunk));
+      var tick = 0;
+
+      wordTimer = setInterval(function () {
+        if (!isPlaying || isPaused) return;
+        tick++;
+        if (tick < wordsInChunk) {
+          updateHighlights(chunk.startWord + tick);
+        }
+      }, stepMs);
+    }
+
+    function resumeWordTicker() {
+      if (currentEngine === 'native' && currentChunkIdx < speechChunks.length) {
+        startWordTickerForChunk(speechChunks[currentChunkIdx]);
+      } else if (currentEngine === 'cloud' && currentChunkIdx < cloudChunks.length) {
+        startWordTickerForChunk(cloudChunks[currentChunkIdx]);
+      }
+    }
+
+    function startKeepAlive() {
+      if (keepAliveTimer) clearInterval(keepAliveTimer);
+      keepAliveTimer = setInterval(function () {
+        if (!isPlaying || isPaused || currentEngine !== 'native') return;
+        if (synth && synth.speaking) {
+          synth.pause();
+          synth.resume();
+        }
+      }, 10000);
+    }
+
+    // ── Interactive Themed HUD Toggle ─────────────────────────────────────
+    function toggleHud() {
+      showHud = !showHud;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.toggle('active', showHud);
+        hudToggleBtn.innerHTML = showHud 
+          ? '<i class="fa-solid fa-closed-captioning"></i> HUD: ON' 
+          : '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) {
+        hud.style.display = showHud ? 'block' : 'none';
+        if (showHud) {
+          updateHighlights(activeWordIndex);
+        }
+      }
+    }
+
+    // ── Open / Close Right-Side Dock Panel ────────────────────────────────
+    function openPanel() {
+      if (panel) panel.classList.add('open');
+      renderScript(currentLang);
+      updateEngineIndicator();
+    }
+
+    function closePanel() {
+      if (panel) panel.classList.remove('open');
+    }
+
+    // ── Event Bindings ────────────────────────────────────────────────────
+    if (playBtn) {
+      playBtn.addEventListener('click', function() {
+        // Unlock audio elements and speech synthesis on user interaction
+        if (!currentAudioEl) {
+          currentAudioEl = document.createElement('audio');
+          currentAudioEl.id = 'vg-cloud-audio-element';
+          currentAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+          currentAudioEl.style.display = 'none';
+          document.body.appendChild(currentAudioEl);
+        }
+        if (synth && synth.paused) {
+          try { synth.resume(); } catch (e) {}
+        }
+        playGuide();
+      });
+    }
+
+    if (stopBtn) stopBtn.addEventListener('click', function() { stopGuide(); });
+
+    if (mainTrigger) {
+      mainTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (navTrigger) {
+      navTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+    if (hudToggleBtn) hudToggleBtn.addEventListener('click', toggleHud);
+    if (hudCloseBtn) hudCloseBtn.addEventListener('click', function() {
+      showHud = false;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.remove('active');
+        hudToggleBtn.innerHTML = '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) hud.style.display = 'none';
+    });
+
+    // Rate button handling: IMMEDIATE audible change
+    document.querySelectorAll('.vg-rate-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.vg-rate-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedRate = parseFloat(btn.dataset.rate) || 1.0;
+        updateEngineIndicator();
+
+        if (currentEngine === 'cloud' && currentAudioEl) {
+          currentAudioEl.playbackRate = selectedRate;
+        } else if (currentEngine === 'native' && isPlaying && !isPaused) {
+          startPlayback(activeWordIndex);
+        }
+      });
+    });
+
+    // Click on words in script box to jump playback
+    if (scriptBox) {
+      scriptBox.addEventListener('click', function (e) {
+        var wordEl = e.target.closest('.vg-word');
+        if (!wordEl) return;
+        var idx = parseInt(wordEl.dataset.idx, 10);
+        if (!isNaN(idx)) {
+          updateHighlights(idx);
+          if (isPlaying) {
+            startPlayback(idx);
+          }
+        }
+      });
+    }
+
+    // Initialization
+    function init() {
+      currentLang = detectLanguage();
+      buildLangPills();
+      renderScript(currentLang);
+
+      function onVoicesLoaded() {
+        updateEngineIndicator();
+      }
+      if (synth) {
+        if (synth.getVoices().length > 0) onVoicesLoaded();
+        else if ('addEventListener' in synth) {
+          synth.addEventListener('voiceschanged', onVoicesLoaded);
+        } else {
+          synth.onvoiceschanged = onVoicesLoaded;
+        }
+      } else {
+        updateEngineIndicator();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+
+
+  })();
+  </script>
+
+</body>
+</html>

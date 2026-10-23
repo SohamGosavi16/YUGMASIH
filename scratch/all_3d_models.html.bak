@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>3D Heritage Vault — All Interactive Models | YUGMA</title>
+  <meta name="description" content="Explore India's most iconic architectural wonders in photorealistic 3D WebXR. Switch seamlessly between 16 interactive national monuments.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #06090e;
+      --gold: #dfa753;
+      --gold-bright: #ffd56b;
+      --gold-glow: rgba(223, 167, 83, 0.45);
+      --glass-bg: rgba(9, 14, 23, 0.85);
+      --glass-border: rgba(223, 167, 83, 0.32);
+      --glass-card: rgba(13, 20, 32, 0.92);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-dark);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #f8fafc;
+    }
+
+    /* Main 3D Viewport Frame */
+    #viewer-stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      background: radial-gradient(circle at 50% 40%, #151d2a 0%, #080a0f 85%, #040507 100%);
+      transition: filter 0.8s ease;
+    }
+
+    #sketchfab-frame {
+      position: absolute;
+      top: -54px;
+      left: 0;
+      width: 100%;
+      height: calc(100% + 108px);
+      border: none;
+      display: block;
+    }
+
+    /* Corner Shields to eliminate owner avatar/name in top-left and Sketchfab logo in bottom-left */
+    .brand-shield-top-left {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 62px;
+      z-index: 11;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(7, 9, 14, 0.96) 0%, rgba(7, 9, 14, 0.72) 45%, transparent 100%);
+    }
+
+    .brand-shield-bottom-left {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      min-width: 210px;
+      height: 52px;
+      z-index: 12;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      padding-bottom: 4px;
+      background: linear-gradient(45deg, rgba(7, 9, 14, 0.96) 0%, rgba(7, 9, 14, 0.75) 50%, transparent 100%);
+      border-top-right-radius: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .brand-shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+      color: var(--gold-bright, #ffd56b);
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      user-select: none;
+    }
+    .brand-shield-badge i {
+      color: var(--gold, #dfa753);
+      font-size: 11px;
+    }
+
+    /* Atmosphere Lighting Presets */
+    .atmos-dawn {
+      filter: sepia(0.25) saturate(1.3) hue-rotate(-12deg) brightness(1.05) contrast(1.04);
+    }
+    .atmos-noon {
+      filter: contrast(1.06) brightness(1.08) saturate(1.02);
+    }
+    .atmos-sunset {
+      filter: sepia(0.55) saturate(1.6) hue-rotate(-22deg) contrast(1.12) brightness(0.98);
+    }
+    .atmos-moonlight {
+      filter: brightness(0.85) contrast(1.2) hue-rotate(185deg) saturate(0.65);
+    }
+
+    #vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.7), inset 0 0 240px rgba(3,5,8,0.9);
+    }
+
+    /* Top Navigation Header */
+    .header-bar {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 25;
+      pointer-events: none;
+    }
+
+    .nav-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      color: #f8fafc;
+      text-decoration: none;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      transition: all 0.25s var(--ease);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      cursor: pointer;
+    }
+
+    .nav-btn:hover {
+      background: rgba(223, 167, 83, 0.22);
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(223, 167, 83, 0.25);
+    }
+    .nav-btn i {
+      color: var(--gold);
+      font-size: 13px;
+    }
+
+    .brand-tag {
+      display: flex;
+      flex-direction: column;
+      padding: 7px 16px;
+      background: rgba(11, 16, 26, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(223, 167, 83, 0.25);
+      border-radius: 10px;
+    }
+    .brand-tag span:first-child {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 2.2px;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+    }
+    .brand-tag span:last-child {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Left Active Monument Card */
+    #info-card {
+      position: fixed;
+      top: 82px;
+      left: 20px;
+      max-width: 380px;
+      background: var(--glass-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 22px 24px;
+      color: #f8fafc;
+      z-index: 15;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.65), 0 0 25px rgba(223, 167, 83, 0.12);
+      transition: all 0.35s var(--ease);
+    }
+
+    #info-card.collapsed {
+      transform: translateY(-10px);
+      padding: 12px 18px;
+    }
+    #info-card.collapsed .card-body {
+      display: none;
+    }
+
+    .badge-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    h1.active-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 26px;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 0%, #fff1d0 50%, #dfa753 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hindi-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: rgba(223, 167, 83, 0.85);
+      margin-left: 6px;
+      -webkit-text-fill-color: initial;
+    }
+
+    .collapse-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(223, 167, 83, 0.25);
+      color: var(--gold);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .collapse-btn:hover {
+      background: var(--gold);
+      color: #04070a;
+    }
+
+    .active-desc {
+      font-size: 12.8px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-top: 10px;
+    }
+
+    .action-links {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(223, 167, 83, 0.2);
+    }
+
+    .launch-btn {
+      flex: 1;
+      padding: 9px 14px;
+      background: linear-gradient(135deg, #dfa753 0%, #c98845 100%);
+      border: none;
+      border-radius: 10px;
+      color: #06090f;
+      font-weight: 700;
+      font-size: 11.5px;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s var(--ease);
+      box-shadow: 0 4px 14px rgba(223, 167, 83, 0.35);
+    }
+    .launch-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(223, 167, 83, 0.5);
+      color: #000;
+    }
+
+    /* Bottom Interactive Carousel */
+    #bottom-dock {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      max-width: 98vw;
+      width: 100%;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      background: rgba(11, 16, 26, 0.85);
+      backdrop-filter: blur(14px);
+      padding: 4px 8px;
+      border-radius: 30px;
+      border: 1px solid rgba(223, 167, 83, 0.25);
+    }
+
+    .filter-btn {
+      padding: 5px 12px;
+      background: transparent;
+      border: none;
+      border-radius: 20px;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: var(--gold);
+      color: #06090f;
+      font-weight: 700;
+    }
+
+    /* Model Cards Carousel Strip */
+    .carousel-wrap {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 8px 12px;
+      max-width: 96vw;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold) transparent;
+      background: var(--glass-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.65);
+    }
+
+    .model-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 220px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+      flex-shrink: 0;
+    }
+
+    .model-card:hover {
+      background: rgba(223, 167, 83, 0.14);
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    .model-card.active {
+      background: linear-gradient(135deg, rgba(223, 167, 83, 0.3) 0%, rgba(201, 136, 69, 0.3) 100%);
+      border-color: var(--gold-bright);
+      box-shadow: 0 4px 16px rgba(223, 167, 83, 0.35);
+    }
+
+    .card-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(223, 167, 83, 0.3);
+      flex-shrink: 0;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .card-state {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #f8fafc;
+    }
+    .card-creator {
+      font-size: 9px;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Gallery Modal (Grid Mode) */
+    #gallery-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 9, 14, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      padding: 30px;
+      overflow-y: auto;
+    }
+    #gallery-modal.open {
+      display: flex;
+    }
+
+    .gallery-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto 24px auto;
+    }
+    .gallery-title {
+      font-family: 'Cinzel', serif;
+      font-size: 28px;
+      color: var(--gold-bright);
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .grid-card {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s var(--ease);
+      display: flex;
+      flex-direction: column;
+    }
+    .grid-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--gold);
+      box-shadow: 0 16px 36px rgba(223, 167, 83, 0.25);
+    }
+    .grid-card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-bottom: 1px solid rgba(223, 167, 83, 0.2);
+    }
+    .grid-card-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .grid-card-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .grid-card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 17px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .grid-card-desc {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #94a3b8;
+      margin-bottom: 14px;
+      flex: 1;
+    }
+    .grid-card-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: linear-gradient(135deg, #dfa753 0%, #c98845 100%);
+      color: #06090f;
+      font-weight: 700;
+      font-size: 11px;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .grid-card-btn:hover {
+      background: #ffd56b;
+      color: #000;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass-card);
+      border: 1px solid var(--gold);
+      border-radius: 30px;
+      padding: 10px 22px;
+      color: var(--gold-bright);
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(5px);
+    }
+
+    @media (max-width: 768px) {
+      #info-card {
+        top: 72px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+      }
+      .brand-tag {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D Viewport Stage -->
+  <div id="viewer-stage" class="atmos-noon">
+    <iframe
+      id="sketchfab-frame"
+      title="3D Heritage Viewer"
+      src="https://sketchfab.com/models/7b43e635cbfb47719d5a124302b78579/embed?autostart=1&internal=1&tracking=0&ui_ar=1&ui_infos=0&ui_snapshots=1&ui_stop=0&ui_theatre=1&ui_watermark=0&ui_theme=dark&camera=0&preload=1"
+      allow="autoplay; fullscreen; xr-spatial-tracking; web-share"
+      xr-spatial-tracking="true"
+      execution-while-out-of-viewport="true"
+      execution-while-not-rendered="true"
+      web-share="true"
+      allowfullscreen
+      mozallowfullscreen="true"
+      webkitallowfullscreen="true">
+    </iframe>
+  </div>
+
+  <div id="vignette"></div>
+
+  <!-- Header Bar -->
+  <header class="header-bar">
+    <div class="nav-group">
+      <a href="index.html" class="nav-btn" title="Return to India 3D Globe">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>3D GLOBE</span>
+      </a>
+      <a href="india_3d_map.html" class="nav-btn" title="Open Interactive 3D Map">
+        <i class="fa-solid fa-map-location-dot"></i>
+        <span>INDIA MAP</span>
+      </a>
+      <button class="nav-btn" id="btn-gallery-toggle" style="background: rgba(223, 167, 83, 0.25); border-color: var(--gold-bright); color: var(--gold-bright);" title="Open 3D Grid Catalog">
+        <i class="fa-solid fa-grid-2"></i>
+        <span>CATALOG GRID</span>
+      </button>
+      <div class="brand-tag">
+        <span>3D HERITAGE VAULT</span>
+        <span>16 INTERACTIVE MODELS</span>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <button class="nav-btn" id="btn-audio" title="Toggle Regional Heritage Ambience">
+        <i class="fa-solid fa-volume-high" id="audio-icon"></i>
+        <span id="audio-text">AMBIENCE</span>
+      </button>
+
+      <button class="nav-btn" id="btn-fullscreen" title="Toggle Fullscreen">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Left Active Info Card -->
+  <aside id="info-card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+      <div>
+        <span class="badge-label" id="card-badge">UNESCO World Heritage</span>
+        <h1 class="active-title" id="card-title">Taj Mahal <span class="hindi-text" id="card-hindi">(ताज महल)</span></h1>
+      </div>
+      <button class="collapse-btn" id="collapse-btn" aria-label="Toggle details">
+        <i class="fa-solid fa-chevron-up"></i>
+      </button>
+    </div>
+
+    <div class="card-body">
+      <p class="active-desc" id="card-desc">
+        Commissioned by Mughal Emperor Shah Jahan for Empress Mumtaz Mahal. A symmetrical marvel of white Makrana marble, four outward-canted minarets, central onion dome, and intricate Pietra Dura semiprecious stone inlays.
+      </p>
+
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px; font-size:11px; color:#94a3b8;">
+        <div>STATE: <strong style="color:#ffd56b;" id="card-state">Uttar Pradesh</strong></div>
+        <div>ERA: <strong style="color:#ffd56b;" id="card-era">1632–1653 CE</strong></div>
+      </div>
+
+      <div class="heritage-provenance-hub" style="margin-top:12px; padding:10px 12px; background:rgba(223,167,83,0.08); border:1px solid rgba(223,167,83,0.22); border-radius:8px; display:flex; flex-direction:column; gap:6px; font-size:11px;">
+        <div style="display:flex; justify-content:space-between; gap:10px; align-items:baseline;">
+          <span style="color:#94a3b8; font-size:9px; text-transform:uppercase; letter-spacing:0.8px; font-weight:600;"><i class="fa-solid fa-monument" style="color:var(--gold);"></i> BUILT FOR:</span>
+          <strong style="color:#ffd56b; text-align:right;" id="card-whom">Empress Mumtaz Mahal & Mughal Emperor Shah Jahan</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:10px; align-items:baseline;">
+          <span style="color:#94a3b8; font-size:9px; text-transform:uppercase; letter-spacing:0.8px; font-weight:600;"><i class="fa-solid fa-location-dot" style="color:var(--gold);"></i> PICKED FROM:</span>
+          <strong style="color:#ffd56b; text-align:right;" id="card-picked">Agra, Uttar Pradesh (Yamuna Riverfront)</strong>
+        </div>
+      </div>
+
+      <div class="action-links">
+        <a id="card-launch" href="taj_mahal_3d.html" class="launch-btn" title="Launch dedicated immersive viewer">
+          <i class="fa-solid fa-vr-cardboard"></i>
+          <span>OPEN DEDICATED VIEW</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Bottom Dock & Carousel Strip -->
+  <div id="bottom-dock">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All (16)</button>
+      <button class="filter-btn" data-filter="North">North</button>
+      <button class="filter-btn" data-filter="South">South</button>
+      <button class="filter-btn" data-filter="West">West</button>
+      <button class="filter-btn" data-filter="East">East</button>
+      <button class="filter-btn" data-filter="Central">Central</button>
+    </div>
+
+    <!-- Carousel Strip -->
+    <div class="carousel-wrap" id="carousel">
+      <div class="model-card active" data-id="taj_mahal" data-region="North">
+        <img src="https://media.sketchfab.com/models/7b43e635cbfb47719d5a124302b78579/thumbnails/eaaa828910514951b184ca1e361958bb/2efe8e3aefbb4104b0ce7f8dfdae0d71.jpeg" alt="Taj Mahal" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Uttar Pradesh</span>
+          <span class="card-title">Taj Mahal</span>
+          <span class="card-creator">1632–1653 CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="ajanta_caves" data-region="West">
+        <img src="https://media.sketchfab.com/models/d916f1bc949c4284ab3fe56ddbfe660d/thumbnails/a278abf7fae242a5adb34bc61b4b433f/b44638751fe24bef9d921fe34ce7cb33.jpeg" alt="Ajanta & Ellora Caves" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Maharashtra</span>
+          <span class="card-title">Ajanta & Ellora Caves</span>
+          <span class="card-creator">2nd C. BCE – 10th C. CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="rani_ki_vav" data-region="West">
+        <img src="https://media.sketchfab.com/models/1a4fee746a4449c9b67c833fefbf7f98/thumbnails/dc001e4a58f64c6d9c62ab1532c64fc3/67b86eb5ad1a4812ba4128eb701850c5.jpeg" alt="Rani Ki Vav" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Gujarat</span>
+          <span class="card-title">Rani Ki Vav</span>
+          <span class="card-creator">11th Century CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="amber_fort" data-region="North">
+        <img src="https://media.sketchfab.com/models/9c4ae1795b4b471b898ad1bfd51f88c8/thumbnails/ccdb8839816a46148b90d0e06d66ceb6/d0e214c973864274a832539446054ce7.jpeg" alt="Amber Fort" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Rajasthan</span>
+          <span class="card-title">Amber Fort</span>
+          <span class="card-creator">1592 CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="victoria_memorial" data-region="East">
+        <img src="https://media.sketchfab.com/models/1d0a3acd2df043288deef67b15763cbb/thumbnails/71c3ee99fe8a40c7a59e4b341bea4d81/7740d9a907894965898e673a42fec06e.jpeg" alt="Victoria Memorial" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">West Bengal</span>
+          <span class="card-title">Victoria Memorial</span>
+          <span class="card-creator">1906–1921 CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="brihadisvara" data-region="South">
+        <img src="https://media.sketchfab.com/models/b80c75f91dad4994a0e7000467433ac9/thumbnails/15d11782974446059b9fd6fa370f6beb/0e037570a0b74872b1a8d7a405ef485d.jpeg" alt="Brihadisvara Temple" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Tamil Nadu</span>
+          <span class="card-title">Brihadisvara Temple</span>
+          <span class="card-creator">1010 CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="hampi_chariot" data-region="South">
+        <img src="https://media.sketchfab.com/models/cb01a9df8996485692d238c64a2509df/thumbnails/a416db6cd38e48048d06616c33da3350/ab144e9c64174da486b5d77b969ad492.jpeg" alt="Stone Chariot in Hampi" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Karnataka</span>
+          <span class="card-title">Stone Chariot in Hampi</span>
+          <span class="card-creator">16th Century CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="konark_sun" data-region="East">
+        <img src="https://media.sketchfab.com/models/6cc905be2ae34e8091eb1eaa84a17738/thumbnails/de5176449b80447c97fec647ca96b179/d25ee051177d4a0ca7b51dd6f275af7a.jpeg" alt="Konark Sun Temple" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Odisha</span>
+          <span class="card-title">Konark Sun Temple</span>
+          <span class="card-creator">1250 CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="rang_ghar" data-region="East">
+        <img src="https://media.sketchfab.com/models/f93985b7b4fd41b1a95e9ef50aac6b96/thumbnails/c587ad512ddf4b419cf8f761288420ed/15ccb72f0917452c974812df3ca241b7.jpeg" alt="Rang Ghar Amphitheater" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Assam</span>
+          <span class="card-title">Rang Ghar Amphitheater</span>
+          <span class="card-creator">1744–1750 CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="padmanabhaswamy" data-region="South">
+        <img src="https://media.sketchfab.com/models/764f3a3192c84f0f9ff2a0aa5c075dc2/thumbnails/d550453a320a40e2a79052c132e1dfd0/1aacf8035741471895d8f622c7948aa8.jpeg" alt="Sree Padmanabhaswamy Temple" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Kerala</span>
+          <span class="card-title">Sree Padmanabhaswamy Temple</span>
+          <span class="card-creator">8th–18th Century CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="mahabodhi" data-region="East">
+        <img src="https://media.sketchfab.com/thumbnails/4c57687b657445e1b46c83b35e494ad4/1024.jpg" alt="Mahabodhi Temple" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Bihar</span>
+          <span class="card-title">Mahabodhi Temple</span>
+          <span class="card-creator">3rd C. BCE & 5th–6th C. CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="lakshmana_temple" data-region="Central">
+        <img src="https://media.sketchfab.com/models/lvUgd1Zyxmja7KHkSJkkqbUKUgG/thumbnails/84114e5dc3c4409ab1da313769ba98e6/4b0290195a8b497a9b3c305fbf94a3fd.jpeg" alt="Lakshmana Temple" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Chhattisgarh</span>
+          <span class="card-title">Lakshmana Temple</span>
+          <span class="card-creator">7th Century CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="bom_jesus" data-region="West">
+        <img src="https://media.sketchfab.com/models/b51a0ccbf0e74c3c8a929f03008c3f84/thumbnails/ac75a0e5e2704a3b8622614afb568e1b/9d50ad9980064c9a9c328ea40e7c42b6.jpeg" alt="Basilica of Bom Jesus" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Goa</span>
+          <span class="card-title">Basilica of Bom Jesus</span>
+          <span class="card-creator">1594–1605 CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="lepakshi_temple" data-region="South">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Lepakshi_Nandi.jpg/640px-Lepakshi_Nandi.jpg" alt="Lepakshi Veerabhadra Temple" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Andhra Pradesh</span>
+          <span class="card-title">Lepakshi Veerabhadra Temple</span>
+          <span class="card-creator">16th Century CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="jageshwar_dham" data-region="North">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Jageshwar_Temple_Complex.jpg/640px-Jageshwar_Temple_Complex.jpg" alt="Jageshwar Dham Temple Cluster" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Uttarakhand</span>
+          <span class="card-title">Jageshwar Dham Temple Cluster</span>
+          <span class="card-creator">8th–12th Century CE</span>
+        </div>
+      </div>
+      <div class="model-card" data-id="neermahal_palace" data-region="East">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Neermahal_Tripura.jpg/640px-Neermahal_Tripura.jpg" alt="Neermahal Water Palace" class="card-thumb">
+        <div class="card-meta">
+          <span class="card-state">Tripura</span>
+          <span class="card-title">Neermahal Water Palace</span>
+          <span class="card-creator">1930–1938 CE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid Catalog Modal -->
+  <div id="gallery-modal">
+    <div class="gallery-header">
+      <div>
+        <h2 class="gallery-title">All 16 National 3D Models</h2>
+        <p style="color:#94a3b8; font-size:13px; margin-top:4px;">Direct access to all photorealistic digital twins and WebXR simulations across India</p>
+      </div>
+      <button class="collapse-btn" id="btn-gallery-close" style="width:36px; height:36px; font-size:16px;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="gallery-grid">
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/7b43e635cbfb47719d5a124302b78579/thumbnails/eaaa828910514951b184ca1e361958bb/2efe8e3aefbb4104b0ce7f8dfdae0d71.jpeg" alt="Taj Mahal" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">North India · Uttar Pradesh</span>
+          <h3 class="grid-card-title">Taj Mahal</h3>
+          <p class="grid-card-desc">Commissioned by Mughal Emperor Shah Jahan for Empress Mumtaz Mahal. A symmetrical marvel of white Makrana marble, four outward-canted minarets, central onion dome, and intricate Pietra Dura semiprecious stone inlays.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Empress Mumtaz Mahal & Mughal Emperor Shah Jahan</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Agra, Uttar Pradesh (Yamuna Riverfront)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="taj_mahal" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="taj_mahal_3d.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/d916f1bc949c4284ab3fe56ddbfe660d/thumbnails/a278abf7fae242a5adb34bc61b4b433f/b44638751fe24bef9d921fe34ce7cb33.jpeg" alt="Ajanta & Ellora Caves" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">West India · Maharashtra</span>
+          <h3 class="grid-card-title">Ajanta & Ellora Caves</h3>
+          <p class="grid-card-desc">Ancient rock-cut Buddhist, Hindu, and Jain cave monuments excavated out of solid volcanic basalt cliffs. Renowned globally for timeless mural masterpieces, monolithic Kailasa temple engineering, and sacred Chaitya prayer halls.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Lord Buddha, Shiva & Jain Tirthankaras (Vakataka & Rashtrakuta Dynasties)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Chhatrapati Sambhajinagar, Maharashtra (Waghora Gorge)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="ajanta_caves" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="ajanta-ellora-caves.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/1a4fee746a4449c9b67c833fefbf7f98/thumbnails/dc001e4a58f64c6d9c62ab1532c64fc3/67b86eb5ad1a4812ba4128eb701850c5.jpeg" alt="Rani Ki Vav" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">West India · Gujarat</span>
+          <h3 class="grid-card-title">Rani Ki Vav</h3>
+          <p class="grid-card-desc">Commissioned by Queen Udayamati in memory of King Bhima I, this masterpiece of Maru-Gurjara stepwell architecture descends into seven subterranean terraces lined with over 500 principal sculptures celebrating Lord Vishnu.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">King Bhima I (Built by Queen Udayamati) & Lord Vishnu</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Patan, Gujarat (Saraswati River Basin)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="rani_ki_vav" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="rani_ki_vav.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/9c4ae1795b4b471b898ad1bfd51f88c8/thumbnails/ccdb8839816a46148b90d0e06d66ceb6/d0e214c973864274a832539446054ce7.jpeg" alt="Amber Fort" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">North India · Rajasthan</span>
+          <h3 class="grid-card-title">Amber Fort</h3>
+          <p class="grid-card-desc">Rising dramatically above Maota Lake amidst the rugged Aravalli hills, Amer Fort unites martial Rajput fortification with opulent courtly elegance, featuring marble courtyards, Sheesh Mahal mirror mosaics, and the Ganesh Pol gate.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Rajput Kachwaha Dynasty (Built by Raja Man Singh I)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Amer, Jaipur, Rajasthan (Aravalli Hills)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="amber_fort" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="amberfort-vr.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/1d0a3acd2df043288deef67b15763cbb/thumbnails/71c3ee99fe8a40c7a59e4b341bea4d81/7740d9a907894965898e673a42fec06e.jpeg" alt="Victoria Memorial" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">East India · West Bengal</span>
+          <h3 class="grid-card-title">Victoria Memorial</h3>
+          <p class="grid-card-desc">Dominating the Kolkata Maidan, this grand white marble monument blends British, Mughal, Venetian, and Egyptian architectural influences. Crowned by a 16-foot rotating bronze Angel of Victory and surrounded by 64 acres of manicured gardens.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Queen Victoria, Empress of India (Commissioned by Lord Curzon)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Kolkata, West Bengal (Kolkata Maidan)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="victoria_memorial" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="victoriamemorial-vr.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/b80c75f91dad4994a0e7000467433ac9/thumbnails/15d11782974446059b9fd6fa370f6beb/0e037570a0b74872b1a8d7a405ef485d.jpeg" alt="Brihadisvara Temple" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">South India · Tamil Nadu</span>
+          <h3 class="grid-card-title">Brihadisvara Temple</h3>
+          <p class="grid-card-desc">Consecrated by Emperor Raja Raja Chola I on the Cauvery delta, Peruvudaiyar Kovil stands as the supreme summit of Dravidian temple architecture, crowned by a 216-foot soaring granite tower sculpted from 130,000 tonnes of granite.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Lord Shiva (Consecrated by Emperor Raja Raja Chola I)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Thanjavur, Tamil Nadu (Cauvery River Delta)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="brihadisvara" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="brihadisvara-vr.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/cb01a9df8996485692d238c64a2509df/thumbnails/a416db6cd38e48048d06616c33da3350/ab144e9c64174da486b5d77b969ad492.jpeg" alt="Stone Chariot in Hampi" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">South India · Karnataka</span>
+          <h3 class="grid-card-title">Stone Chariot in Hampi</h3>
+          <p class="grid-card-desc">Standing majestically within the courtyard of the Vijaya Vittala Temple, this iconic shrine dedicated to Garuda is sculpted from interlocking granite slabs to resemble a colossal battle chariot, celebrated across the world as an emblem of Karnataka's golden age.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Garuda (Vahana of Lord Vishnu) & Vijayanagara Golden Age (King Krishnadevaraya)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Hampi, Vijayanagara, Karnataka (Tungabhadra Basin)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="hampi_chariot" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="hampi_precise.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/6cc905be2ae34e8091eb1eaa84a17738/thumbnails/de5176449b80447c97fec647ca96b179/d25ee051177d4a0ca7b51dd6f275af7a.jpeg" alt="Konark Sun Temple" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">East India · Odisha</span>
+          <h3 class="grid-card-title">Konark Sun Temple</h3>
+          <p class="grid-card-desc">Conceived as a colossal celestial chariot for the Sun God Surya, pulled by seven spirited horses on 24 intricately sculpted sundial wheels. Built of Khondalite and Chlorite stone, it embodies the peak of Kalinga temple architecture.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Surya (The Sun God) (Commissioned by King Narasimhadeva I)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Konark, Puri, Odisha (Bay of Bengal Coast)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="konark_sun" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="odisha_precise.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/f93985b7b4fd41b1a95e9ef50aac6b96/thumbnails/c587ad512ddf4b419cf8f761288420ed/15ccb72f0917452c974812df3ca241b7.jpeg" alt="Rang Ghar Amphitheater" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">East India · Assam</span>
+          <h3 class="grid-card-title">Rang Ghar Amphitheater</h3>
+          <p class="grid-card-desc">Constructed by Swargadeo Pramatta Singha in the royal capital of Rongpur, Rang Ghar ('House of Entertainment') is a two-storied oval pavilion from which Ahom royalty enjoyed elephant fights, buffalo matches, and indigenous wrestling during the Rongali Bihu festivities.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Ahom Royal Dynasty (Built by Swargadeo Pramatta Singha)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Sivasagar (Rongpur), Assam</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="rang_ghar" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="rang_ghar_precision.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/764f3a3192c84f0f9ff2a0aa5c075dc2/thumbnails/d550453a320a40e2a79052c132e1dfd0/1aacf8035741471895d8f622c7948aa8.jpeg" alt="Sree Padmanabhaswamy Temple" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">South India · Kerala</span>
+          <h3 class="grid-card-title">Sree Padmanabhaswamy Temple</h3>
+          <p class="grid-card-desc">Revered as one of the 108 sacred Divya Desams, blending Kerala and Dravidian temple architecture. Renowned for its 100-foot seven-tier Rajagopuram, 365 carved granite pillars in the corridor, and sacred underground royal treasure vaults.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Lord Padmanabhaswamy (Anantha Sayana Vishnu) (Travancore Royal Dynasty)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Thiruvananthapuram, Kerala</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="padmanabhaswamy" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="padmanabhapuram-vr.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/thumbnails/4c57687b657445e1b46c83b35e494ad4/1024.jpg" alt="Mahabodhi Temple" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">East India · Bihar</span>
+          <h3 class="grid-card-title">Mahabodhi Temple</h3>
+          <p class="grid-card-desc">Marking the sacred spot where Prince Siddhartha Gautama attained supreme enlightenment under the Bodhi Tree. The 55-meter grand pyramidal temple stands as one of the oldest all-brick structures surviving in India.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Gautama Buddha (Site of Supreme Enlightenment; Emperor Ashoka)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Bodh Gaya, Bihar (Niranjana River)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="mahabodhi" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="mahabodhi_explorer.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/lvUgd1Zyxmja7KHkSJkkqbUKUgG/thumbnails/84114e5dc3c4409ab1da313769ba98e6/4b0290195a8b497a9b3c305fbf94a3fd.jpeg" alt="Lakshmana Temple" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">Central India · Chhattisgarh</span>
+          <h3 class="grid-card-title">Lakshmana Temple</h3>
+          <p class="grid-card-desc">Regarded as one of India's finest surviving red brick temples, built with precision-carved terracotta bricks on a massive stone jagati. Dedicated to Lord Vishnu, featuring intricate Krishnaleela doorframe reliefs and Pancharatha shikhara.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Lord Vishnu & King Harshagupta (Built by Queen Vasata)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Sirpur, Mahasamund, Chhattisgarh (Mahanadi River Basin)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="lakshmana_temple" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="lakshmana_temple_3d.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://media.sketchfab.com/models/b51a0ccbf0e74c3c8a929f03008c3f84/thumbnails/ac75a0e5e2704a3b8622614afb568e1b/9d50ad9980064c9a9c328ea40e7c42b6.jpeg" alt="Basilica of Bom Jesus" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">West India · Goa</span>
+          <h3 class="grid-card-title">Basilica of Bom Jesus</h3>
+          <p class="grid-card-desc">A masterpiece of Baroque and Mannerist architecture built of unplastered red laterite stone and Basalt. Houses the sacred relics of St. Francis Xavier in a silver casket inside a multi-tiered Florentine marble mausoleum.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">St. Francis Xavier & The Infant Jesus (Jesuit Order of Goa)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Old Goa (Velha Goa), Goa (Mandovi River)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="bom_jesus" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="bom_jesus_3d.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Lepakshi_Nandi.jpg/640px-Lepakshi_Nandi.jpg" alt="Lepakshi Veerabhadra Temple" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">South India · Andhra Pradesh</span>
+          <h3 class="grid-card-title">Lepakshi Veerabhadra Temple</h3>
+          <p class="grid-card-desc">16th-century Vijayanagara sanctuary famous for the legendary Hanging Pillar, colossal monolithic Basavanna (Nandi), and fresco ceiling paintings depicting Puranic epics.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Lord Veerabhadra (Shiva) (Commissioned by Virupanna & Viranna)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Lepakshi, Sri Sathya Sai District, Andhra Pradesh</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="lepakshi_temple" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="lepakshi_temple_3d.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Jageshwar_Temple_Complex.jpg/640px-Jageshwar_Temple_Complex.jpg" alt="Jageshwar Dham Temple Cluster" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">North India · Uttarakhand</span>
+          <h3 class="grid-card-title">Jageshwar Dham Temple Cluster</h3>
+          <p class="grid-card-desc">Cluster of over 100 stone Latina Nagara temples nestled in a sacred Deodar cedar valley, housing the ancient Maha Mrityunjaya Mahadev shrine in the Kumaon Himalayas.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">Lord Shiva (Maha Mrityunjaya) (Katyuri & Chand Dynasties)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Almora, Uttarakhand (Jata Ganga Valley, Himalayas)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="jageshwar_dham" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="jageshwar-vr.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="grid-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Neermahal_Tripura.jpg/640px-Neermahal_Tripura.jpg" alt="Neermahal Water Palace" class="grid-card-img">
+        <div class="grid-card-body">
+          <span class="grid-card-tag">East India · Tripura</span>
+          <h3 class="grid-card-title">Neermahal Water Palace</h3>
+          <p class="grid-card-desc">Floating jewel of the Manikya kings built in the center of Rudrasagar Lake, fusing Hindu and Mughal pavilions with motorboat landing docks and royal water gardens.</p>
+          <div style="margin-bottom:12px; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:4px; border-top:1px solid rgba(223,167,83,0.15); padding-top:8px;">
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Built For:</span> <strong style="color:#ffd56b;">King Bir Bikram Kishore Manikya Bahadur (Manikya Dynasty)</strong></div>
+            <div><span style="color:#94a3b8; font-size:9px; text-transform:uppercase; font-weight:600;">Picked From:</span> <strong style="color:#ffd56b;">Melaghar, Tripura (Rudrasagar Lake Island)</strong></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="grid-card-btn select-monument-btn" data-id="neermahal_palace" style="flex:1; cursor:pointer; border:none;">
+              <i class="fa-solid fa-eye"></i> View on Stage
+            </button>
+            <a href="neermahal-vr.html" class="grid-card-btn" style="background:rgba(255,255,255,0.08); color:#ffd56b; border:1px solid rgba(223,167,83,0.3);">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">3D Model Loaded</div>
+
+  <script>
+    const MONUMENTS = [
+  {
+    "id": "taj_mahal",
+    "title": "Taj Mahal",
+    "hindi": "\u0924\u093e\u091c \u092e\u0939\u0932",
+    "state": "Uttar Pradesh",
+    "region": "North",
+    "era": "1632\u20131653 CE",
+    "uid": "7b43e635cbfb47719d5a124302b78579",
+    "whom_made": "Empress Mumtaz Mahal & Mughal Emperor Shah Jahan",
+    "picked_from": "Agra, Uttar Pradesh (Yamuna Riverfront)",
+    "file": "taj_mahal_3d.html",
+    "thumb": "https://media.sketchfab.com/models/7b43e635cbfb47719d5a124302b78579/thumbnails/eaaa828910514951b184ca1e361958bb/2efe8e3aefbb4104b0ce7f8dfdae0d71.jpeg",
+    "badge": "UNESCO World Heritage",
+    "desc": "Commissioned by Mughal Emperor Shah Jahan for Empress Mumtaz Mahal. A symmetrical marvel of white Makrana marble, four outward-canted minarets, central onion dome, and intricate Pietra Dura semiprecious stone inlays.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      138.59,
+      207.65,
+      277.18,
+      415.3
+    ]
+  },
+  {
+    "id": "ajanta_caves",
+    "title": "Ajanta & Ellora Caves",
+    "hindi": "\u0905\u091c\u093f\u0902\u0920\u093e \u0935 \u0935\u0947\u0930\u0942\u0933 \u0932\u0947\u0923\u0940",
+    "state": "Maharashtra",
+    "region": "West",
+    "era": "2nd C. BCE \u2013 10th C. CE",
+    "uid": "d916f1bc949c4284ab3fe56ddbfe660d",
+    "whom_made": "Lord Buddha, Shiva & Jain Tirthankaras (Vakataka & Rashtrakuta Dynasties)",
+    "picked_from": "Chhatrapati Sambhajinagar, Maharashtra (Waghora Gorge)",
+    "file": "ajanta-ellora-caves.html",
+    "thumb": "https://media.sketchfab.com/models/d916f1bc949c4284ab3fe56ddbfe660d/thumbnails/a278abf7fae242a5adb34bc61b4b433f/b44638751fe24bef9d921fe34ce7cb33.jpeg",
+    "badge": "UNESCO Rock-Cut Sanctuary",
+    "desc": "Ancient rock-cut Buddhist, Hindu, and Jain cave monuments excavated out of solid volcanic basalt cliffs. Renowned globally for timeless mural masterpieces, monolithic Kailasa temple engineering, and sacred Chaitya prayer halls.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      110.0,
+      164.81,
+      220.0,
+      329.63
+    ]
+  },
+  {
+    "id": "rani_ki_vav",
+    "title": "Rani Ki Vav",
+    "hindi": "\u0ab0\u0abe\u0aa3\u0a95\u0ac0 \u0ab5\u0abe\u0ab5",
+    "state": "Gujarat",
+    "region": "West",
+    "era": "11th Century CE",
+    "uid": "1a4fee746a4449c9b67c833fefbf7f98",
+    "whom_made": "King Bhima I (Built by Queen Udayamati) & Lord Vishnu",
+    "picked_from": "Patan, Gujarat (Saraswati River Basin)",
+    "file": "rani_ki_vav.html",
+    "thumb": "https://media.sketchfab.com/models/1a4fee746a4449c9b67c833fefbf7f98/thumbnails/dc001e4a58f64c6d9c62ab1532c64fc3/67b86eb5ad1a4812ba4128eb701850c5.jpeg",
+    "badge": "UNESCO Inverted Water Temple",
+    "desc": "Commissioned by Queen Udayamati in memory of King Bhima I, this masterpiece of Maru-Gurjara stepwell architecture descends into seven subterranean terraces lined with over 500 principal sculptures celebrating Lord Vishnu.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      130.81,
+      196.0,
+      261.63,
+      392.0
+    ]
+  },
+  {
+    "id": "amber_fort",
+    "title": "Amber Fort",
+    "hindi": "\u0906\u092e\u0947\u0930 \u0915\u093c\u093f\u0932\u093e",
+    "state": "Rajasthan",
+    "region": "North",
+    "era": "1592 CE",
+    "uid": "9c4ae1795b4b471b898ad1bfd51f88c8",
+    "whom_made": "Rajput Kachwaha Dynasty (Built by Raja Man Singh I)",
+    "picked_from": "Amer, Jaipur, Rajasthan (Aravalli Hills)",
+    "file": "amberfort-vr.html",
+    "thumb": "https://media.sketchfab.com/models/9c4ae1795b4b471b898ad1bfd51f88c8/thumbnails/ccdb8839816a46148b90d0e06d66ceb6/d0e214c973864274a832539446054ce7.jpeg",
+    "badge": "UNESCO Hill Forts of Rajasthan",
+    "desc": "Rising dramatically above Maota Lake amidst the rugged Aravalli hills, Amer Fort unites martial Rajput fortification with opulent courtly elegance, featuring marble courtyards, Sheesh Mahal mirror mosaics, and the Ganesh Pol gate.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      146.83,
+      220.0,
+      293.66,
+      440.0
+    ]
+  },
+  {
+    "id": "victoria_memorial",
+    "title": "Victoria Memorial",
+    "hindi": "\u09ad\u09bf\u0995\u09cd\u099f\u09cb\u09b0\u09bf\u09af\u09bc\u09be \u09ae\u09c7\u09ae\u09cb\u09b0\u09bf\u09af\u09bc\u09be\u09b2",
+    "state": "West Bengal",
+    "region": "East",
+    "era": "1906\u20131921 CE",
+    "uid": "1d0a3acd2df043288deef67b15763cbb",
+    "whom_made": "Queen Victoria, Empress of India (Commissioned by Lord Curzon)",
+    "picked_from": "Kolkata, West Bengal (Kolkata Maidan)",
+    "file": "victoriamemorial-vr.html",
+    "thumb": "https://media.sketchfab.com/models/1d0a3acd2df043288deef67b15763cbb/thumbnails/71c3ee99fe8a40c7a59e4b341bea4d81/7740d9a907894965898e673a42fec06e.jpeg",
+    "badge": "Makrana Marble Monument",
+    "desc": "Dominating the Kolkata Maidan, this grand white marble monument blends British, Mughal, Venetian, and Egyptian architectural influences. Crowned by a 16-foot rotating bronze Angel of Victory and surrounded by 64 acres of manicured gardens.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      130.81,
+      196.0,
+      261.63,
+      329.63
+    ]
+  },
+  {
+    "id": "brihadisvara",
+    "title": "Brihadisvara Temple",
+    "hindi": "\u0baa\u0bc6\u0bb0\u0bc1\u0bb5\u0bc1\u0b9f\u0bc8\u0baf\u0bbe\u0bb0\u0bcd \u0b95\u0bcb\u0baf\u0bbf\u0bb2\u0bcd",
+    "state": "Tamil Nadu",
+    "region": "South",
+    "era": "1010 CE",
+    "uid": "b80c75f91dad4994a0e7000467433ac9",
+    "whom_made": "Lord Shiva (Consecrated by Emperor Raja Raja Chola I)",
+    "picked_from": "Thanjavur, Tamil Nadu (Cauvery River Delta)",
+    "file": "brihadisvara-vr.html",
+    "thumb": "https://media.sketchfab.com/models/b80c75f91dad4994a0e7000467433ac9/thumbnails/15d11782974446059b9fd6fa370f6beb/0e037570a0b74872b1a8d7a405ef485d.jpeg",
+    "badge": "UNESCO Great Living Chola Temples",
+    "desc": "Consecrated by Emperor Raja Raja Chola I on the Cauvery delta, Peruvudaiyar Kovil stands as the supreme summit of Dravidian temple architecture, crowned by a 216-foot soaring granite tower sculpted from 130,000 tonnes of granite.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      123.47,
+      185.0,
+      246.94,
+      370.0
+    ]
+  },
+  {
+    "id": "hampi_chariot",
+    "title": "Stone Chariot in Hampi",
+    "hindi": "\u0cb9\u0c82\u0caa\u0cbf \u0c95\u0cb2\u0ccd\u0cb2\u0cbf\u0ca8 \u0cb0\u0ca5",
+    "state": "Karnataka",
+    "region": "South",
+    "era": "16th Century CE",
+    "uid": "cb01a9df8996485692d238c64a2509df",
+    "whom_made": "Garuda (Vahana of Lord Vishnu) & Vijayanagara Golden Age (King Krishnadevaraya)",
+    "picked_from": "Hampi, Vijayanagara, Karnataka (Tungabhadra Basin)",
+    "file": "hampi_precise.html",
+    "thumb": "https://media.sketchfab.com/models/cb01a9df8996485692d238c64a2509df/thumbnails/a416db6cd38e48048d06616c33da3350/ab144e9c64174da486b5d77b969ad492.jpeg",
+    "badge": "UNESCO Monument of Vijayanagara",
+    "desc": "Standing majestically within the courtyard of the Vijaya Vittala Temple, this iconic shrine dedicated to Garuda is sculpted from interlocking granite slabs to resemble a colossal battle chariot, celebrated across the world as an emblem of Karnataka's golden age.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      138.59,
+      207.65,
+      277.18,
+      415.3
+    ]
+  },
+  {
+    "id": "konark_sun",
+    "title": "Konark Sun Temple",
+    "hindi": "\u0b15\u0b4b\u0b23\u0b3e\u0b30\u0b4d\u0b15 \u0b38\u0b42\u0b30\u0b4d\u0b2f\u0b4d\u0b5f \u0b2e\u0b28\u0b4d\u0b26\u0b3f\u0b30",
+    "state": "Odisha",
+    "region": "East",
+    "era": "1250 CE",
+    "uid": "6cc905be2ae34e8091eb1eaa84a17738",
+    "whom_made": "Surya (The Sun God) (Commissioned by King Narasimhadeva I)",
+    "picked_from": "Konark, Puri, Odisha (Bay of Bengal Coast)",
+    "file": "odisha_precise.html",
+    "thumb": "https://media.sketchfab.com/models/6cc905be2ae34e8091eb1eaa84a17738/thumbnails/de5176449b80447c97fec647ca96b179/d25ee051177d4a0ca7b51dd6f275af7a.jpeg",
+    "badge": "UNESCO 24-Wheeled Solar Chariot",
+    "desc": "Conceived as a colossal celestial chariot for the Sun God Surya, pulled by seven spirited horses on 24 intricately sculpted sundial wheels. Built of Khondalite and Chlorite stone, it embodies the peak of Kalinga temple architecture.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      146.83,
+      220.0,
+      293.66,
+      440.0
+    ]
+  },
+  {
+    "id": "rang_ghar",
+    "title": "Rang Ghar Amphitheater",
+    "hindi": "\u09f0\u0982\u0998\u09f0",
+    "state": "Assam",
+    "region": "East",
+    "era": "1744\u20131750 CE",
+    "uid": "f93985b7b4fd41b1a95e9ef50aac6b96",
+    "whom_made": "Ahom Royal Dynasty (Built by Swargadeo Pramatta Singha)",
+    "picked_from": "Sivasagar (Rongpur), Assam",
+    "file": "rang_ghar_precision.html",
+    "thumb": "https://media.sketchfab.com/models/f93985b7b4fd41b1a95e9ef50aac6b96/thumbnails/c587ad512ddf4b419cf8f761288420ed/15ccb72f0917452c974812df3ca241b7.jpeg",
+    "badge": "Asia's Oldest Sports Amphitheater",
+    "desc": "Constructed by Swargadeo Pramatta Singha in the royal capital of Rongpur, Rang Ghar ('House of Entertainment') is a two-storied oval pavilion from which Ahom royalty enjoyed elephant fights, buffalo matches, and indigenous wrestling during the Rongali Bihu festivities.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      130.81,
+      196.0,
+      261.63,
+      392.0
+    ]
+  },
+  {
+    "id": "padmanabhaswamy",
+    "title": "Sree Padmanabhaswamy Temple",
+    "hindi": "\u0d2a\u0d24\u0d4d\u0d2e\u0d28\u0d3e\u0d2d\u0d38\u0d4d\u0d35\u0d3e\u0d2e\u0d3f \u0d15\u0d4d\u0d37\u0d47\u0d24\u0d4d\u0d30\u0d02",
+    "state": "Kerala",
+    "region": "South",
+    "era": "8th\u201318th Century CE",
+    "uid": "764f3a3192c84f0f9ff2a0aa5c075dc2",
+    "whom_made": "Lord Padmanabhaswamy (Anantha Sayana Vishnu) (Travancore Royal Dynasty)",
+    "picked_from": "Thiruvananthapuram, Kerala",
+    "file": "padmanabhapuram-vr.html",
+    "thumb": "https://media.sketchfab.com/models/764f3a3192c84f0f9ff2a0aa5c075dc2/thumbnails/d550453a320a40e2a79052c132e1dfd0/1aacf8035741471895d8f622c7948aa8.jpeg",
+    "badge": "100ft Dravidian Rajagopuram",
+    "desc": "Revered as one of the 108 sacred Divya Desams, blending Kerala and Dravidian temple architecture. Renowned for its 100-foot seven-tier Rajagopuram, 365 carved granite pillars in the corridor, and sacred underground royal treasure vaults.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      123.47,
+      164.81,
+      246.94,
+      329.63
+    ]
+  },
+  {
+    "id": "mahabodhi",
+    "title": "Mahabodhi Temple",
+    "hindi": "\u092e\u0939\u093e\u092c\u094b\u0927\u093f \u092e\u0928\u094d\u0926\u093f\u0930",
+    "state": "Bihar",
+    "region": "East",
+    "era": "3rd C. BCE & 5th\u20136th C. CE",
+    "uid": "957bb7c7a6eb439dac21c1e945974a3c",
+    "whom_made": "Gautama Buddha (Site of Supreme Enlightenment; Emperor Ashoka)",
+    "picked_from": "Bodh Gaya, Bihar (Niranjana River)",
+    "file": "mahabodhi_explorer.html",
+    "thumb": "https://media.sketchfab.com/thumbnails/4c57687b657445e1b46c83b35e494ad4/1024.jpg",
+    "badge": "UNESCO Supreme Enlightenment",
+    "desc": "Marking the sacred spot where Prince Siddhartha Gautama attained supreme enlightenment under the Bodhi Tree. The 55-meter grand pyramidal temple stands as one of the oldest all-brick structures surviving in India.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      130.81,
+      164.81,
+      196.0,
+      261.63
+    ]
+  },
+  {
+    "id": "lakshmana_temple",
+    "title": "Lakshmana Temple",
+    "hindi": "\u0932\u0915\u094d\u0937\u094d\u092e\u0923 \u092e\u0928\u094d\u0926\u093f\u0930",
+    "state": "Chhattisgarh",
+    "region": "Central",
+    "era": "7th Century CE",
+    "uid": "lvUgd1Zyxmja7KHkSJkkqbUKUgG",
+    "whom_made": "Lord Vishnu & King Harshagupta (Built by Queen Vasata)",
+    "picked_from": "Sirpur, Mahasamund, Chhattisgarh (Mahanadi River Basin)",
+    "file": "lakshmana_temple_3d.html",
+    "thumb": "https://media.sketchfab.com/models/lvUgd1Zyxmja7KHkSJkkqbUKUgG/thumbnails/84114e5dc3c4409ab1da313769ba98e6/4b0290195a8b497a9b3c305fbf94a3fd.jpeg",
+    "badge": "Ancient Terracotta Brick Temple",
+    "desc": "Regarded as one of India's finest surviving red brick temples, built with precision-carved terracotta bricks on a massive stone jagati. Dedicated to Lord Vishnu, featuring intricate Krishnaleela doorframe reliefs and Pancharatha shikhara.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      146.83,
+      220.0,
+      293.66,
+      440.0
+    ]
+  },
+  {
+    "id": "bom_jesus",
+    "title": "Basilica of Bom Jesus",
+    "hindi": "\u092c\u094b\u092e \u091c\u093f\u091c\u0938 \u092c\u0947\u0938\u093f\u0932\u093f\u0915\u093e",
+    "state": "Goa",
+    "region": "West",
+    "era": "1594\u20131605 CE",
+    "uid": "b51a0ccbf0e74c3c8a929f03008c3f84",
+    "whom_made": "St. Francis Xavier & The Infant Jesus (Jesuit Order of Goa)",
+    "picked_from": "Old Goa (Velha Goa), Goa (Mandovi River)",
+    "file": "bom_jesus_3d.html",
+    "thumb": "https://media.sketchfab.com/models/b51a0ccbf0e74c3c8a929f03008c3f84/thumbnails/ac75a0e5e2704a3b8622614afb568e1b/9d50ad9980064c9a9c328ea40e7c42b6.jpeg",
+    "badge": "UNESCO World Heritage Baroque",
+    "desc": "A masterpiece of Baroque and Mannerist architecture built of unplastered red laterite stone and Basalt. Houses the sacred relics of St. Francis Xavier in a silver casket inside a multi-tiered Florentine marble mausoleum.",
+    "type": "sketchfab",
+    "drone_freqs": [
+      130.81,
+      196.0,
+      261.63,
+      392.0
+    ]
+  },
+  {
+    "id": "lepakshi_temple",
+    "title": "Lepakshi Veerabhadra Temple",
+    "hindi": "\u0c32\u0c47\u0c2a\u0c3e\u0c15\u0c4d\u0c37\u0c3f \u0c35\u0c40\u0c30\u0c2d\u0c26\u0c4d\u0c30 \u0c26\u0c47\u0c35\u0c3e\u0c32\u0c2f\u0c02",
+    "state": "Andhra Pradesh",
+    "region": "South",
+    "era": "16th Century CE",
+    "uid": null,
+    "whom_made": "Lord Veerabhadra (Shiva) (Commissioned by Virupanna & Viranna)",
+    "picked_from": "Lepakshi, Sri Sathya Sai District, Andhra Pradesh",
+    "file": "lepakshi_temple_3d.html",
+    "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Lepakshi_Nandi.jpg/640px-Lepakshi_Nandi.jpg",
+    "badge": "Hanging Pillar & Monolithic Nandi",
+    "desc": "16th-century Vijayanagara sanctuary famous for the legendary Hanging Pillar, colossal monolithic Basavanna (Nandi), and fresco ceiling paintings depicting Puranic epics.",
+    "type": "webgl",
+    "drone_freqs": [
+      123.47,
+      185.0,
+      246.94,
+      370.0
+    ]
+  },
+  {
+    "id": "jageshwar_dham",
+    "title": "Jageshwar Dham Temple Cluster",
+    "hindi": "\u091c\u093e\u0917\u0947\u0936\u094d\u0935\u0930 \u0927\u093e\u092e",
+    "state": "Uttarakhand",
+    "region": "North",
+    "era": "8th\u201312th Century CE",
+    "uid": null,
+    "whom_made": "Lord Shiva (Maha Mrityunjaya) (Katyuri & Chand Dynasties)",
+    "picked_from": "Almora, Uttarakhand (Jata Ganga Valley, Himalayas)",
+    "file": "jageshwar-vr.html",
+    "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Jageshwar_Temple_Complex.jpg/640px-Jageshwar_Temple_Complex.jpg",
+    "badge": "Alpine Nagara Temple Sanctuary",
+    "desc": "Cluster of over 100 stone Latina Nagara temples nestled in a sacred Deodar cedar valley, housing the ancient Maha Mrityunjaya Mahadev shrine in the Kumaon Himalayas.",
+    "type": "webgl",
+    "drone_freqs": [
+      110.0,
+      164.81,
+      220.0,
+      329.63
+    ]
+  },
+  {
+    "id": "neermahal_palace",
+    "title": "Neermahal Water Palace",
+    "hindi": "\u09a8\u09c0\u09b0\u09ae\u09b9\u09b2",
+    "state": "Tripura",
+    "region": "East",
+    "era": "1930\u20131938 CE",
+    "uid": null,
+    "whom_made": "King Bir Bikram Kishore Manikya Bahadur (Manikya Dynasty)",
+    "picked_from": "Melaghar, Tripura (Rudrasagar Lake Island)",
+    "file": "neermahal-vr.html",
+    "thumb": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Neermahal_Tripura.jpg/640px-Neermahal_Tripura.jpg",
+    "badge": "Royal Lake Palace of Rudrasagar",
+    "desc": "Floating jewel of the Manikya kings built in the center of Rudrasagar Lake, fusing Hindu and Mughal pavilions with motorboat landing docks and royal water gardens.",
+    "type": "webgl",
+    "drone_freqs": [
+      130.81,
+      196.0,
+      261.63,
+      392.0
+    ]
+  }
+];
+
+    (function() {
+      "use strict";
+
+      const iframe = document.getElementById('sketchfab-frame');
+      const toast = document.getElementById('toast');
+      const infoCard = document.getElementById('info-card');
+      const collapseBtn = document.getElementById('collapse-btn');
+      const cardBadge = document.getElementById('card-badge');
+      const cardTitle = document.getElementById('card-title');
+      const cardHindi = document.getElementById('card-hindi');
+      const cardDesc = document.getElementById('card-desc');
+      const cardState = document.getElementById('card-state');
+      const cardEra = document.getElementById('card-era');
+      const cardLaunch = document.getElementById('card-launch');
+      const fullscreenBtn = document.getElementById('btn-fullscreen');
+      const audioBtn = document.getElementById('btn-audio');
+      const audioIcon = document.getElementById('audio-icon');
+      const audioText = document.getElementById('audio-text');
+      const galleryModal = document.getElementById('gallery-modal');
+      const galleryToggle = document.getElementById('btn-gallery-toggle');
+      const galleryClose = document.getElementById('btn-gallery-close');
+
+      let currentModel = MONUMENTS[0];
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      // Switch active model
+      window.selectMonument = function(id) {
+        const m = MONUMENTS.find(x => x.id === id);
+        if (!m) return;
+        currentModel = m;
+
+        // Update cards
+        document.querySelectorAll('.model-card').forEach(c => {
+          c.classList.toggle('active', c.getAttribute('data-id') === id);
+        });
+
+        // Update card info
+        cardBadge.textContent = m.badge;
+        cardTitle.firstChild.textContent = m.title + ' ';
+        cardHindi.textContent = '(' + m.hindi + ')';
+        cardDesc.textContent = m.desc;
+        cardState.textContent = m.state;
+        cardEra.textContent = m.era;
+        const cardWhom = document.getElementById('card-whom');
+        const cardPicked = document.getElementById('card-picked');
+        if (cardWhom) cardWhom.textContent = m.whom_made;
+        if (cardPicked) cardPicked.textContent = m.picked_from;
+        cardLaunch.href = m.file;
+
+        // Change iframe src
+        if (m.type === 'sketchfab' && m.uid) {
+          iframe.src = `https://sketchfab.com/models/${m.uid}/embed?autostart=1&internal=1&tracking=0&ui_ar=1&ui_infos=0&ui_snapshots=1&ui_stop=0&ui_theatre=1&ui_watermark=0&ui_theme=dark&camera=0&preload=1`;
+        } else {
+          iframe.src = m.file;
+        }
+        showToast(`${m.title} (${m.state}) Loaded`);
+
+        // If audio playing, restart with new frequencies
+        if (isAudioPlaying) {
+          stopAmbience();
+          startAmbience();
+        }
+      };
+
+      // Card clicks
+      document.querySelectorAll('.model-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-id');
+          selectMonument(id);
+        });
+      });
+
+      // Grid view clicks
+      document.querySelectorAll('.select-monument-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          selectMonument(id);
+          galleryModal.classList.remove('open');
+        });
+      });
+
+      // Gallery Modal Toggle
+      galleryToggle.addEventListener('click', () => {
+        galleryModal.classList.add('open');
+      });
+      galleryClose.addEventListener('click', () => {
+        galleryModal.classList.remove('open');
+      });
+
+      // Region Filter clicks
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.getAttribute('data-filter');
+          document.querySelectorAll('.model-card').forEach(card => {
+            const reg = card.getAttribute('data-region');
+            card.style.display = (filter === 'all' || reg === filter) ? 'flex' : 'none';
+          });
+        });
+      });
+
+      // Collapse toggle
+      collapseBtn.addEventListener('click', () => {
+        infoCard.classList.toggle('collapsed');
+        const isCollapsed = infoCard.classList.contains('collapsed');
+        collapseBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-chevron-down"></i>' : '<i class="fa-solid fa-chevron-up"></i>';
+      });
+
+      // Fullscreen
+      fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+        } else {
+          document.exitFullscreen().catch(() => {});
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+        }
+      });
+
+      // Audio Synthesizer Engine
+      let audioCtx = null;
+      let isAudioPlaying = false;
+      let ambientNodes = [];
+
+      function startAmbience() {
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!audioCtx) audioCtx = new AudioContext();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+
+          const masterGain = audioCtx.createGain();
+          masterGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+          masterGain.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 2.5);
+          masterGain.connect(audioCtx.destination);
+          ambientNodes.push(masterGain);
+
+          const baseFreqs = currentModel.drone_freqs || [138.59, 207.65, 277.18, 415.30];
+          baseFreqs.forEach((f, idx) => {
+            const osc = audioCtx.createOscillator();
+            const oscGain = audioCtx.createGain();
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+
+            const lfo = audioCtx.createOscillator();
+            lfo.frequency.setValueAtTime(0.2 + idx * 0.1, audioCtx.currentTime);
+            const lfoGain = audioCtx.createGain();
+            lfoGain.gain.setValueAtTime(1.5, audioCtx.currentTime);
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start();
+
+            oscGain.gain.setValueAtTime(0.04 / (idx + 1), audioCtx.currentTime);
+            osc.connect(oscGain);
+            oscGain.connect(masterGain);
+            osc.start();
+            ambientNodes.push(osc, lfo);
+          });
+
+          // Shimmer Air Filter
+          const bufferSize = audioCtx.sampleRate * 2;
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+          const whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          whiteNoise.loop = true;
+
+          const biquad = audioCtx.createBiquadFilter();
+          biquad.type = 'bandpass';
+          biquad.frequency.setValueAtTime(1100, audioCtx.currentTime);
+          biquad.Q.setValueAtTime(1.4, audioCtx.currentTime);
+
+          const noiseGain = audioCtx.createGain();
+          noiseGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+
+          whiteNoise.connect(biquad);
+          biquad.connect(noiseGain);
+          noiseGain.connect(masterGain);
+          whiteNoise.start();
+          ambientNodes.push(whiteNoise);
+
+          isAudioPlaying = true;
+          audioIcon.className = 'fa-solid fa-volume-high';
+          audioText.textContent = 'SOUND ON';
+          audioBtn.style.borderColor = 'var(--gold-bright)';
+          audioBtn.style.color = 'var(--gold-bright)';
+          showToast(`${currentModel.title} Ambience Playing`);
+        } catch(e) {
+          console.warn('Audio not allowed:', e);
+        }
+      }
+
+      function stopAmbience() {
+        ambientNodes.forEach(n => {
+          try { if (n.stop) n.stop(); if (n.disconnect) n.disconnect(); } catch(e) {}
+        });
+        ambientNodes = [];
+        isAudioPlaying = false;
+        audioIcon.className = 'fa-solid fa-volume-xmark';
+        audioText.textContent = 'MUTED';
+        audioBtn.style.borderColor = 'var(--glass-border)';
+        audioBtn.style.color = '#f8fafc';
+        showToast('Ambience Muted');
+      }
+
+      audioBtn.addEventListener('click', () => {
+        if (!isAudioPlaying) startAmbience();
+        else stopAmbience();
+      });
+
+    })();
+  </script>
+</body>
+</html>

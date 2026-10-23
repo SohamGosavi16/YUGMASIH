@@ -1,0 +1,473 @@
+
+  (function () {
+    "use strict";
+
+    var SITE_NAME = "Statue of Unity";
+    var SUPPORTED_LANGS = [
+      { key: 'en', code: 'en-IN', fallback: 'en-US', label: 'English', flag: '🇬🇧' },
+      { key: 'hi', code: 'hi-IN', fallback: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+      { key: 'ta', code: 'ta-IN', fallback: 'ta', label: 'தமிழ்', flag: '🇮🇳' },
+      { key: 'te', code: 'te-IN', fallback: 'te', label: 'తెలుగు', flag: '🇮🇳' },
+      { key: 'bn', code: 'bn-IN', fallback: 'bn', label: 'বাংলা', flag: '🇮🇳' },
+      { key: 'mr', code: 'mr-IN', fallback: 'mr', label: 'मराठी', flag: '🇮🇳' },
+      { key: 'gu', code: 'gu-IN', fallback: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+      { key: 'kn', code: 'kn-IN', fallback: 'kn', label: 'ಕನ್ನಡ', flag: '🇮🇳' },
+      { key: 'ml', code: 'ml-IN', fallback: 'ml', label: 'മലയാളം', flag: '🇮🇳' },
+      { key: 'pa', code: 'pa-IN', fallback: 'pa', label: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+      { key: 'fr', code: 'fr-FR', fallback: 'fr', label: 'Français', flag: '🇫🇷' },
+      { key: 'es', code: 'es-ES', fallback: 'es', label: 'Español', flag: '🇪🇸' },
+      { key: 'de', code: 'de-DE', fallback: 'de', label: 'Deutsch', flag: '🇩🇪' },
+      { key: 'ja', code: 'ja-JP', fallback: 'ja', label: '日本語', flag: '🇯🇵' },
+      { key: 'zh', code: 'zh-CN', fallback: 'zh', label: '中文', flag: '🇨🇳' }
+    ];
+
+    var VG_SCRIPTS = {"en": "Welcome to the Statue of Unity, the world's tallest monument, rising an astounding 182 meters (597 feet) above the sacred Narmada River on Sadhu Bet island in Kevadia, Gujarat. Dedicated to Sardar Vallabhbhai Patel—revered across the subcontinent as the 'Iron Man of India' and the supreme architect of modern national integration—this colossal masterpiece stands as a monumental tribute to democratic unity, visionary statesmanship, and unprecedented twenty-first-century civil engineering. Facing the immense Sardar Sarovar Dam and framed by the rugged peaks of the Vindhyachal and Satpura mountain ranges, the monument embodies the living spirit of a united India. It honors the courageous leader who, with remarkable diplomacy and unyielding resolve, peacefully integrated over 562 diverse princely states into a single sovereign democratic republic following national independence in 1947.\n\nArchitecturally and structurally, the Statue of Unity is a supreme triumph of modern megastructure engineering, designed by master sculptor Padma Bhushan Ram V. Sutar and constructed by Larsen & Toubro in partnership with international engineering consortiums. The exact height of 182 meters was purposefully calibrated to represent the 182 legislative constituencies of the Gujarat State Assembly, embedding democratic symbolism directly into the monument's physical stature. Sculpting a standing human figure of this magnitude posed extraordinary aerodynamic and structural challenges. Unlike traditional monuments with broad, pyramid-like bases, the statue depicts Sardar Patel in a natural walking posture, draped in his characteristic Indian dhoti, kurta, and shawl, with feet slightly apart. This posed unprecedented center-of-gravity and wind-shear considerations for the structural engineers. To ensure absolute permanence against severe seismic activity and ferocious cyclonic storms, the colossus was engineered with twin reinforced concrete cores at its center, surrounded by a structural steel space frame and enveloped by 1,700 tonnes of high-grade bronze plates divided into 6,500 individual cast panels. The statue is engineered to withstand ferocious gale winds exceeding 180 kilometers per hour and category six earthquakes.\n\nA profound and emotional hallmark of the monument is its nation-wide grassroots foundation, famously known as the Loha Campaign. Over 100 million farmers across 169,000 villages throughout every state of India contributed their used iron agricultural implements, such as ploughshares, sickle blades, and hoes. More than 135 tonnes of donated farming iron were collected, smelted, and utilized in the internal foundations of the statue, symbolizing the sweat, toil, and agrarian bedrock of the Indian people in the creation of a united nation. High-speed express elevators traveling at four meters per second transport visitors in under forty seconds to a spacious high-altitude viewing gallery situated at 153 meters inside Sardar Patel's chest, capable of hosting 200 visitors simultaneously, offering breathtaking panoramic vistas of the Narmada River, Garudeshwar weir, and lush reserve forests.\n\nToday, the Statue of Unity has transformed Kevadia into a flourishing global ecotourism hub, encompassing the Valley of Flowers, Butterfly Park, Jungle Safari, Cactus Garden, and the Sardar Patel National Memorial Museum. You are now experiencing a millimeter-accurate 3D digital twin of this modern wonder. Rotate, pan, and zoom around the bronze drapery, detailed facial features, and the colossal lotus base as you explore India's crowning symbol of national integrity, architectural brilliance, and engineering excellence.", "hi": "विश्व की सबसे ऊंची प्रतिमा, स्टैच्यू ऑफ यूनिटी (Statue of Unity) में आपका हार्दिक स्वागत है। गुजरात के नर्मदा जिले में केवडिया स्थित साधु बेट द्वीप पर पवित्र नर्मदा नदी के तट पर स्थित यह विशाल स्मारक 182 मीटर (597 फीट) की ऐतिहासिक ऊंचाई पर गर्व से खड़ा है। भारत के 'लौह पुरुष' और आधुनिक राष्ट्र के एकीकरण के सूत्रधार सरदार वल्लभभाई पटेल को समर्पित यह स्मारक एकता, दृढ़ राजनीतिक संकल्प और इक्कीसवीं सदी की उत्कृष्ट सिविल इंजीनियरिंग का एक अद्वितीय प्रतीक है। विशाल सरदार सरोवर बांध के सम्मुख और विंध्याचल तथा सतपुड़ा की सुरम्य पर्वत श्रृंखलाओं की गोद में स्थित यह प्रतिमा उस महानायक को नमन करती है जिन्होंने 1947 में स्वतंत्रता के बाद 562 से अधिक देशी रियासतों का भारतीय संघ में शांतिपूर्ण विलय कर एक अखंड भारत का निर्माण किया।\n\nवास्तुशिल्प और संरचनात्मक दृष्टिकोण से स्टैच्यू ऑफ यूनिटी आधुनिक महाकाय इंजीनियरिंग की एक बेमिसाल मिसाल है। इसका डिज़ाइन सुप्रसिद्ध मूर्तिकार पद्मभूषण राम वी. सुतार द्वारा तैयार किया गया था और इसका निर्माण लार्सन एंड टुब्रो (L&T) द्वारा वैश्विक विशेषज्ञों के सहयोग से किया गया। 182 मीटर की ऊंचाई गुजरात विधानसभा के 182 निर्वाचन क्षेत्रों का प्रतिनिधित्व करती है। इतनी विशाल प्रतिमा को एक स्वाभाविक चलने की मुद्रा में खड़ा करना अत्यंत जटिल और चुनौतीपूर्ण कार्य था। पारंपरिक चौड़े आधार वाले स्मारकों के विपरीत, इसमें सरदार पटेल को अपनी पारंपरिक धोती, कुर्ता और कंधे पर शॉल ओढ़े आगे बढ़ते हुए दर्शाया गया है, जिससे इसका गुरुत्वाकर्षण केंद्र अत्यंत संवेदनशील हो जाता है। भूकंप और तेज आंधियों से सुरक्षा के लिए इसके केंद्र में दो प्रबलित कंक्रीट कोर बनाए गए हैं, जिन्हें स्टील स्पेस फ्रेम और 1,700 टन कांसे से ढालकर 6,500 व्यक्तिगत पैनलों में तैयार किया गया है। यह संरचना 180 किलोमीटर प्रति घंटे की आंधी और तीव्र भूकंप के झटकों को आसानी से सहन कर सकती है।\n\nइस स्मारक की सबसे भावनात्मक और ऐतिहासिक विशेषता इसका देशव्यापी 'लोहा अभियान' रहा। भारत के प्रत्येक राज्य के 169,000 गांवों के 10 करोड़ से अधिक किसानों ने अपने खेतों में इस्तेमाल किए गए पुराने लोहे के औजार, जैसे हल और कुदाल, इस प्रतिमा के लिए दान किए। 135 टन से अधिक एकत्रित कृषि लोहे को पिघलाकर प्रतिमा की नींव और आंतरिक संरचना में समाहित किया गया, जो भारतीय किसानों के पसीने, परिश्रम और राष्ट्रीय एकता के प्रति उनके अटूट समर्पण का साक्षात प्रमाण है। इसके अतिरिक्त, चार मीटर प्रति सेकंड की गति से चलने वाली लिफ्ट आगंतुकों को 153 मीटर की ऊंचाई पर सरदार पटेल के सीने में स्थित विशाल व्यूइंग गैलरी तक ले जाती है, जहां से 200 लोग एक साथ नर्मदा नदी, सरदार सरोवर बांध और हरे-भरे वनों का विहंगम दृश्य देख सकते हैं।\n\nआज स्टैच्यू ऑफ यूनिटी ने केवडिया को वैश्विक पर्यटन के मानचित्र पर स्थापित कर दिया है, जहां फूलों की घाटी, जंगल सफारी, कैक्टस गार्डन और सरदार पटेल संग्रहालय स्थित हैं। आप इस समय इस आधुनिक अजूबे की मिलीमीटर-सटीक त्रि-आयामी 3D डिजिटल प्रतिकृति का अनुभव कर रहे हैं। इसके कांसे के वस्त्रों, चेहरे के भावों और आधार का अन्वेषण करें तथा लाइव ऑडियो गाइड के साथ भारत के गौरव को महसूस करें। यह स्मारक हमें यह निरंतर याद दिलाता है कि भारत की वास्तविक शक्ति उसकी विविधता और अटूट एकता में निहित है।", "gu": "વિશ્વના સૌથી ઊંચા સ્મારક સ્ટેચ્યુ ઓફ યુનિટી (Statue of Unity) માં આપનું હાર્દિક સ્વાગત છે. ગુજરાતના નર્મદા જિલ્લામાં કેવડિયા ખાતે સાધુ બેટ ટાપુ પર પવિત્ર નર્મદા નદીના કાંઠે સ્થિત આ ભવ્ય પ્રતિમા 182 મીટર (597 ફૂટ) ની ઐતિહાસિક ઊંચાઈ સાથે ગૌરવભેર ઊભી છે. ભારતના 'લોખંડી પુરુષ' અને અખંડ ભારતના શિલ્પી સરદાર વલ્લભભાઈ પટેલને સમર્પિત આ પ્રતિમા એકતા, અડગ નેતૃત્વ અને એકવીસમી સદીની અપ્રતિમ ઇજનેરી કૌશલ્યનું જીવંત પ્રતીક છે. વિશાળ સરદાર સરોવર ડેમની સામે અને વિંધ્યાચલ તથા સાતપુડા પર્વતમાળાઓની વચ્ચે સ્થિત આ સ્મારક એ મહામાનવને વંદન કરે છે જેમણે 1947માં આઝાદી પછી 562થી વધુ દેશી રજવાડાંઓનું ભારતીય સંઘમાં વિલીનીકરણ કરીને અખંડ ભારતનું સર્જન કર્યું હતું.\n\nસ્થાપત્ય અને રચનાત્મક દ્રષ્ટિએ સ્ટેચ્યુ ઓફ યુનિટી આધુનિક મેગાસ્ટ્રક્ચર એન્જિનિયરિંગની સર્વોચ્ચ સિદ્ધિ છે. આ પ્રતિમાની ડિઝાઇન દેશના ખ્યાતનામ મૂર્તિકાર પદ્મભૂષણ રામ વી. સુતાર દ્વારા તૈયાર કરવામાં આવી હતી અને તેનું નિર્માણ લાર્સન એન્ડ ટુબ્રો (L&T) દ્વારા આંતરરાષ્ટ્રીય સલાહકારો સાથે મળીને કરવામાં આવ્યું હતું. 182 મીટરની ઊંચાઈ ગુજરાત વિધાનસભાની 182 બેઠકોનું પ્રતીકાત્મક સન્માન દર્શાવે છે. આટલી વિરાટ પ્રતિમાને ચાલવાની કુદરતી મુદ્રામાં ઊભી રાખવી એ વિશ્વ એન્જિનિયરિંગ માટે એક અસાધારણ પડકાર હતો. પરંપરાગત પહોળા પાયાવાળા સ્મારકોથી વિપરીત, આ પ્રતિમામાં સરદાર સાહેબને ધોતી, કુરતો અને ખેસ પહેરીને ગંભીરતાપૂર્વક આગળ વધતા દર્શાવવામાં આવ્યા છે. ભારે પવન અને ભૂકંપ સામે અડીખમ રાખવા માટે અંદર બે આરસીસી કોંક્રિટ કોર બનાવવામાં આવ્યા છે, જેને સ્ટીલ ફ્રેમ અને 1,700 ટન કાંસાના 6,500 થી વધુ પેનલ્સથી આચ્છાદિત કરવામાં આવ્યા છે. તે 180 કિમી પ્રતિ કલાકની ઝડપે ફૂંકાતા વાવાઝોડા અને ઝોન 6 ના ભૂકંપ સામે અડીખમ ઊભી રહેવા સક્ષમ છે.\n\nઆ સ્મારકનું સૌથી પવિત્ર પાસું રાષ્ટ્રવ્યાપી 'લોહા અભિયાન' હતું. ભારતના 1,69,000 ગામડાંઓના 10 કરોડથી વધુ ખેડૂતોએ પોતાના ખેતરોમાં વપરાયેલા જૂના લોખંડના ઓજારો, જેમ કે હળ અને કોદાળીનું દાન આપ્યું હતું. 135 ટનથી વધુ ખેતીનું લોખંડ એકત્ર કરીને ઓગાળીને પ્રતિમાના પાયામાં વાપરવામાં આવ્યું, જે ભારતીય ધરતીપુત્રોના પરસેવા અને રાષ્ટ્રીય એકતાની ભાવનાનું અમર પ્રતીક છે. પ્રતિમાની અંદર 4 મીટર પ્રતિ સેકન્ડની ઝડપે દોડતી હાઇ-સ્પીડ લિફ્ટ્સ મુલાકાતીઓને 153 મીટરની ઊંચાઈએ આવેલી વ્યુઇંગ ગેલેરી સુધી લઈ જાય છે, જ્યાંથી એકસાથે 200 લોકો નર્મદા નદી, સરદાર સરોવર ડેમ અને કુદરતી જંગલોનો અદભુત નજારો માણી શકે છે.\n\nઆજે સ્ટેચ્યુ ઓફ યુનિટીએ કેવડિયાને વૈશ્વિક પ્રવાસનનું ગૌરવવંતું કેન્દ્ર બનાવ્યું છે, જેમાં વેલી ઓફ ફ્લાવર્સ, જંગલ સફારી, કેક્ટસ ગાર્ડન અને સરદાર પટેલ નેશનલ મ્યુઝિયમ આવેલા છે. અત્યારે આપ આ ઐતિહાસિક સ્મારકની મિલિમીટર-ચોક્કસ 3D ડિજિટલ પ્રતિકૃતિનો અનુભવ કરી રહ્યા છો. પ્રતિમાની તમામ મુદ્રાઓ, કાંસાના વસ્ત્રો અને આધારનું અવલોકન કરો અને લાઈવ ઓડિયો ગાઈડ સાથે ગુજરાત અને ભારતના ગૌરવને માણો. ભારત માતાના આ સપૂતનું યોગદાન સદાય અમર રહેશે.", "ta": "உலகின் மிக உயரமான நினைவுச்சின்னமான ஒற்றுமையின் சிலை (Statue of Unity) திருத்தலத்திற்கு உங்களை அன்புடன் வரவேற்கிறோம். குஜராத்தின் நர்மதை மாவட்டத்தில் கேவாடியா பகுதியில் அமைந்துள்ள சாது பெட் தீவில் புனித நர்மதை நதிக்கரையில் அமைந்துள்ள இந்த பிரம்மாண்ட நினைவுச்சின்னம் 182 மீட்டர் (597 அடி) உயரத்தில் கம்பீரமாக விண்ணை முட்டி நிற்கிறது. இந்தியாவின் 'இரும்பு மனிதர்' என்றும், நவீன இந்தியாவின் ஒற்றுமையின் தந்தை என்றும் போற்றப்படும் சர்தார் வல்லபாய் படேல் அவர்களுக்கு அர்ப்பணிக்கப்பட்ட இந்த அற்புதம், ஒற்றுமை, தியாகம் மற்றும் 21-ஆம் நூற்றாண்டின் ஒப்பற்ற சிவில் இன்ஜினியரிங் சாதனையின் உலகளாவிய அடையாளமாகும். பிரம்மாண்ட சர்தார் சரோவர் அணைக்கு எதிரே, விந்திய மற்றும் சாத்புரா மலைத்தொடர்களின் பசுமையான மடியில் அமைந்துள்ள இந்த சிலை, 1947-ல் சுதந்திரத்திற்குப் பிறகு 562-க்கும் மேற்பட்ட சுதேச சமஸ்தானங்களை அமைதி வழியில் ஒருங்கிணைத்து ஒரே பாரத தேசமாக உருவாக்கிய வரலாற்று நாயகனுக்கு செலுத்தப்படும் அழியாத காணிக்கையாகும்.\n\nகட்டடக்கலை மற்றும் பொறியியல் பார்வையில், ஒற்றுமையின் சிலை நவீன உலகின் தலைசிறந்த மெகா ஸ்ட்ரக்சர் இன்ஜினியரிங் சாதனையாகும். புகழ்பெற்ற இந்திய சிற்பக் கலைஞர் பத்மபூஷண் ராம் வி. சுதார் அவர்களால் வடிவமைக்கப்பட்டு, லார்சன் & டூப்ரோ (L&T) நிறுவனத்தால் உலகத்தரம் வாய்ந்த நிபுணர்களுடன் இணைந்து இது கட்டப்பட்டது. குஜராத் சட்டமன்றத்தின் 182 தொகுதிகளை பிரதிபலிக்கும் வகையில் இதன் உயரம் சரியாக 182 மீட்டராக நிர்ணயிக்கப்பட்டது. இவ்வளவு பிரம்மாண்டமான சிலையை இயல்பான நடைபயிற்சி தோரணையில் நிலைநிறுத்துவது மிகப்பெரிய ஏரோடைனமிக் சவாலாக இருந்தது. வழக்கமான அகலமான பிரமிடு அடித்தளங்களுக்கு மாறாக, சர்தார் படேல் தனது பாரம்பரிய வேட்டி, குர்தா மற்றும் சால்வை அணிந்து கால்களை சற்று அகலமாக வைத்து கம்பீரமாக நடப்பது போன்ற தோற்றத்தில் வடிவமைக்கப்பட்டுள்ளது. கடுமையான நிலநடுக்கங்கள் மற்றும் சூறாவளிகளைத் தாங்கும் வகையில், சிலையினுள் இரட்டை வலுவூட்டப்பட்ட கான்கிரீட் தூண்கள் அமைக்கப்பட்டு, அவற்றைச் சுற்றி எஃகு சட்டகங்கள் மற்றும் 1,700 டன் எடையுள்ள 6,500 வெண்கலத் தகடுகளால் இது மூடப்பட்டுள்ளது. மணிக்கு 180 கி.மீ வேகத்தில் வீசும் பலத்த காற்று மற்றும் நிலநடுக்கங்களை தாங்கும் வலிமை இதற்கு உண்டு.\n\nஇந்த நினைவுச்சின்னத்தின் மிக உன்னதமான வரலாற்று அம்சம் நாடு தழுவிய 'இரும்பு சேகரிப்பு இயக்கம்' (Loha Campaign) ஆகும். இந்தியாவின் அனைத்து மாநிலங்களிலும் உள்ள 1,69,000 கிராமங்களைச் சேர்ந்த 10 கோடிக்கும் மேற்பட்ட விவசாயிகள் தங்கள் விவசாயத்தில் பயன்படுத்திய பழைய இரும்புக் கலப்பைகள் மற்றும் கருவிகளை இந்த சிலைக்காக நன்கொடையாக வழங்கினர். அவ்வாறு திரட்டப்பட்ட 135 டன்களுக்கும் அதிகமான விவசாய இரும்பு உருக்கப்பட்டு சிலையின் உள் அடித்தளத்தில் பயன்படுத்தப்பட்டது. இது இந்திய விவசாயிகளின் வியர்வைக்கும், உழைப்பிற்கும், தேசிய ஒற்றுமைக்கும் கிடைத்த மகத்தான மரியாதையாகும். வினாடிக்கு 4 மீட்டர் வேகத்தில் இயங்கும் அதிவேக மின்தூக்கிகள் மூலம் பார்வையாளர்கள் படேலின் மார்புப் பகுதியில் 153 மீட்டர் உயரத்தில் அமைந்துள்ள பார்வை மாடத்திற்கு அழைத்துச் செல்லப்படுகிறார்கள். அங்கிருந்து ஒரே நேரத்தில் 200 பேர் நர்மதை நதி, சர்தார் சரோவர் அணை மற்றும் சுற்றியுள்ள இயற்கை அழகை ரசிக்க முடியும்.\n\nஇன்று கேவாடியா பகுதி மலர்களின் பள்ளத்தாக்கு, காடுகள் மற்றும் சர்தார் படேல் அருங்காட்சியகத்துடன் உலகளாவிய சுற்றுலா மையமாக மலர்ந்துள்ளது. இப்போது நீங்கள் இந்த நவீன வரலாற்று சாதனையின் மிகத் துல்லியமான 3D டிஜிட்டல் மாதிரியைப் பார்வையிடுகிறீர்கள். சுழற்றி, பெரிதாக்கி வெண்கல வேலைப்பாடுகளை கண்டு களித்து பாரதத்தின் பெருமையை உணருங்கள்.", "te": "ప్రపంచంలోనే అత్యంత ఎత్తైన స్మారక చిహ్నం, స్టాచ్యూ ఆఫ్ యూనిటీ (Statue of Unity) కి మీకు హృదయపూర్వక స్వాగతం. గుజరాత్ లోని నర్మదా జిల్లా కెవాడియా వద్ద సాధు బెట్ ద్వీపంలో పవిత్ర నర్మదా నదీ తీరాన వెలసిన ఈ అద్భుత కట్టడం 182 మీటర్ల (597 అడుగుల) చారిత్రక ఎత్తుతో ఆకాశాన్ని తాకుతూ గర్వంగా నిలుచుంది. భారతదేశపు 'ఉక్కు మనిషి' మరియు ఆధునిక భారత ఐక్యతా శిల్పి సర్దార్ వల్లభ్ భాయ్ పటేల్ గారికి అంకితం చేయబడిన ఈ బృహత్ నిర్మాణం, జాతీయ సమగ్రత, అచంచల నాయకత్వం మరియు 21వ శతాబ్దపు అసమాన సివిల్ ఇంజనీరింగ్ ప్రతిభకు శాశ్వత చిహ్నంగా భాసిల్లుతోంది. భారీ సర్దార్ సరోవర్ డ్యామ్ కు అభిముఖంగా, వింధ్య మరియు సాత్పురా పర్వత శ్రేణుల మధ్య నెలకొన్న ఈ విగ్రహం, 1947 స్వాతంత్ర్యం అనంతరం 562 పైగా స్వదేశీ సంస్థానాలను శాంతియుతంగా విలీనం చేసి అఖండ భారతదేశాన్ని ఆవిష్కరించిన ఆ మహనీయునికి సమర్పించిన ఘన నివాళి.\n\nవాస్తుశిల్ప మరియు ఇంజనీరింగ్ రంగాలలో స్టాచ్యూ ఆఫ్ యూనిటీ ఆధునిక ప్రపంచ అద్భుతాలలో అగ్రగామిగా నిలుస్తుంది. ఈ విగ్రహాన్ని ప్రఖ్యాత శిల్పి పద్మభూషణ్ రామ్ వి. సుతార్ రూపొందించగా, ప్రముఖ నిర్మాణ సంస్థ లార్సన్ అండ్ టుబ్రో (L&T) అంతర్జాతీయ నిపుణుల భాగస్వామ్యంతో నిర్మించింది. గుజరాత్ శాసనసభలోని 182 నియోజకవర్గాలకు ప్రతీకగా దీని ఎత్తును సరిగ్గా 182 మీటర్లుగా నిర్ణయించారు. ఇంత భారీ విగ్రహాన్ని నడిచే సహజ భంగిమలో నిలబెట్టడం ఇంజనీర్లకు అత్యంత క్లిష్టమైన సవాలుగా మారింది. సాధారణ స్మారక చిహ్నాల మాదిరిగా విస్తృతమైన ఆధారం లేకుండా, సర్దార్ పటేల్ తన సంప్రదాయ ధోవతి, కుర్తా మరియు శాలువా ధరించి గంభీరంగా అడుగులు వేస్తున్నట్లు రూపొందించారు. భూకంపాలు మరియు పెను తుఫానులను తట్టుకునేందుకు విగ్రహం లోపల రెండు భారీ రీఇన్‌ఫోర్స్డ్ కాంక్రీట్ కోర్లను నిర్మించి, వాటి చుట్టూ స్టీల్ ఫ్రేమ్ మరియు 1,700 టన్నుల బరువు గల 6,500 కాంస్య పలకలతో కప్పారు. గంటకు 180 కిలోమీటర్ల వేగంతో వీచే గాలులను, తీవ్రమైన భూకంపాలను సైతం ఇది తట్టుకోగలదు.\n\nఈ స్మారక చిహ్న నిర్మాణంలో అత్యంత విశేషమైనది దేశవ్యాప్త 'ఇనుము సేకరణ ఉద్యమం' (లోహా క్యాంపెయిన్). భారతదేశంలోని 1,69,000 గ్రామాలకు చెందిన 10 కోట్లకు పైగా రైతులు తమ వ్యవసాయ పనుల్లో వాడిన పాత ఇనుప నాగళ్లు, పనిముట్లను విరాళంగా ఇచ్చారు. సేకరించిన 135 టన్నులకు పైగా రైతు ఇనుమును కరిగించి విగ్రహ పునాదులలో వినియోగించారు, ఇది భారతీయ అన్నదాతల శ్రమకు, దేశ సమైక్యతకు దక్కిన పరమోన్నత గౌరవం. సెకనుకు 4 మీటర్ల వేగంతో ప్రయాణించే హై-స్పీడ్ లిఫ్టుల ద్వారా సందర్శకులు పటేల్ గారి ఛాతీ భాగంలో 153 మీటర్ల ఎత్తున ఉన్న వ్యూయింగ్ గ్యాలరీకి చేరుకుంటారు. అక్కడ ఒకేసారి 200 మంది నిలబడి నర్మదా నది, సర్దార్ సరోవర్ ఆనకట్ట మరియు సుందర వనాల విహంగ దృశ్యాలను తిలకించవచ్చు.\n\nనేడు కెవాడియా వ్యాలీ ఆఫ్ ఫ్లవర్స్, జంగిల్ సఫారీ మరియు సర్దార్ పటేల్ మ్యూజియంతో ప్రపంచ పర్యాటక కేంద్రంగా విలసిల్లుతోంది. ప్రస్తుతం మీరు ఈ ఆధునిక అద్భుతం యొక్క అత్యంత ఖచ్చితమైన 3D డిజిటల్ నమూనాను పరిశీలిస్తున్నారు. కాంస్య కళాఖండాలను అన్ని కోణాల్లో తిలకిస్తూ భారతదేశపు గౌరవాన్ని అనుభవించండి.", "bn": "বিশ্বের উচ্চতম সৌধ, স্ট্যাচু অব ইউনিটি (Statue of Unity)-তে আপনাকে আন্তরিক সাদর সম্ভাষণ জানাই। গুজরাতের নর্মদা জেলার কেভাদিয়ায় সাধু বেট দ্বীপে পবিত্র নর্মদা নদীর তীরে অবস্থিত এই কালজয়ী বিশাল মূর্তিটি ১৮২ মিটার (৫৯৭ ফুট) ঐতিহাসিক উচ্চতায় সগৌরবে দাঁড়িয়ে রয়েছে। ভারতের 'লৌহমানব' এবং আধুনিক ভারতীয় ঐক্যের প্রধান স্থপতি সর্দার বল্লভভাই প্যাটেলের স্মৃতির উদ্দেশ্যে উৎসর্গীকৃত এই মহাকাব্যিক সৃষ্টি জাতীয় সংহতি, দূরদর্শী রাষ্ট্রনীতি এবং একবিংশ শতাব্দীর অতুলনীয় সিভিল ইঞ্জিনিয়ারিংয়ের এক অমর বিজয়গাথা। সুবিশাল সর্দার সরোবর বাঁধের মুখোমুখি এবং বিন্ধ্য ও সাতপুরা পর্বতশ্রেণীর অপরূপ প্রাকৃতিক কোলে অবস্থিত এই ভাস্কর্যটি সেই মহানায়কের প্রতি বিনম্র শ্রদ্ধাঞ্জলি, যিনি ১৯৪৭ সালে স্বাধীনতার পর ৫৬২টিরও বেশি দেশীয় রাজ্যকে শান্তিপূর্ণভাবে একত্রিত করে একটি ঐক্যবদ্ধ সার্বভৌম গণতান্ত্রিক ভারত রাষ্ট্র গঠন করেছিলেন।\n\nস্থাপত্য ও প্রযুক্তির দিক থেকে স্ট্যাচু অব ইউনিটি আধুনিক মেগাস্ট্রাকচার ইঞ্জিনিয়ারিংয়ের এক পরম বিস্ময়। ভারতের প্রখ্যাত ভাস্কর পদ্মভূষণ রাম ভি. সুতার এটি ডিজাইন করেন এবং লারসেন অ্যান্ড টুব্রো (L&T) আন্তর্জাতিক বিশেষজ্ঞদের সাথে যৌথভাবে এটি সফলভাবে নির্মাণ করে। গুজরাত বিধানসভার ১৮২টি নির্বাচনী আসনের প্রতীক হিসেবে এর উচ্চতা ঠিক ১৮২ মিটার নির্ধারণ করা হয়। এত বিশাল আকারের মূর্তিকে একটি স্বাভাবিক হাঁটার ভঙ্গিতে দাঁড় করানো ছিল একটি অভূতপূর্ব চ্যালেঞ্জ। প্রচলিত চওড়া পিরামিড ভিত্তির বিপরীতে, এখানে সর্দার প্যাটেলকে তাঁর পরিচিত ধুতি, কুর্তা ও শাল পরিহিত অবস্থায় ধীর পদক্ষেপে এগিয়ে চলার ভঙ্গিমায় উপস্থাপন করা হয়েছে। তীব্র ঝড় ও ভূমিকম্প প্রতিরোধ করার জন্য মূর্তির অভ্যন্তরে দুটি শক্তিশালী রিইনফোর্সড কংক্রিট কোর তৈরি করা হয়েছে, যা স্টিল স্পেস ফ্রেম এবং ১,৭০০ টন ওজনের ৬,৫০০টি স্বতন্ত্র ব্রোঞ্জ প্যানেলে সুরক্ষিত। এটি ঘণ্টায় ১৮০ কিমি বেগের প্রবল বাতাস এবং তীব্র ভূমিকম্প সহ্য করতে সক্ষম।\n\nএই সৌধের সবচেয়ে আবেগময় ও ঐতিহাসিক গৌরব হলো দেশব্যাপী 'লোহা সংগ্রহ অভিযান' (Loha Campaign)। ভারতের প্রতিটি রাজ্যের ১,৬৯,০০০টি গ্রামের ১০ কোটিরও বেশি কৃষক তাঁদের ব্যবহৃত পুরনো লোহার লাঙল এবং কৃষিজ যন্ত্রপাতি দান করেছিলেন। সংগৃহীত ১৩৫ টনেরও বেশি কৃষকদের লোহা গলিয়ে মূর্তির অভ্যন্তরীণ ভিত্তিতে স্থাপন করা হয়, যা ভারতের কোটি কোটি কৃষকের ঘাম, শ্রম এবং দেশপ্রেমের চিরন্তন প্রতীক। প্রতি সেকেন্ডে ৪ মিটার বেগে চলা উচ্চগতির লিফটের মাধ্যমে দর্শনার্থীরা সর্দার প্যাটেলের বুকে ১৫৩ মিটার উচ্চতায় অবস্থিত বিশাল ভিউয়িং গ্যালারিতে পৌঁছান, যেখান থেকে একযোগে ২০০ জন মানুষ নর্মদা নদী, বাঁধ এবং বনাঞ্চলের মনোরম দৃশ্য উপভোগ করতে পারেন।\n\nআজ স্ট্যাচু অব ইউনিটি কেভাদিয়াকে বিশ্ব পর্যটনের কেন্দ্রে পরিণত করেছে। আপনি এই মুহূর্তে এই আধুনিক বিস্ময়ের একটি নিখুঁত 3D ডিজিটাল রূপ প্রত্যক্ষ করছেন। এর ব্রোঞ্জের গঠন, মুখের ভাব এবং পদ্ম বেসটি পুঙ্খানুপুঙ্খভাবে ঘুরে দেখুন এবং লাইভ অডিও গাইডের মাধ্যমে ভারতের গৌরব উপলব্ধি করুন।", "mr": "जगातील सर्वात उंच स्मारक, स्टॅच्यू ऑफ युनिटी (Statue of Unity) मध्ये आपले मनःपूर्वक स्वागत आहे. गुजरातमधील नर्मदा जिल्ह्यातील केवडिया येथील साधू बेट बेटावर पवित्र नर्मदा नदीच्या काठावर उभे असलेले हे भव्य स्मारक तब्बल १८२ मीटर (५९७ फूट) इतक्या ऐतिहासिक उंचीवर अभिमानाने उभे आहे. भारताचे 'लोहपुरुष' आणि अखंड भारताचे शिल्पकार सरदार वल्लभभाई पटेल यांना समर्पित असलेले हे भव्य शिल्प राष्ट्रीय एकात्मता, कणखर नेतृत्व आणि २१ व्या शतकातील अद्वितीय स्थापत्य कौशल्याचे एक जागतिक प्रतीक आहे. अथांग सरदार सरोवर धरणाच्या समोर आणि विंध्य व सातपुडा पर्वतरांगांच्या निसर्गरम्य कुशीत वसलेले हे स्मारक त्या महान नेत्याला वंदन करते, ज्यांनी १९४७ मध्ये स्वातंत्र्यानंतर ५६२ हून अधिक संस्थानांचे विलीनीकरण करून एकात्म भारताची निर्मिती केली.\n\nवास्तुकला आणि अभियांत्रिकीच्या दृष्टीने स्टॅच्यू ऑफ युनिटी ही आधुनिक महाकाय अभियांत्रिकीची एक अद्वितीय किमया आहे. प्रसिद्ध शिल्पकार पद्मभूषण राम व्ही. सुतार यांनी या भव्य मूर्तीची रचना केली असून लार्सन अँड टुब्रो (L&T) कंपनीने आंतरराष्ट्रीय तज्ज्ञांच्या सहकार्याने ती पूर्ण केली. गुजरात विधानसभेच्या १८२ मतदारसंघांचे प्रतिनिधित्व करण्यासाठी या स्मारकाची उंची अचूक १८२ मीटर ठेवण्यात आली. एवढ्या महाकाय पुतळ्याला नैसर्गिक चालण्याच्या मुद्रेत उभे करणे हे अत्यंत गुंतागुंतीचे आव्हान होते. नेहमीच्या रुंद पायांच्या स्मारकांपेक्षा वेगळे, यात सरदार पटेल आपल्या पारंपरिक धोती, कुर्ता आणि शाल परिधान करून खंबीरपणे पुढे जाताना दाखवले आहेत. भूकंप आणि चक्रीवादळांपासून संरक्षणासाठी पुतळ्याच्या मध्यभागी दोन आरसीसी काँक्रीट कोर तयार करण्यात आले आहेत, ज्यांना स्टील फ्रेम आणि १,७०० टन वजनाच्या ६,৫०० कांस्य प्लेट्सने आच्छादित केले आहे. हे स्मारक ताशी १८० किमी वेगाचे वारे आणि तीव्र भूकंप सहज पेलू शकते.\n\nया स्मारकाचे सर्वात भावनिक वैशिष्ट्य म्हणजे देशव्यापी 'लोहा मोहीम'. भारतातील १,६९,००० गावांमधील १० कोटींहून अधिक शेतकऱ्यांनी आपल्या शेतात वापरलेली जुनी लोखंडी अवजारे, नांगर आणि कुदळी या स्मारकासाठी दान केल्या. गोळा केलेले १३५ टनांपेक्षा जास्त शेतकऱ्यांचे लोखंड वितळवून पुतळ्याच्या पायात वापरण्यात आले, जे भारतीय शेतकऱ्यांच्या कष्टाचे आणि राष्ट्रीय ऐक्याचे अमर प्रतीक आहे. सेकंदाला ४ मीटर वेगाने जाणाऱ्या हाय-स्पीड लिफ्ट्सद्वारे पर्यटक १५३ मीटर उंचीवर सरदार पटेलांच्या छातीतील गॅलरीत पोहोचतात, जिथून एकाच वेळी २०० लोक नर्मदा नदी, धरण आणि निसर्गाचे विहंगम दृश्य पाहू शकतात.\n\nआज स्टॅच्यू ऑफ युनिटीमुळे केवडिया जागतिक पर्यटन केंद्र बनले आहे. सध्या आपण या आधुनिक चमत्काराची अतिशय अचूक 3D डिजिटल प्रतिकृती पाहत आहात. विविध कोनातून या कांस्य शिल्पाचे निरीक्षण करा आणि भारताच्या अभिमानास्पद इतिहासाचा अनुभव घ्या.", "kn": "ವಿಶ್ವದ ಅತ್ಯಂತ ಎತ್ತರದ ಸ್ಮಾರಕ, ಏಕತೆಯ ಪ್ರತಿಮೆ (Statue of Unity) ಗೆ ನಿಮಗೆ ಹೃತ್ಪೂರ್ವಕ ಸ್ವಾಗತ. ಗುಜರಾತಿನ ನರ್ಮದಾ ಜಿಲ್ಲೆಯ ಕೆವಾಡಿಯಾದ ಸಾಧು ಬೆಟ್ ದ್ವೀಪದಲ್ಲಿ ಪವಿತ್ರ ನರ್ಮದಾ ನದಿಯ ತೀರದಲ್ಲಿ ನೆಲೆಸಿರುವ ಈ ಬೃಹತ್ ಸ್ಮಾರಕವು 182 ಮೀಟರ್ (597 ಅಡಿ) ಐತಿಹಾಸಿಕ ಎತ್ತರದಲ್ಲಿ ಗರ್ವದಿಂದ ತಲೆಎತ್ತಿ ನಿಂತಿದೆ. ಭಾರತದ 'ಉಕ್ಕಿನ ಮನುಷ್ಯ' ಮತ್ತು ಆಧುನಿಕ ಭಾರತೀಯ ಏಕತೆಯ ಹರಿಕಾರ ಸರ್ದಾರ್ ವಲ್ಲಭಭಾಯಿ ಪಟೇಲ್ ಅವರಿಗೆ ಸಮರ್ಪಿತವಾಗಿರುವ ಈ ಮಹಾನ್ ಶಿಲ್ಪವು ರಾಷ್ಟ್ರೀಯ ಸಮಗ್ರತೆ, ಅಚಲ ನಾಯಕತ್ವ ಮತ್ತು 21ನೇ ಶತಮಾನದ ಅತ್ಯುನ್ನತ ಸಿವಿಲ್ ಇಂಜಿನಿಯರಿಂಗ್ ಸಾಧನೆಯ ಶಾಶ್ವತ ಸಂಕೇತವಾಗಿದೆ. ವಿಶಾಲವಾದ ಸರ್ದಾರ್ ಸರೋವರ ಅಣೆಕಟ್ಟಿನ ಎದುರು, ವಿಂಧ್ಯ ಮತ್ತು ಸಾತ್ಪುರ ಪರ್ವತ ಶ್ರೇಣಿಗಳ ಮಡಿಲಲ್ಲಿರುವ ಈ ಸ್ಮಾರಕವು 1947 ರ ಸ್ವಾತಂತ್ರ್ಯದ ನಂತರ 562 ಕ್ಕೂ ಹೆಚ್ಚು ರಾಜಪ್ರಭುತ್ವದ ಸಂಸ್ಥಾನಗಳನ್ನು ಒಗ್ಗೂಡಿಸಿ ಅಖಂಡ ಭಾರತವನ್ನು ನಿರ್ಮಿಸಿದ ಮಹಾನ್ ನಾಯಕನಿಗೆ ಅರ್ಪಿಸಿದ ಅನನ್ಯ ನಮನವಾಗಿದೆ.\n\nವಾಸ್ತುಶಿಲ್ಪ ಮತ್ತು ಇಂಜಿನಿಯರಿಂಗ್ ದೃಷ್ಟಿಯಿಂದ ಏಕತೆಯ ಪ್ರತಿಮೆಯು ಆಧುನಿಕ ಜಗತ್ತಿನ ಅದ್ಭುತಗಳಲ್ಲಿ ಒಂದಾಗಿದೆ. ಖ್ಯಾತ ಶಿಲ್ಪಿ ಪದ್ಮಭೂಷಣ ರಾಮ್ ವಿ. ಸುತಾರ್ ಅವರು ಇದನ್ನು ವಿನ್ಯಾಸಗೊಳಿಸಿದ್ದು, ಲಾರ್ಸನ್ & ಟೂಬ್ರೊ (L&T) ಜಾಗತಿಕ ತಜ್ಞರ ಸಹಯೋಗದೊಂದಿಗೆ ನಿರ್ಮಿಸಿದೆ. ಗುಜರಾತ್ ವಿಧಾನಸಭೆಯ 182 ಕ್ಷೇತ್ರಗಳನ್ನು ಪ್ರತಿನಿಧಿಸುವಂತೆ ಇದರ ಎತ್ತರವನ್ನು ನಿಖರವಾಗಿ 182 ಮೀಟರ್‌ಗಳಾಗಿ ನಿಗದಿಪಡಿಸಲಾಗಿದೆ. ಇಷ್ಟು ಬೃಹತ್ ಪ್ರತಿಮೆಯನ್ನು ನೈಸರ್ಗಿಕ ನಡಿಗೆಯ ಭಂಗಿಯಲ್ಲಿ ನಿಲ್ಲಿಸುವುದು ಅತ್ಯಂತ ಸವಾಲಿನ ಕೆಲಸವಾಗಿತ್ತು. ಸರ್ದಾರ್ ಪಟೇಲ್ ಅವರು ತಮ್ಮ ಸಾಂಪ್ರದಾಯಿಕ ಧೋತಿ, ಕುರ್ತಾ ಮತ್ತು ಶಾಲು ಧರಿಸಿ ಗಂಭೀರವಾಗಿ ಮುನ್ನಡೆಯುತ್ತಿರುವಂತೆ ಕೆತ್ತಲಾಗಿದೆ. ತೀವ್ರ ಭೂಕಂಪ ಮತ್ತು ಚಂಡಮಾರುತಗಳನ್ನು ತಡೆದುಕೊಳ್ಳಲು, ಪ್ರತಿಮೆಯ ಒಳಗೆ ಎರಡು ಬಲವರ್ಧಿತ ಕಾಂಕ್ರೀಟ್ ಕೋರ್‌ಗಳನ್ನು ನಿರ್ಮಿಸಿ, ಅವುಗಳನ್ನು ಸ್ಟೀಲ್ ಫ್ರೇಮ್ ಮತ್ತು 1,700 ಟನ್ ತೂಕದ 6,500 ಕಂಚಿನ ಫಲಕಗಳಿಂದ ಆವರಿಸಲಾಗಿದೆ. ಇದು ಗಂಟೆಗೆ 180 ಕಿ.ಮೀ ವೇಗದ ಬಿರುಗಾಳಿ ಮತ್ತು ಪ್ರಬಲ ಭೂಕಂಪಗಳನ್ನು ಸಹಿಸಿಕೊಳ್ಳುವ ಸಾಮರ್ಥ್ಯ ಹೊಂದಿದೆ.\n\nಈ ಸ್ಮಾರಕದ ಅತ್ಯಂತ ಪವಿತ್ರ ಹೆಗ್ಗುರುತು ಎಂದರೆ ದೇಶವ್ಯಾಪಿ ನಡೆದ 'ಕಬ್ಬಿಣ ಸಂಗ್ರಹ ಅಭಿಯಾನ' (ಲೋಹಾ ಕ್ಯಾಂಪೇನ್). ಭಾರತದ 1,69,000 ಹಳ್ಳಿಗಳ 10 ಕೋಟಿಗೂ ಹೆಚ್ಚು ರೈತರು ತಮ್ಮ ಕೃಷಿ ಕೆಲಸಕ್ಕೆ ಬಳಸಿದ ಹಳೆಯ ಕಬ್ಬಿಣದ ನೇಗಿಲು ಮತ್ತು ಉಪಕರಣಗಳನ್ನು ಈ ಪ್ರತಿಮೆಗಾಗಿ ದಾನವಾಗಿ ನೀಡಿದರು. ಸಂಗ್ರಹಿಸಿದ 135 ಟನ್‌ಗೂ ಹೆಚ್ಚು ರೈತರ ಕಬ್ಬಿಣವನ್ನು ಕರಗಿಸಿ ಪ್ರತಿಮೆಯ ಅಡಿಪಾಯದಲ್ಲಿ ಬಳಸಲಾಯಿತು. ಇದು ಭಾರತೀಯ ಅನ್ನದಾತರ ಬೆವರು, ಪರಿಶ್ರಮ ಮತ್ತು ದೇಶಪ್ರೇಮದ ಜೀವಂತ ಸಾಕ್ಷಿಯಾಗಿದೆ. ಸೆಕೆಂಡಿಗೆ 4 ಮೀಟರ್ ವೇಗದಲ್ಲಿ ಚಲಿಸುವ ಲಿಫ್ಟ್‌ಗಳ ಮೂಲಕ ಪ್ರವಾಸಿಗರು ಪಟೇಲ್ ಅವರ ಎದೆಯ ಭಾಗದಲ್ಲಿ 153 ಮೀಟರ್ ಎತ್ತರದಲ್ಲಿರುವ ವೀಕ್ಷಣಾ ಗ್ಯಾಲರಿಗೆ ತಲುಪುತ್ತಾರೆ, ಅಲ್ಲಿಂದ 200 ಜನರು ಏಕಕಾಲದಲ್ಲಿ ನರ್ಮದಾ ನದಿ, ಅಣೆಕಟ್ಟು ಮತ್ತು ಅರಣ್ಯಗಳ ವಿಹಂಗಮ ನೋಟವನ್ನು ಆನಂದಿಸಬಹುದು.\n\nಇಂದು ಕೆವಾಡಿಯಾ ಜಾಗತಿಕ ಪ್ರವಾಸೋದ್ಯಮ ತಾಣವಾಗಿ ಮಾರ್ಪಟ್ಟಿದೆ. ಈಗ ನೀವು ಈ ಆಧುನಿಕ ಅದ್ಭುತದ ನಿಖರವಾದ 3D ಡಿಜಿಟಲ್ ಮಾದರಿಯನ್ನು ವೀಕ್ಷಿಸುತ್ತಿದ್ದೀರಿ. ಎಲ್ಲಾ ಕೋನಗಳಿಂದಲೂ ಈ ಕಂಚಿನ ಶಿಲ್ಪವನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಭಾರತದ ಗರಿಮೆಯನ್ನು ಅನುಭವಿಸಿ.", "ml": "ലോകത്തിലെ ഏറ്റവും ഉയരം കൂടിയ സ്മാരകമായ സ്റ്റാച്യു ഓഫ് യൂണിറ്റിയിലേക്ക് (Statue of Unity) നിങ്ങൾക്ക് ഹൃദ്യമായ സ്വാഗതം. ഗുജറാത്തിലെ നർമ്മദ ജില്ലയിലെ കേവാദിയയിലുള്ള സാധു ബെറ്റ് ദ്വീപിൽ പവിത്രമായ നർമ്മദാ നദിക്കരയിൽ സ്ഥിതി ചെയ്യുന്ന ഈ ബൃഹത്തായ ശിൽപം 182 മീറ്റർ (597 അടി) ഉയരത്തിൽ തലയുയർത്തി നിൽക്കുന്നു. ഭാരതത്തിന്റെ 'ഇരുമ്പ് മനുഷ്യനും' ആധുനിക ഇന്ത്യയുടെ ഐക്യത്തിന്റെ ശില്പിയുമായ സർദാർ വല്ലഭ്ഭായ് പട്ടേലിനായി സമർപ്പിച്ചിരിക്കുന്ന ഈ അത്ഭുതം ദേശീയ സമഗ്രതയുടെയും ഇരുപത്തിയൊന്നാം നൂറ്റാണ്ടിലെ സമാനതകളില്ലാത്ത എഞ്ചിനീയറിംഗ് മികവിന്റെയും മകുടോദാഹരണമാണ്. വിശാലമായ സർദാർ സരോവർ അണക്കെട്ടിന് അഭിമുഖമായി, വിന്ധ്യ-സാത്പുര മലനിരകളുടെ താഴ്‌വരയിൽ സ്ഥിതി ചെയ്യുന്ന ഈ പ്രതിമ, 1947-ൽ സ്വാതന്ത്ര്യത്തിനുശേഷം 562-ലധികം നാട്ടുരാജ്യങ്ങളെ സംയോജിപ്പിച്ച് അഖണ്ഡഭാരതം രൂപീകരിച്ച ധീരനായകന് നൽകുന്ന ഉചിതമായ ആദരവാണ്.\n\nവാസ്തുവിദ്യാപരമായും എഞ്ചിനീയറിംഗ് പരമായും സ്റ്റാച്യു ഓഫ് യൂണിറ്റി ആധുനിക മെഗാസ്ട്രക്ചർ എഞ്ചിനീയറിംഗിന്റെ പരമോന്നത വിജയമാണ്. പ്രശസ്ത ശില്പി പത്മഭൂഷൺ റാം വി. സുതാറാണ് ഇത് രൂപകല്പന ചെയ്തത്. പ്രമുഖ നിർമ്മാണ കമ്പനിയായ ലാർസൻ & ടൂബ്രോ (L&T) അന്താരാഷ്ട്ര വിദഗ്ധരുമായി ചേർന്നാണ് നിർമ്മാണം പൂർത്തിയാക്കിയത്. ഗുജറാത്ത് നിയമസഭയിലെ 182 മണ്ഡലങ്ങളെ പ്രതിനിധീകരിക്കുന്നതിനാണ് ഇതിന്റെ ഉയരം കൃത്യമായി 182 മീറ്ററായി നിശ്ചയിച്ചത്. ഇത്രയും വലിയൊരു ശില്പം സ്വാഭാവികമായ നടത്തത്തിന്റെ ഭാവത്തിൽ ഉറപ്പിച്ചു നിർത്തുക എന്നത് വലിയൊരു വെല്ലുവിളിയായിരുന്നു. പട്ടേൽ തന്റെ പരമ്പരാഗത ധോത്തിയും കുർത്തയും ഷാളും ധരിച്ച് ശാന്തമായി മുന്നോട്ട് നടന്നുനീങ്ങുന്ന രീതിയിലാണ് ഇത് നിർമ്മിച്ചിരിക്കുന്നത്. കനത്ത കാറ്റിനെയും ഭൂകമ്പങ്ങളെയും പ്രതിരോധിക്കാൻ രണ്ട് കോൺക്രീറ്റ് കോറുകൾ നിർമ്മിച്ച്, അവയ്ക്ക് ചുറ്റും സ്റ്റീൽ ഫ്രെയിമും 1,700 ടൺ ഭാരമുള്ള 6,500 വെങ്കല പാളികളും ഘടിപ്പിച്ചിരിക്കുന്നു. മണിക്കൂറിൽ 180 കിലോമീറ്റർ വേഗതയിലുള്ള കാറ്റിനെയും ഭൂകമ്പങ്ങളെയും ഇതിന് പ്രതിരോധിക്കാൻ കഴിയും.\n\nഈ സ്മാരകത്തിന്റെ ഏറ്റവും വലിയ പ്രത്യേകത രാജ്യവ്യാപകമായി നടന്ന 'ലോഹ കാമ്പയിൻ' ആണ്. ഇന്ത്യയിലെ 1,69,000 ഗ്രാമങ്ങളിലെ 10 കോടിയിലധികം കർഷകർ തങ്ങളുടെ പഴയ കാർഷിക ഉപകരണങ്ങൾ ഈ സ്മാരകത്തിനായി സംഭാവന ചെയ്തു. ശേഖരിച്ച 135 ടണ്ണിലധികം ഇരുമ്പ് ഉരുക്കി പ്രതിമയുടെ അടിത്തറയിൽ ഉപയോഗിച്ചു. ഇത് ഭാരതത്തിലെ കർഷകരുടെ വിയർപ്പിനും കഠിനാധ്വാനത്തിനും ദേശീയ ഐക്യത്തിനും നൽകിയ പരമോന്നത ബഹുമതിയാണ്. സെക്കൻഡിൽ 4 മീറ്റർ വേഗതയിൽ പോകുന്ന ലിഫ്റ്റുകൾ വഴി സന്ദർശകർക്ക് പട്ടേലിന്റെ നെഞ്ചിൽ 153 മീറ്റർ ഉയരത്തിലുള്ള വ്യൂവിംഗ് ഗാലറിയിൽ എത്താം. അവിടെ നിന്ന് ഒരേസമയം 200 പേർക്ക് നർമ്മദാ നദിയുടെയും പ്രകൃതിയുടെയും മനോഹരമായ കാഴ്ചകൾ കാണാം.\n\nഇന്ന് കേവാദിയ വിനോദസഞ്ചാരികളുടെ പ്രധാന ആകർഷണ കേന്ദ്രമായി മാറിയിരിക്കുന്നു. ഇപ്പോൾ നിങ്ങൾ ഈ ആധുനിക അത്ഭുതത്തിന്റെ 3D ഡിജിറ്റൽ പതിപ്പാണ് അനുഭവിക്കുന്നത്. എല്ലാ കോണുകളിൽ നിന്നും ഇത് കണ്ട് ആസ്വദിക്കൂ.", "pa": "ਦੁਨੀਆ ਦੇ ਸਭ ਤੋਂ ਉੱਚੇ ਸਮਾਰਕ, ਸਟੈਚੂ ਆਫ਼ ਯੂਨਿਟੀ (Statue of Unity) ਵਿਖੇ ਤੁਹਾਡਾ ਨਿੱਘਾ ਸਵਾਗਤ ਹੈ। ਗੁਜਰਾਤ ਦੇ ਨਰਮਦਾ ਜ਼ਿਲ੍ਹੇ ਦੇ ਕੇਵਡੀਆ ਵਿਖੇ ਸਾਧੂ ਬੇਟ ਟਾਪੂ ਉੱਤੇ ਪਵਿੱਤਰ ਨਰਮਦਾ ਨਦੀ ਦੇ ਕੰਢੇ ਸਥਿਤ ਇਹ ਵਿਸ਼ਾਲ ਬੁੱਤ 182 ਮੀਟਰ (597 ਫੁੱਟ) ਦੀ ਇਤਿਹਾਸਕ ਉਚਾਈ 'ਤੇ ਮਾਣ ਨਾਲ ਖੜ੍ਹਾ ਹੈ। ਭਾਰਤ ਦੇ 'ਲੋਹ ਪੁਰਸ਼' ਅਤੇ ਆਧੁਨਿਕ ਭਾਰਤੀ ਏਕਤਾ ਦੇ ਨਿਰਮਾਤਾ ਸਰਦਾਰ ਵੱਲਭਭਾਈ ਪਟੇਲ ਨੂੰ ਸਮਰਪਿਤ ਇਹ ਵਿਸ਼ਾਲ ਸ਼ਾਹਕਾਰ ਰਾਸ਼ਟਰੀ ਏਕਤਾ, ਦੂਰਅੰਦੇਸ਼ ਅਗਵਾਈ ਅਤੇ 21ਵੀਂ ਸਦੀ ਦੀ ਬੇਮਿਸਾਲ ਸਿਵਲ ਇੰਜੀਨੀਅਰਿੰਗ ਦਾ ਇੱਕ ਵਿਸ਼ਵ ਪੱਧਰੀ ਪ੍ਰਤੀਕ ਹੈ। ਵਿਸ਼ਾਲ ਸਰਦਾਰ ਸਰੋਵਰ ਡੈਮ ਦੇ ਸਾਹਮਣੇ ਅਤੇ ਵਿੰਧਿਆਚਲ ਅਤੇ ਸਤਪੁੜਾ ਪਰਬਤ ਲੜੀਆਂ ਦੀ ਗੋਦ ਵਿੱਚ ਸਥਿਤ ਇਹ ਸਮਾਰਕ ਉਸ ਮਹਾਨ ਆਗੂ ਨੂੰ ਨਮਨ ਕਰਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਨੇ 1947 ਦੀ ਆਜ਼ਾਦੀ ਤੋਂ ਬਾਅਦ 562 ਤੋਂ ਵੱਧ ਰਿਆਸਤਾਂ ਨੂੰ ਸ਼ਾਂਤੀਪੂਰਵਕ ਇਕਜੁੱਟ ਕਰਕੇ ਇੱਕ ਅਖੰਡ ਭਾਰਤ ਦਾ ਨਿਰਮਾਣ ਕੀਤਾ ਸੀ।\n\nਵਾਸਤੂਕਲਾ ਅਤੇ ਇੰਜੀਨੀਅਰਿੰਗ ਦੇ ਪੱਖੋਂ ਸਟੈਚੂ ਆਫ਼ ਯੂਨਿਟੀ ਆਧੁਨਿਕ ਵਿਸ਼ਵ ਇੰਜੀਨੀਅਰਿੰਗ ਦੀ ਇੱਕ ਮਹਾਨ ਪ੍ਰਾਪਤੀ ਹੈ। ਇਸ ਦਾ ਡਿਜ਼ਾਈਨ ਪ੍ਰਸਿੱਧ ਮੂਰਤੀਕਾਰ ਪਦਮ ਭੂਸ਼ਣ ਰਾਮ ਵੀ. ਸੁਤਾਰ ਦੁਆਰਾ ਤਿਆਰ ਕੀਤਾ ਗਿਆ ਸੀ ਅਤੇ ਲਾਰਸਨ ਐਂਡ ਟੂਬਰੋ (L&T) ਵੱਲੋਂ ਕੌਮਾਂਤਰੀ ਮਾਹਿਰਾਂ ਦੇ ਸਹਿਯੋਗ ਨਾਲ ਇਸ ਦੀ ਉਸਾਰੀ ਕੀਤੀ ਗਈ। ਗੁਜਰਾਤ ਵਿਧਾਨ ਸਭਾ ਦੇ 182 ਹਲਕਿਆਂ ਦੀ ਨੁਮਾਇੰਦਗੀ ਕਰਨ ਲਈ ਇਸ ਦੀ ਉਚਾਈ ਠੀਕ 182 ਮੀਟਰ ਰੱਖੀ ਗਈ ਹੈ। ਇੰਨੇ ਵਿਸ਼ਾਲ ਬੁੱਤ ਨੂੰ ਕੁਦਰਤੀ ਤੁਰਨ ਦੀ ਮੁਦਰਾ ਵਿੱਚ ਖੜ੍ਹਾ ਕਰਨਾ ਇੰਜੀਨੀਅਰਾਂ ਲਈ ਇੱਕ ਵੱਡੀ ਚੁਣੌਤੀ ਸੀ। ਸਰਦਾਰ ਪਟੇਲ ਨੂੰ ਆਪਣੀ ਰਵਾਇਤੀ ਧੋਤੀ, ਕੁੜਤਾ ਅਤੇ ਸ਼ਾਲ ਪਹਿਨੇ ਦ੍ਰਿੜ੍ਹਤਾ ਨਾਲ ਅੱਗੇ ਵਧਦੇ ਦਿਖਾਇਆ ਗਿਆ ਹੈ। ਤੇਜ਼ ਹਵਾਵਾਂ ਅਤੇ ਭੁਚਾਲਾਂ ਤੋਂ ਸੁਰੱਖਿਆ ਲਈ ਬੁੱਤ ਦੇ ਅੰਦਰ ਦੋ ਮਜ਼ਬੂਤ ਕੰਕਰੀਟ ਕੋਰ ਬਣਾਏ ਗਏ ਹਨ, ਜਿਨ੍ਹਾਂ ਨੂੰ ਸਟੀਲ ਫਰੇਮ ਅਤੇ 1,700 ਟਨ ਵਜ਼ਨ ਦੀਆਂ 6,500 ਕਾਂਸੀ ਦੀਆਂ ਪਲੇਟਾਂ ਨਾਲ ਢੱਕਿਆ ਗਿਆ ਹੈ। ਇਹ 180 ਕਿਮੀ ਪ੍ਰਤੀ ਘੰਟਾ ਦੀ ਰਫ਼ਤਾਰ ਵਾਲੇ ਤੂਫ਼ਾਨਾਂ ਅਤੇ ਭੁਚਾਲਾਂ ਨੂੰ ਆਸਾਨੀ ਨਾਲ ਸਹਿਣ ਕਰ ਸਕਦਾ ਹੈ।\n\nਇਸ ਸਮਾਰਕ ਦੀ ਸਭ ਤੋਂ ਇਤਿਹਾਸਕ ਵਿਸ਼ੇਸ਼ਤਾ ਦੇਸ਼ ਵਿਆਪੀ 'ਲੋਹਾ ਮੁਹਿੰਮ' ਰਹੀ। ਭਾਰਤ ਦੇ 1,69,000 ਪਿੰਡਾਂ ਦੇ 10 ਕਰੋੜ ਤੋਂ ਵੱਧ ਕਿਸਾਨਾਂ ਨੇ ਖੇਤੀ ਵਿੱਚ ਵਰਤੇ ਗਏ ਆਪਣੇ ਪੁਰਾਣੇ ਲੋਹੇ ਦੇ ਔਜ਼ਾਰ ਇਸ ਸਮਾਰਕ ਲਈ ਦਾਨ ਕੀਤੇ। ਇਕੱਠੇ ਕੀਤੇ 135 ਟਨ ਤੋਂ ਵੱਧ ਕਿਸਾਨੀ ਲੋਹੇ ਨੂੰ ਪਿਘਲਾ ਕੇ ਬੁੱਤ ਦੀ ਨੀਂਹ ਵਿੱਚ ਵਰਤਿਆ ਗਿਆ, ਜੋ ਭਾਰਤੀ ਕਿਸਾਨਾਂ ਦੀ ਮਿਹਨਤ ਅਤੇ ਰਾਸ਼ਟਰੀ ਏਕਤਾ ਦਾ ਅਮਰ ਪ੍ਰਤੀਕ ਹੈ। ਚਾਰ ਮੀਟਰ ਪ੍ਰਤੀ ਸੈਕਿੰਡ ਦੀ ਰਫ਼ਤਾਰ ਵਾਲੀਆਂ ਲਿਫਟਾਂ ਰਾਹੀਂ ਸੈਲਾਨੀ 153 ਮੀਟਰ ਦੀ ਉਚਾਈ 'ਤੇ ਸਥਿਤ ਵਿਊਇੰਗ ਗੈਲਰੀ ਤੱਕ ਪਹੁੰਚਦੇ ਹਨ, ਜਿੱਥੋਂ 200 ਲੋਕ ਇੱਕੋ ਸਮੇਂ ਨਰਮਦਾ ਨਦੀ ਅਤੇ ਡੈਮ ਦਾ ਸੁੰਦਰ ਨਜ਼ਾਰਾ ਦੇਖ ਸਕਦੇ ਹਨ।\n\nਅੱਜ ਕੇਵਡੀਆ ਇੱਕ ਵਿਸ਼ਵ ਪ੍ਰਸਿੱਧ ਸੈਰ-ਸਪਾਟਾ ਕੇਂਦਰ ਬਣ ਚੁੱਕਾ ਹੈ। ਤੁਸੀਂ ਇਸ ਸਮੇਂ ਇਸ ਆਧੁਨਿਕ ਅਜੂਬੇ ਦਾ 3D ਡਿਜੀਟਲ ਮਾਡਲ ਦੇਖ ਰਹੇ ਹੋ। ਇਸ ਦੀ ਕਾਂਸੀ ਦੀ ਬਣਤਰ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਭਾਰਤ ਦੇ ਮਾਣ ਨੂੰ ਮਹਿਸੂਸ ਕਰੋ।", "fr": "Bienvenue à la Statue de l'Unité, le monument le plus haut du monde, s'élevant à 182 mètres (597 pieds) au-dessus du fleuve sacré Narmada sur l'île de Sadhu Bet à Kevadia, Gujarat. Dédiée à Sardar Vallabhbhai Patel — vénéré comme 'l'Homme de fer de l'Inde' et l'artisan suprême de l'intégration nationale moderne — ce chef-d'œuvre colossal constitue un vibrant hommage à l'unité, au sens de l'État et aux prouesses du génie civil du XXIe siècle. Faisant face au gigantesque barrage de Sardar Sarovar et encadré par les chaînes de montagnes de Vindhyachal et Satpura, ce colosse commémore le dirigeant qui a unifié pacifiquement plus de 562 principautés en une seule république démocratique et souveraine après l'indépendance de 1947.\n\nSur le plan architectural et structurel, la Statue de l'Unité représente un triomphe de l'ingénierie moderne, conçue par le maître sculpteur Padma Bhushan Ram V. Sutar et réalisée par Larsen & Toubro avec des experts internationaux. La hauteur de 182 mètres a été délibérément choisie pour honorer les 182 circonscriptions de l'Assemblée législative du Gujarat. Sculpter une figure debout de cette envergure en posture de marche naturelle, vêtue du dhoti traditionnel et d'un châle, constituait un défi aérodynamique sans précédent. Pour résister aux séismes majeurs et aux vents violents, la structure est ancrée par deux noyaux centraux en béton armé, une armature spatiale en acier et 1 700 tonnes de bronze moulé réparties en 6 500 panneaux. Elle peut résister à des vents de 180 km/h et à des séismes de magnitude 6,5.\n\nUn aspect particulièrement mémorable est la Campagne du Fer (Loha Campaign). Plus de 100 millions d'agriculteurs de 169 000 villages indiens ont fait don de leurs vieux outils agricoles en fer. Plus de 135 tonnes de fer ont ainsi été fondues et intégrées aux fondations, symbolisant le travail acharné du peuple indien dans l'édification de la nation. Des ascenseurs express emmènent les visiteurs à une galerie panoramique située à 153 mètres de hauteur dans la poitrine du colosse, offrant une vue saisissante sur le fleuve Narmada et le barrage. Vous explorez actuellement le jumeau numérique 3D ultra-précis de cette merveille d'ingénierie.", "es": "Bienvenido a la Estatua de la Unidad, el monumento más alto del planeta, que se alza a 182 metros (597 pies) sobre el sagrado río Narmada en la isla Sadhu Bet en Kevadia, Gujarat. Dedicada a Sardar Vallabhbhai Patel —venerado como el 'Hombre de Hierro de la India' y el artífice de la integración nacional moderna—, esta colosal obra maestra rinde homenaje a la unidad soberana, el liderazgo visionario y las proezas de la ingeniería civil del siglo XXI. Frente a la inmensa presa Sardar Sarovar y enmarcada por las cordilleras de Vindhyachal y Satpura, la estatua honra al líder que integró pacíficamente más de 562 estados principescos en una sola república democrática tras la independencia de 1947.\n\nDesde el punto de vista arquitectónico, la Estatua de la Unidad es un triunfo de la ingeniería contemporánea, diseñada por el célebre escultor Ram V. Sutar y construida por Larsen & Toubro. La altura de 182 metros representa simbólicamente los 182 distritos electorales de Gujarat. Representar a Patel en postura de marcha natural, con su dhoti tradicional y chal, supuso un inmenso reto de centro de gravedad y aerodinámica. Su núcleo consta de dos columnas de hormigón armado envueltas en un marco de acero y 1.700 toneladas de bronce fundido distribuidas en 6.500 paneles. Puede resistir vientos huracanados de 180 km/h y terremotos de categoría seis.\n\nUn rasgo histórico profundamente conmovedor fue la Campaña Loha: más de 100 millones de agricultores de 169.000 aldeas donaron herramientas de hierro usadas, aportando más de 135 toneladas de hierro fundidas en sus cimientos. Ascensores de alta velocidad llevan a los visitantes a una galería de observación a 153 metros de altura. Disfrute ahora de este gemelo digital tridimensional de alta precisión.", "de": "Willkommen bei der Statue der Einheit, dem höchsten Denkmal der Welt, das sich beeindruckende 182 Meter (597 Fuß) über den heiligen Fluss Narmada auf der Insel Sadhu Bet in Kevadia, Gujarat, erhebt. Gewidmet Sardar Vallabhbhai Patel — verehrt als der 'Eiserne Mann Indiens' und Architekt der modernen nationalen Einheit — steht dieses kolossale Meisterwerk als Symbol für Integrität, visionäre Staatskunst und bahnbrechende Ingenieurkunst des 21. Jahrhunderts. Gegenüber der gewaltigen Sardar-Sarovar-Talsperre und umrahmt von den Vindhya- und Satpura-Bergen erinnert das Denkmal an den Staatsmann, der nach der Unabhängigkeit 1947 über 562 Fürstenstaaten friedlich in eine demokratische Republik integrierte.\n\nArchitektonisch ist die Statue ein monumentaler Triumph der Bauingenieurkunst, entworfen vom Meisterbildhauer Ram V. Sutar und errichtet von Larsen & Toubro. Die Höhe von 182 Metern symbolisiert die 182 Wahlkreise des Bundesstaates Gujarat. Die Darstellung in natürlicher Geh-Haltung im traditionellen Dhoti stellte extreme aerodynamische Anforderungen. Die Konstruktion besteht aus zwei Stahlbetonkernen, einem Stahlraumfachwerk und 1.700 Tonnen Bronze in 6.500 Gussplatten, ausgelegt für Windgeschwindigkeiten bis 180 km/h und schwere Erdbeben.\n\nBemerkenswert war die landesweite Loha-Kampagne, bei der über 100 Millionen Bauern aus 169.000 Dörfern altes Eisenwerkzeug spendeten; über 135 Tonnen Eisen wurden im Fundament eingeschmolzen. Hochgeschwindigkeitsaufzüge führen zu einer Aussichtsgalerie in 153 Metern Höhe. Sie erleben nun einen hochpräzisen 3D-Zwilling dieses Weltwunders.", "ja": "世界で最も高い記念碑「統一の像（Statue of Unity）」へようこそ。インド・グジャラート州ケワディアのナルマダー川に浮かぶサドゥ・ベット島にそびえ立つこの巨大な像は、高さ182メートル（597フィート）を誇ります。「インドの鉄人」と称えられ、近代的国家統合の父として尊敬されるサルダール・ヴァッలಭバーイー・パテールに捧げられたこの記念碑は、団結、政治的決断力、そして21世紀の驚異的な土木技術の世界的象徴です。1947年の独立後、562以上の藩王国を平和的に統合した偉業を称えています。\n\n彫刻家ラーム・V・スタールによって設計され、ラーセン＆トゥブロ（L&T）社によって建設されたこの像の高さ182メートルは、グジャラート州議会の182の選挙区を表しています。伝統的なドーティを身にまとい、歩みを進める自然な姿勢を巨大なスケールで再現するため、高度な流体力学と耐震設計が施されました。内部には2本の鉄筋コンクリートコアと鉄骨フレームが配置され、1,700トンのブロンズ（6,500枚のパネル）で覆われています。時速180kmの強風や大地震にも耐えられる堅牢な構造です。\n\n全国の農民1億人以上が使わなくなった農具を寄付した「鉄回収キャンペーン」により、集まった135トン以上の鉄が基礎に使用されました。胸部の高さ153メートルには展望デッキが設置されています。現在、ミリメートル単位で正確な3Dデジタルツインをご体験いただけます。", "zh": "热烈欢迎参观世界上最高的纪念碑——团结雕像（Statue of Unity）。该雕像巍然矗立在印度古吉拉特邦凯瓦迪亚的萨杜贝特岛上，俯瞰神圣的纳尔马达河，高达惊人的182米（597英尺）。这座巨大的杰作献给被尊为“印度铁人”的萨达尔·瓦拉卜拜·帕特尔，他是现代印度国家统一的总设计师。雕像面对壮阔的萨达尔萨罗瓦水坝，背靠温迪亚和萨特普拉山脉，纪念这位在1947年独立后和平整合了562多个土邦的伟大领袖。\n\n在建筑与工程结构上，团结雕像是现代巨型工程的卓越典范。由著名雕塑大师拉姆·苏塔尔设计，拉森特博鲁（L&T）工程集团承建。182米的高度精准对应古吉拉特邦议会的182个选区。雕像展现了帕特尔身着传统多蒂与披肩从容迈步的姿态。为抵御强风和六级地震，其内部采用双钢筋混凝土核心筒与钢结构空间桁架，外层覆以1700吨高品质铸造青铜（由6500块独立铜板拼接而成），可抵御180公里/小时的强飓风。\n\n该建筑的一大历史亮点是全国范围的“铁质农具收集运动”：全印16.9万个村庄的1亿多名农民捐赠了废旧铁农具，熔炼出135吨铁注入雕像基础。高速电梯仅需数十秒即可将游客送至位于153米胸部的高空观景台。您现在正在探索该建筑的高精度三维数字孪生模型。"};
+
+    var currentLang = 'en';
+    var isPlaying = false;
+    var isPaused = false;
+    var selectedRate = 1.0;
+    var showHud = true;
+
+    // Trackers
+    var wordSpans = [];
+    var allWords = [];
+    var activeWordIndex = 0;
+    var wordTimer = null;
+    var synth = window.speechSynthesis;
+    var currentUtterance = null;
+    var speechChunks = [];
+    var currentChunkIdx = 0;
+
+    // DOM Elements
+    var playBtn = document.getElementById('vg-play');
+    var playIcon = document.getElementById('vg-play-icon');
+    var playLabel = document.getElementById('vg-play-label');
+    var stopBtn = document.getElementById('vg-stop');
+    var scriptBox = document.getElementById('vg-script-box');
+    var progressBar = document.getElementById('vg-progress-bar');
+    var voiceInfo = document.getElementById('vg-voice-info');
+    var panel = document.getElementById('voice-guide-panel');
+    var hud = document.getElementById('vg-subtitle-hud');
+    var hudContent = document.getElementById('vg-hud-content');
+    var hudLangLabel = document.getElementById('vg-hud-lang-label');
+    var hudToggleBtn = document.getElementById('vg-hud-toggle');
+    var hudCloseBtn = document.getElementById('vg-hud-close');
+    var mainTrigger = document.getElementById('btn-voice-guide');
+    var closeBtn = document.getElementById('vg-close');
+
+    function detectLanguage() {
+      var raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      var code = raw.split('-')[0];
+      var match = SUPPORTED_LANGS.find(function (l) { return l.key === code; });
+      return match ? match.key : 'en';
+    }
+
+    function buildLangPills() {
+      var row = document.getElementById('vg-lang-row');
+      if (!row) return;
+      row.innerHTML = '';
+      SUPPORTED_LANGS.forEach(function (lang) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'vg-lang-pill' + (lang.key === currentLang ? ' active' : '');
+        btn.dataset.lang = lang.key;
+        btn.textContent = lang.flag + ' ' + lang.label;
+        btn.addEventListener('click', function () {
+          var wasPlaying = isPlaying;
+          stopGuide();
+          currentLang = lang.key;
+          document.querySelectorAll('.vg-lang-pill').forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          renderScript(currentLang);
+          updateEngineIndicator();
+          if (wasPlaying) playGuide(0);
+        });
+        row.appendChild(btn);
+      });
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderScript(langKey) {
+      var sc = VG_SCRIPTS[langKey] || VG_SCRIPTS['en'] || '';
+      allWords = sc.trim().split(/\s+/);
+      if (scriptBox) {
+        scriptBox.innerHTML = allWords.map(function (w, i) {
+          return '<span class="vg-word" id="vg-w-' + i + '" data-idx="' + i + '">' + escapeHtml(w) + ' </span>';
+        }).join('');
+        wordSpans = allWords.map(function (_, i) {
+          return document.getElementById('vg-w-' + i);
+        });
+        scriptBox.scrollTop = 0;
+      }
+      if (hudContent && !isPlaying) {
+        hudContent.textContent = sc.substring(0, 140) + (sc.length > 140 ? '…' : '');
+      }
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; });
+      if (hudLangLabel && meta) {
+        hudLangLabel.textContent = meta.label.toUpperCase();
+      }
+      activeWordIndex = 0;
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function updateEngineIndicator() {
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      if (voiceInfo) {
+        voiceInfo.textContent = '🔊 ' + meta.label + ' (' + selectedRate + 'x)';
+      }
+    }
+
+    function updateHighlights(idx) {
+      activeWordIndex = Math.max(0, Math.min(idx, allWords.length - 1));
+
+      for (var i = 0; i < wordSpans.length; i++) {
+        var span = wordSpans[i];
+        if (!span) continue;
+        if (i < activeWordIndex) {
+          span.className = 'vg-word vg-word-spoken';
+        } else if (i === activeWordIndex) {
+          span.className = 'vg-word vg-word-active';
+          if (isPlaying && scriptBox) {
+            span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          span.className = 'vg-word';
+        }
+      }
+
+      if (hud && hudContent && showHud) {
+        var windowSize = 9;
+        var start = Math.max(0, activeWordIndex - 3);
+        var end = Math.min(allWords.length, start + windowSize);
+        if (end - start < windowSize && start > 0) {
+          start = Math.max(0, end - windowSize);
+        }
+        var hudHtml = '';
+        for (var k = start; k < end; k++) {
+          var cls = (k < activeWordIndex) ? 'vg-hud-word spoken' : (k === activeWordIndex ? 'vg-hud-word active' : 'vg-hud-word pending');
+          hudHtml += '<span class="' + cls + '">' + escapeHtml(allWords[k]) + ' </span>';
+        }
+        hudContent.innerHTML = hudHtml;
+      }
+
+      if (progressBar && allWords.length > 1) {
+        var pct = Math.min(100, Math.round((activeWordIndex / (allWords.length - 1)) * 100));
+        progressBar.style.width = pct + '%';
+      }
+    }
+
+    function getBestVoiceForLang(langKey) {
+      if (!synth) return null;
+      var voices = synth.getVoices() || [];
+      var meta = SUPPORTED_LANGS.find(function(l) { return l.key === langKey; }) || SUPPORTED_LANGS[0];
+      var targetCode = (meta.code || '').toLowerCase();
+      var fallbackCode = (meta.fallback || '').toLowerCase();
+      
+      var v = voices.find(function(item) { return (item.lang || '').toLowerCase() === targetCode; });
+      if (v) return v;
+      v = voices.find(function(item) { return (item.lang || '').toLowerCase().startsWith(meta.key); });
+      if (v) return v;
+      v = voices.find(function(item) { return (item.lang || '').toLowerCase().startsWith(fallbackCode); });
+      return v || null;
+    }
+
+    // ── Primary Native Speech Synthesis Audio Engine ────────────────────────
+    function playGuide(startFromWord) {
+      if (!synth) {
+        alert('Web Speech Synthesis is not supported in this browser.');
+        return;
+      }
+
+      // Toggle Pause
+      if (isPlaying && !isPaused && arguments.length === 0) {
+        synth.pause();
+        isPaused = true;
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        updatePlayControls(false, true);
+        return;
+      }
+
+      // Toggle Resume
+      if (isPaused && arguments.length === 0) {
+        synth.resume();
+        isPaused = false;
+        isPlaying = true;
+        updatePlayControls(true, false);
+        resumeWordTicker();
+        return;
+      }
+
+      startFromWord = typeof startFromWord === 'number' ? startFromWord : activeWordIndex;
+      speakFromWord(startFromWord);
+    }
+
+    function speakFromWord(startIdx) {
+      synth.cancel();
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+
+      activeWordIndex = Math.max(0, Math.min(startIdx, allWords.length - 1));
+      updateHighlights(activeWordIndex);
+
+      var remainingWords = allWords.slice(activeWordIndex);
+      var remainingText = remainingWords.join(' ');
+      if (!remainingText.trim()) {
+        onPlaybackFinished();
+        return;
+      }
+
+      // Chunk into sentences so browsers never freeze on long audio
+      speechChunks = [];
+      var rawSentences = remainingText.match(/[^.!?।৷\n]+[.!?।৷\n]*/g) || [remainingText];
+      var curWordOffset = activeWordIndex;
+      rawSentences.forEach(function (s) {
+        var sTrim = s.trim();
+        if (!sTrim) return;
+        var count = sTrim.split(/\s+/).length;
+        speechChunks.push({
+          text: sTrim,
+          startWord: curWordOffset,
+          wordCount: count
+        });
+        curWordOffset += count;
+      });
+
+      currentChunkIdx = 0;
+      isPlaying = true;
+      isPaused = false;
+      updatePlayControls(true, false);
+      if (hud && showHud) hud.style.display = 'block';
+
+      playNextSpeechChunk();
+    }
+
+    function playNextSpeechChunk() {
+      if (!isPlaying || currentChunkIdx >= speechChunks.length) {
+        onPlaybackFinished();
+        return;
+      }
+
+      var chunk = speechChunks[currentChunkIdx];
+      var utt = new SpeechSynthesisUtterance(chunk.text);
+      currentUtterance = utt;
+      utt.rate = selectedRate;
+
+      var meta = SUPPORTED_LANGS.find(function (l) { return l.key === currentLang; }) || SUPPORTED_LANGS[0];
+      utt.lang = meta.code || 'en-US';
+      var bestVoice = getBestVoiceForLang(currentLang);
+      if (bestVoice) utt.voice = bestVoice;
+
+      startWordTickerForChunk(chunk);
+
+      utt.onboundary = function (e) {
+        if (e.name === 'word') {
+          var ratio = e.charIndex / (chunk.text.length || 1);
+          var wIdx = Math.min(chunk.wordCount - 1, Math.floor(ratio * chunk.wordCount));
+          updateHighlights(chunk.startWord + wIdx);
+        }
+      };
+
+      utt.onend = function () {
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < speechChunks.length && isPlaying) {
+          playNextSpeechChunk();
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      utt.onerror = function (err) {
+        console.warn('Speech notice:', err);
+        if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+        currentChunkIdx++;
+        if (currentChunkIdx < speechChunks.length && isPlaying) {
+          setTimeout(playNextSpeechChunk, 40);
+        } else {
+          onPlaybackFinished();
+        }
+      };
+
+      synth.speak(utt);
+    }
+
+    function startWordTickerForChunk(chunk) {
+      if (wordTimer) clearInterval(wordTimer);
+      var wordsInChunk = chunk.wordCount;
+      var wpm = 145 * selectedRate;
+      var totalSec = (wordsInChunk / wpm) * 60;
+      var stepMs = Math.max(80, (totalSec * 1000) / Math.max(1, wordsInChunk));
+      var tick = 0;
+
+      wordTimer = setInterval(function () {
+        if (!isPlaying || isPaused) return;
+        tick++;
+        if (tick < wordsInChunk) {
+          updateHighlights(chunk.startWord + tick);
+        }
+      }, stepMs);
+    }
+
+    function resumeWordTicker() {
+      if (currentChunkIdx < speechChunks.length) {
+        var chunk = speechChunks[currentChunkIdx];
+        startWordTickerForChunk(chunk);
+      }
+    }
+
+    function stopGuide() {
+      isPlaying = false;
+      isPaused = false;
+      if (synth) synth.cancel();
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      activeWordIndex = 0;
+      updatePlayControls(false, false);
+      updateHighlights(0);
+      if (progressBar) progressBar.style.width = '0%';
+    }
+
+    function onPlaybackFinished() {
+      isPlaying = false;
+      isPaused = false;
+      if (wordTimer) { clearInterval(wordTimer); wordTimer = null; }
+      updatePlayControls(false, false);
+      if (allWords.length > 0) updateHighlights(allWords.length - 1);
+      if (progressBar) progressBar.style.width = '100%';
+      if (hudContent) {
+        hudContent.textContent = 'Voice guide narration complete. Click Play to listen again.';
+      }
+    }
+
+    function updatePlayControls(playing, paused) {
+      if (playing) {
+        playBtn.classList.add('playing');
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playLabel) playLabel.textContent = 'Pause Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else if (paused) {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Resume Narration';
+        if (stopBtn) stopBtn.disabled = false;
+      } else {
+        playBtn.classList.remove('playing');
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'Play Audio Guide';
+        if (stopBtn) stopBtn.disabled = true;
+      }
+    }
+
+    // ── Instant Working Themed HUD Toggle ──────────────────────────────────
+    function toggleHud() {
+      showHud = !showHud;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.toggle('active', showHud);
+        hudToggleBtn.innerHTML = showHud 
+          ? '<i class="fa-solid fa-closed-captioning"></i> HUD: ON' 
+          : '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) {
+        hud.style.display = showHud ? 'block' : 'none';
+        if (showHud) {
+          updateHighlights(activeWordIndex);
+        }
+      }
+    }
+
+    // ── Open / Close Right-Side Dock Panel ────────────────────────────────
+    function openPanel() {
+      if (panel) panel.classList.add('open');
+      renderScript(currentLang);
+      updateEngineIndicator();
+    }
+
+    function closePanel() {
+      if (panel) panel.classList.remove('open');
+    }
+
+    // ── Event Bindings ────────────────────────────────────────────────────
+    if (playBtn) playBtn.addEventListener('click', function() { playGuide(); });
+    if (stopBtn) stopBtn.addEventListener('click', function() { stopGuide(); });
+
+    if (mainTrigger) {
+      mainTrigger.addEventListener('click', function() {
+        if (panel && panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+    if (hudToggleBtn) hudToggleBtn.addEventListener('click', toggleHud);
+    if (hudCloseBtn) hudCloseBtn.addEventListener('click', function() {
+      showHud = false;
+      if (hudToggleBtn) {
+        hudToggleBtn.classList.remove('active');
+        hudToggleBtn.innerHTML = '<i class="fa-solid fa-closed-captioning"></i> HUD: OFF';
+      }
+      if (hud) hud.style.display = 'none';
+    });
+
+    // Rate button handling: IMMEDIATE audible change
+    document.querySelectorAll('.vg-rate-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.vg-rate-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedRate = parseFloat(btn.dataset.rate) || 1.0;
+        updateEngineIndicator();
+
+        if (isPlaying && !isPaused) {
+          var currentWord = activeWordIndex;
+          synth.cancel();
+          setTimeout(function() {
+            speakFromWord(currentWord);
+          }, 50);
+        }
+      });
+    });
+
+    // Click on words in script box to jump playback
+    if (scriptBox) {
+      scriptBox.addEventListener('click', function (e) {
+        var wordEl = e.target.closest('.vg-word');
+        if (!wordEl) return;
+        var idx = parseInt(wordEl.dataset.idx, 10);
+        if (!isNaN(idx)) {
+          updateHighlights(idx);
+          if (isPlaying) {
+            synth.cancel();
+            setTimeout(function() { speakFromWord(idx); }, 50);
+          }
+        }
+      });
+    }
+
+    // Initialization
+    function init() {
+      currentLang = detectLanguage();
+      buildLangPills();
+      renderScript(currentLang);
+
+      function onVoicesLoaded() {
+        updateEngineIndicator();
+      }
+      if (synth) {
+        if (synth.getVoices().length > 0) onVoicesLoaded();
+        else synth.addEventListener('voiceschanged', onVoicesLoaded);
+      } else {
+        updateEngineIndicator();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+  })();
+  

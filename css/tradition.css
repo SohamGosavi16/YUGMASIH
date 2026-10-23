@@ -1,0 +1,866 @@
+/* =============================================================
+   YUGMA — 3D TRADITION STUDIO LUXURY DARK AESTHETIC
+   Hero 3D Viewer (60%) • Cultural Archive Panel (40%)
+   ============================================================= */
+
+:root {
+  --tradition-gold: #c9a24a;
+  --tradition-gold-bright: #e5c378;
+  --tradition-gold-dim: rgba(201, 162, 74, 0.25);
+  --tradition-bg: #06090e;
+  --tradition-surface: #0a0e16;
+  --tradition-surface-2: #101622;
+  --tradition-card: rgba(16, 22, 34, 0.7);
+  --tradition-border: rgba(201, 162, 74, 0.22);
+  --tradition-border-subtle: rgba(255, 255, 255, 0.08);
+  --tradition-text: #f1ece0;
+  --tradition-text-dim: #94a3b8;
+  --tradition-text-muted: #64748b;
+  --tradition-primary: #c9a24a;
+  --tradition-secondary: #e5c378;
+}
+
+/* Modal Shell */
+.tradition-modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s;
+}
+
+.tradition-modal-container.active {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+}
+
+.tradition-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(10, 14, 22, 0.94) 0%, rgba(4, 6, 9, 0.98) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Window Shell */
+.tradition-modal-window {
+  position: relative;
+  z-index: 10;
+  width: min(1440px, 96vw);
+  height: min(880px, 94vh);
+  background: var(--tradition-surface);
+  border: 1px solid var(--tradition-border);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 50px 140px -30px rgba(0, 0, 0, 0.95), 0 0 40px -10px rgba(201, 162, 74, 0.15);
+}
+
+/* Header */
+.tradition-header {
+  padding: 16px 28px;
+  background: rgba(8, 12, 18, 0.95);
+  border-bottom: 1px solid var(--tradition-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.tradition-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3px;
+}
+
+.tradition-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  color: var(--tradition-gold);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tradition-divider {
+  color: var(--tradition-text-muted);
+  font-size: 10px;
+}
+
+.tradition-state-tag {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--tradition-text-dim);
+  text-transform: uppercase;
+}
+
+.tradition-header h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.12em;
+  color: var(--tradition-text);
+}
+
+.tradition-header p {
+  font-size: 11px;
+  color: var(--tradition-text-muted);
+  letter-spacing: 0.16em;
+  margin: 3px 0 0 0;
+  text-transform: uppercase;
+}
+
+.tradition-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* State Selector */
+.tradition-state-selector-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(16, 24, 38, 0.85);
+  border: 1px solid var(--tradition-border);
+  border-radius: 30px;
+  padding: 2px 14px;
+  margin-right: 6px;
+  transition: all 0.25s ease;
+}
+
+.tradition-state-selector-wrap:hover,
+.tradition-state-selector-wrap:focus-within {
+  border-color: var(--tradition-gold);
+  box-shadow: 0 0 15px rgba(201, 162, 74, 0.2);
+}
+
+.tradition-select-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--tradition-gold);
+  font-weight: 600;
+  margin-right: 8px;
+  text-transform: uppercase;
+}
+
+.tradition-state-select {
+  background: transparent;
+  border: none;
+  color: var(--tradition-text);
+  font-family: 'Onest', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 7px 4px;
+  cursor: pointer;
+  outline: none;
+}
+
+.tradition-state-select option {
+  background: #0d131e;
+  color: var(--tradition-text);
+  padding: 8px 12px;
+}
+
+/* Control Buttons */
+.tradition-control-btn {
+  background: rgba(22, 32, 48, 0.65);
+  border: 1px solid var(--tradition-border-subtle);
+  border-radius: 8px;
+  color: var(--tradition-text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tradition-control-btn:hover {
+  border-color: var(--tradition-gold);
+  color: #ffffff;
+  background: rgba(201, 162, 74, 0.16);
+  box-shadow: 0 0 12px rgba(201, 162, 74, 0.15);
+}
+
+.tradition-control-btn.active {
+  border-color: var(--tradition-gold);
+  background: rgba(201, 162, 74, 0.25);
+  color: var(--tradition-gold-bright);
+}
+
+.tradition-close-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(22, 32, 48, 0.6);
+  border: 1px solid var(--tradition-border-subtle);
+  border-radius: 50%;
+  color: var(--tradition-text-dim);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  margin-left: 4px;
+}
+
+.tradition-close-btn:hover {
+  border-color: #ef4444;
+  color: #ffffff;
+  background: rgba(239, 68, 68, 0.2);
+  transform: rotate(90deg);
+}
+
+/* =============================================================
+   STAGE: 60% 3D HERO VIEWPORT + 40% CULTURAL DETAILS
+   ============================================================= */
+.tradition-viewer-stage {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 60% Hero Living Performance Showcase Viewport */
+.tradition-canvas-wrap {
+  flex: 0 0 60%;
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, #0d1522 0%, #06090e 70%, #020407 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Living Performance Showcase Box */
+.tradition-showcase-box {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px 26px;
+  box-sizing: border-box;
+  position: relative;
+  background: radial-gradient(circle at center, rgba(16, 24, 38, 0.65) 0%, rgba(6, 9, 14, 0.95) 100%);
+}
+
+.showcase-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(201, 162, 74, 0.22);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.showcase-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #ffd27a;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.showcase-live-indicator .pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+  animation: pulseLive 1.8s infinite;
+}
+
+.showcase-tradition-badge {
+  font-family: 'Onest', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(232, 223, 200, 0.65);
+  text-transform: uppercase;
+  text-align: right;
+}
+
+/* Main Video Player Stage */
+.showcase-player-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  padding: 10px 0;
+}
+
+.showcase-player-frame {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: #000;
+  border: 1px solid rgba(201, 162, 74, 0.45);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 30px rgba(201, 162, 74, 0.18);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.showcase-player-frame:hover {
+  border-color: rgba(201, 162, 74, 0.75);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.9), 0 0 40px rgba(201, 162, 74, 0.28);
+}
+
+.showcase-player-frame iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Curation Placeholder Card (for states without video) */
+.showcase-curation-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  padding: 16px;
+}
+
+.curation-inner-card {
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  background: rgba(10, 16, 26, 0.85);
+  border: 1px solid rgba(201, 162, 74, 0.35);
+  border-radius: 16px;
+  padding: 32px 28px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(201, 162, 74, 0.05);
+}
+
+.curation-glyph {
+  font-size: 38px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 12px rgba(201, 162, 74, 0.4));
+}
+
+.curation-pill {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--tradition-gold);
+  background: rgba(201, 162, 74, 0.12);
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.curation-title {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fff;
+  margin: 0 0 4px 0;
+}
+
+.curation-state {
+  font-family: 'Onest', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--tradition-gold-bright);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.curation-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(232, 223, 200, 0.72);
+  margin: 0 0 18px 0;
+}
+
+.curation-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.c-tag {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: rgba(232, 223, 200, 0.55);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Bottom Bar of Showcase Box */
+.showcase-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid rgba(201, 162, 74, 0.22);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.showcase-note-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.showcase-note-icon {
+  font-size: 14px;
+  color: var(--tradition-gold);
+  flex-shrink: 0;
+}
+
+.showcase-note-text {
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(232, 223, 200, 0.75);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-pill {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--tradition-gold);
+  background: rgba(201, 162, 74, 0.12);
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+
+/* =============================================================
+   40% RICH CULTURAL INFORMATION PANEL (SCROLLABLE)
+   ============================================================= */
+.tradition-info-panel {
+  flex: 0 0 40%;
+  background: rgba(10, 14, 22, 0.95);
+  border-left: 1px solid var(--tradition-border);
+  overflow-y: auto;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 162, 74, 0.3) rgba(10, 14, 22, 0.5);
+}
+
+.tradition-info-panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.tradition-info-panel::-webkit-scrollbar-track {
+  background: rgba(8, 12, 18, 0.5);
+}
+
+.tradition-info-panel::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 74, 0.35);
+  border-radius: 4px;
+}
+
+.tradition-info-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--tradition-gold);
+}
+
+.panel-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-hero {
+  border-bottom: 1px solid var(--tradition-border-subtle);
+  padding-bottom: 20px;
+}
+
+.tradition-category-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  color: var(--tradition-gold);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.tradition-name-large {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.tradition-state-sub {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--tradition-text-dim);
+  text-transform: uppercase;
+}
+
+.tradition-description {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: rgba(241, 236, 224, 0.9);
+  margin: 6px 0 0 0;
+}
+
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--tradition-gold-bright);
+  margin: 0 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(201, 162, 74, 0.15);
+  padding-bottom: 6px;
+}
+
+/* Cultural DNA Grid */
+.cultural-dna-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.dna-card {
+  background: var(--tradition-card);
+  border: 1px solid var(--tradition-border-subtle);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.25s ease;
+}
+
+.dna-card:hover {
+  border-color: rgba(201, 162, 74, 0.35);
+}
+
+.dna-label {
+  font-size: 8.5px;
+  letter-spacing: 0.2em;
+  color: var(--tradition-text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.dna-val {
+  font-size: 12px;
+  color: var(--tradition-text);
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+/* Cultural Role */
+.cultural-role-text {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--tradition-text-dim);
+  margin: 0;
+}
+
+/* Heritage Connection Card */
+.heritage-conn-card {
+  background: linear-gradient(135deg, rgba(20, 28, 42, 0.8) 0%, rgba(12, 18, 28, 0.9) 100%);
+  border: 1px solid var(--tradition-border);
+  border-left: 3px solid var(--tradition-gold);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.heritage-conn-name {
+  font-family: 'Cinzel', serif;
+  font-size: 13.5px;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+}
+
+.heritage-conn-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tradition-text-dim);
+  margin: 0;
+}
+
+/* Attire & Musicology */
+.costume-block, .music-block {
+  background: var(--tradition-card);
+  border: 1px solid var(--tradition-border-subtle);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.block-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--tradition-gold);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.block-text {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--tradition-text-dim);
+  margin: 0;
+}
+
+.instruments-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.inst-pill {
+  background: rgba(201, 162, 74, 0.12);
+  border: 1px solid rgba(201, 162, 74, 0.28);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--tradition-gold-bright);
+}
+
+/* Did You Know Facts */
+.tradition-facts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tradition-facts-list li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--tradition-text-dim);
+}
+
+.tradition-facts-list li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  top: 1px;
+  color: var(--tradition-gold);
+  font-size: 11px;
+}
+
+/* 3D Objects List */
+.objects-list-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.object-item {
+  background: rgba(14, 20, 30, 0.7);
+  border: 1px solid var(--tradition-border-subtle);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: var(--tradition-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.object-item .cube-icon {
+  color: var(--tradition-gold);
+  font-size: 12px;
+}
+
+/* AR/VR Potential Card */
+.arvr-potential-card {
+  background: linear-gradient(135deg, rgba(16, 26, 42, 0.75) 0%, rgba(8, 14, 24, 0.85) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 6px;
+}
+
+.arvr-tag {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.arvr-potential-card p {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--tradition-text-dim);
+  margin: 0;
+}
+
+/* =============================================================
+   FOOTER
+   ============================================================= */
+.tradition-footer {
+  padding: 14px 28px;
+  background: rgba(6, 9, 14, 0.98);
+  border-top: 1px solid var(--tradition-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.footer-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--tradition-gold);
+}
+
+.footer-tagline {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--tradition-text-muted);
+  text-transform: uppercase;
+}
+
+.footer-status-pill {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: var(--tradition-text-dim);
+  text-transform: uppercase;
+}
+
+.footer-copyright {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--tradition-text-muted);
+  text-transform: uppercase;
+}
+
+/* Keyframes */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =============================================================
+   RESPONSIVE DESIGN (MOBILE / TABLET)
+   ============================================================= */
+@media (max-width: 960px) {
+  .tradition-modal-window {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .tradition-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+
+  .tradition-viewer-stage {
+    flex-direction: column;
+  }
+
+  .tradition-canvas-wrap {
+    flex: 0 0 45vh;
+    min-height: 280px;
+  }
+
+  .tradition-info-panel {
+    flex: 1;
+    border-left: none;
+    border-top: 1px solid var(--tradition-border);
+    padding: 20px 18px;
+  }
+
+  .cultural-dna-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tradition-footer {
+    display: none;
+  }
+}
+
+/* End of tradition styles */
+
+

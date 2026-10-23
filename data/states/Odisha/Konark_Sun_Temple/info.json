@@ -1,0 +1,66 @@
+{
+  "stateId": "odisha",
+  "stateName": "Odisha",
+  "stateNameHindi": "ओडिशा",
+  "heritage": "Konark Sun Temple",
+  "heritageHindi": "कोणार्क सूर्य मन्दिर",
+  "tradition": "Odissi",
+  "traditionHindi": "ओडिसी",
+  "location": "Konark, Bay of Bengal Coast, Puri District, Odisha",
+  "era": "1250 CE (Eastern Ganga Dynasty, King Narasimhadeva I)",
+  "unescoYear": "1984",
+  "tagline": "The Black Pagoda: Cosmic Chariot of the Sun God",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "KONARK SUN TEMPLE",
+      "subtitle": "The Grand Sun Chariot: Astronomical Marvels & Kalinga Masterpieces",
+      "state": "Odisha, India",
+      "dynasty": "Eastern Ganga Dynasty (King Narasimhadeva I)",
+      "summary": "Conceived as a colossal 24-wheeled stone chariot of the Sun God Surya pulled by seven galloping horses on the shores of the Bay of Bengal, the Konark Sun Temple is the crowning masterpiece of Kalinga temple architecture."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "The Solar Vow of King Narasimhadeva",
+      "content": "Commissioned around 1250 CE by King Narasimhadeva I of the Eastern Ganga Dynasty to commemorate his decisive military victories against Muslim invaders from Bengal and to seek the blessings of the Sun God, the temple was built by a guild of 1,200 master craftsmen under the chief architect Bisu Maharana over 12 strenuous years.\n\nAccording to Odia folklore, when the project faced engineering failure in fixing the heavy crowning stone (Dadhinauti), the 12-year-old prodigy son of the architect, Dharmapada, successfully positioned the capstone and sacrificed himself to save the craftsmen from royal execution.\n\nSailing merchants on the Bay of Bengal used its dark khondalite stone towers as a primary coastal navigational beacon, calling it the 'Black Pagoda'."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "The Astronomical Chariot & Sundial Wheels",
+      "content": "Sculpted from ferruginous khondalite stone, the entire temple is shaped as Surya's chariot:\n• 24 Carved Sundial Wheels: 12 pairs of intricately carved stone wheels (3 meters in diameter) representing the 12 months of the Hindu solar calendar.\n• 7 Galloping Horses: Symbolizing the seven days of the week and the seven colors of visible sunlight.\n• The Jagamohana (Assembly Hall): The surviving pyramidal porch rising 39 meters, crowned by a stepped stepped roof (pidha deula) adorned with statues of celestial musicians.\n• Precision Sundial Engineering: The eight major spokes and eight minor spokes of each wheel function as a functional solar clock capable of calculating the exact time within a 3-minute margin by the cast shadow of the central axle."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "Nata Mandira & Erotic Sculptural Friezes",
+      "content": "The detached Nata Mandira (Hall of Dance) at the entrance features high-relief carvings of celestial musicians playing mridanga, cymbals, veena, and flutes in every possible classical posture.\n\nThe base plinth is wrapped in miles of intricate friezes depicting war elephants, hunting processions, royal courts, and world-renowned Mithuna (erotic couples) representing the harmony of Kama, Artha, and Dharma.\n\nThree monolithic green chlorite statues of Surya face East, South, and West, strategically aligned to catch the direct first rays of dawn, noon, and sunset sunlight."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "Odissi: Sculptural Poetry in Motion",
+      "content": "Odisha's sacred classical dance form, Odissi, was directly nurtured within the Nata Mandira of Konark and the Jagannath Temple in Puri by the temple dancers (Maharis) and young boy disciples (Gotipuas).\n\nOdissi is distinguished by its lyrical sculptural geometry, alternating between the rigid square stance of Chowk (representing the masculine energy of Jagannath) and the three-bend deflection of Tribhanga (representing feminine grace), recreating the living statues of Konark through movement."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Magnetic Levitation & Unsolved Riddles",
+      "content": "• The Floating Idol Legend: European maritime logs record that the original main Surya idol was suspended mid-air inside the sanctum by opposing magnetic forces created by an iron lodestone capstone and balanced magnetic floor plates.\n• Sand-Filled Conservation: In 1903, British Lieutenant Governor Sir John Woodburn filled the entire hollow interior of the Jagamohana with marine sand and stone masonry to prevent catastrophic structural collapse.\n• Zero Foundation Pavements: The temple was erected on sandy coastal terrain using a floating raft foundation of interlocking laterite stone slabs."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Historical Timeline & Coordinates",
+      "content": "• 1238–1250 CE: Construction under King Narasimhadeva I.\n• 1568 CE: Temple damaged during invasions by Kalapahad.\n• 1903 CE: Major structural stabilization by ASI under Lord Curzon.\n• 1984 CE: Inscribed as a UNESCO World Heritage Site.\n\nGeographic Coordinates: 19.8876° N, 86.0945° E\nAltitude: 3 meters above sea level\nLocation: Konark Coastal Belt, Puri District, Odisha."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Epigraphical Texts & Archival Sources",
+      "content": "• 'Madala Panji': The Temple Chronicle of Puri Jagannath.\n• 'Baya Chakada': Palm-leaf administrative logbook of the Konark construction.\n• Archaeological Survey of India (ASI) Memoir No. 44 on Konark.\n• UNESCO World Heritage Inscription Ref. No. 246."
+    }
+  ]
+}

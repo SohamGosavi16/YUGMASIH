@@ -1,0 +1,66 @@
+{
+  "stateId": "gujarat",
+  "stateName": "Gujarat",
+  "stateNameHindi": "गुजरात",
+  "heritage": "Rani ki Vav",
+  "heritageHindi": "રાણકી વાવ (रानी की वाव)",
+  "tradition": "Garba",
+  "traditionHindi": "ગરબા (गरबा)",
+  "location": "Patan, Saraswati River Basin, Gujarat",
+  "era": "11th Century CE (1063 CE, Solanki / Chaulukya Dynasty)",
+  "unescoYear": "2014",
+  "tagline": "The Inverted Subterranean Temple of Sacred Water",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageType": "cover",
+      "title": "RANI KI VAV",
+      "subtitle": "The Queen's Stepwell: An Inverted Hymn to Sanctity and Water",
+      "state": "Gujarat, India",
+      "dynasty": "Solanki / Chaulukya Dynasty (11th Century CE)",
+      "summary": "Built by Queen Udayamati in memory of King Bhima I, Rani ki Vav is an extraordinary subterranean stepwell engineered as an inverted temple with seven stepped tiers honoring the life-sustaining sanctity of water."
+    },
+    {
+      "pageNumber": 2,
+      "pageType": "history",
+      "title": "The Queen's Memorial & Buried Eras",
+      "content": "Commissioned around 1063 CE during the golden age of the Solanki (Chaulukya) Empire, Rani ki Vav was built by Queen Udayamati following the demise of her consort King Bhima I. While traditional memorials were raised skyward, this queen chose to plunge deep into the earth to sanctify life-giving water.\n\nSilt deposition from catastrophic flooding of the Saraswati River gradually submerged the stepwell for over eight centuries, perfectly preserving its intricate sculptural panels from atmospheric weathering.\n\nThe Archaeological Survey of India initiated extensive desilting and stabilization in the 1980s, revealing more than 500 principal sculptures and over a thousand secondary friezes in pristine condition."
+    },
+    {
+      "pageNumber": 3,
+      "pageType": "architecture",
+      "title": "Subterranean Maru-Gurjara Engineering",
+      "content": "Rani ki Vav represents the zenith of the Maru-Gurjara architectural style. Measuring 65 meters long, 20 meters wide, and 28 meters deep, it is oriented on an east-west axis entering from ground level down to the deep circular well shaft.\n\nKey architectural elements include:\n• Seven Terraced Pavilions: Tiered pillared halls supported by multistoried colonnades that step downward.\n• The Stepped Corridor: Intricately braced retaining walls with carved niches holding divine pantheons.\n• The Deep Reservoir Well: An impressive circular shaft lined with continuous narrative friezes, designed to maintain cool groundwater year-round amidst the arid Patan plains."
+    },
+    {
+      "pageNumber": 4,
+      "pageType": "art",
+      "title": "The Celestial Iconography & Dashavatara",
+      "content": "The stepwell is sanctified by the presence of Lord Vishnu in his cosmic Sheshashayi form—reclining upon the thousand-headed serpent Sheshanaga on the water's surface.\n\nMasterful iconographic compositions include:\n• The Complete Dashavatara: Precise carvings of all ten avatars of Vishnu (Matsya, Kurma, Varaha, Narasimha, Vamana, Parashurama, Rama, Balarama/Krishna, Buddha, and Kalki).\n• Solah Shringar (16 Adornments of Apsaras): Exquisite figures of celestial damsels applying collyrium, braiding pearl-laced hair, and adjusting ankle-bells.\n• The Nagakanyas and Dikpalas: Serpentine guardian maidens and the eight directional deities protecting the sacred waters."
+    },
+    {
+      "pageNumber": 5,
+      "pageType": "culture",
+      "title": "Water Sanctity & Garba Celebrations",
+      "content": "In Gujarat's semi-arid landscape, stepwells (vavs) functioned not only as technological infrastructure for water harvesting, but as vibrant social, spiritual, and communal sanctuaries.\n\nThis devotion to the feminine creative force (Shakti) and water rejuvenation finds its living counterpart in the circular, devotional dance of Garba. Held under the autumn moon during Navratri, Garba honors the cosmic womb (Garbha Deep) with rhythmic clapping, rotating mandalas, and exuberant community devotion."
+    },
+    {
+      "pageNumber": 6,
+      "pageType": "facts",
+      "title": "Engineering Marvels & Mysteries",
+      "content": "• The 30-Kilometer Escape Tunnel: Below the lowest tier exists a sealed stone door leading to a 30 km secret escape tunnel that originally connected Patan to the neighboring town of Siddhpur.\n• Inverted Temple Metaphor: Built upside-down deliberately to signify that all divine blessings flow downward from the heavens through water into the earth.\n• Silt-Vault Preservation: The alluvial sand deposited by the Saraswati River formed a protective, oxygen-deprived seal that prevented stone erosion for over 700 years.\n• Featured on Indian Currency: The geometric majesty of Rani ki Vav is immortalized on the modern Indian ₹100 banknote."
+    },
+    {
+      "pageNumber": 7,
+      "pageType": "timeline",
+      "title": "Chronology & Geographic Footprint",
+      "content": "• 1063 CE: Construction initiated by Queen Udayamati.\n• 1300s CE: Saraswati River course changes; stepwell progressively silted.\n• 1890s CE: Henry Cousens and James Burgess document initial visible ruins.\n• 1986 CE: ASI completes major excavation and restoration.\n• 2014 CE: Declared a UNESCO World Heritage Site under Category (i) and (iv).\n\nGeographic Coordinates: 23.8589° N, 72.1017° E\nLocation: Patan, Northern Gujarat\nClimatic Zone: Semi-arid Western Plains."
+    },
+    {
+      "pageNumber": 8,
+      "pageType": "references",
+      "title": "Epigraphs & Archival Sources",
+      "content": "• 'Prabandha Chintamani' by Merutunga Acharya (1304 CE): Documents Queen Udayamati's charitable dedication of the monument.\n• Archaeological Survey of India: 'Rani ki Vav, Patan - Architectural Monograph'.\n• 'Stepwells of Gujarat in Art-Historical Perspective' by Jutta Jain-Neubauer.\n• UNESCO World Heritage Committee Nomination Dossier No. 922."
+    }
+  ]
+}

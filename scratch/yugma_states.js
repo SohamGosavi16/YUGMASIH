@@ -1,0 +1,1520 @@
+var YUGMA_STATES = {
+      maharashtra: { name: 'Maharashtra', nameHindi: 'महाराष्ट्र', heritage: 'Ajanta & Ellora Caves', tradition: 'Lavani', region: 'West', tagline: 'Sanctuary of Ancient Buddhist Frescoes & Monolithic Kailasa Temple', lat: 19.75, lng: 75.71, monumentLat: 20.55, monumentLng: 75.70, themeColor: '#e0231c', vrPath: 'ajanta-ellora-caves.html', videoUrl: 'https://www.youtube-nocookie.com/embed/Kh4MU4EonkI', youtubeId: 'Kh4MU4EonkI' },
+      gujarat: { name: 'Gujarat', nameHindi: 'ગુજરાત', heritage: 'Rani ki Vav', tradition: 'Garba', region: 'West', tagline: 'The Inverted Subterranean Temple of Sacred Water', lat: 22.25, lng: 71.19, monumentLat: 23.85, monumentLng: 72.10, themeColor: '#c9a24a', vrPath: 'rani_ki_vav.html', videoUrl: 'https://www.youtube-nocookie.com/embed/gZjNpNuaPLw', youtubeId: 'gZjNpNuaPLw' },
+      statue_of_unity: { name: 'Gujarat', nameHindi: 'ગુજરાત (નર્મદા)', heritage: 'Statue of Unity', heritageHindi: 'સ્ટેચ્યુ ઓફ યુનિટી (૧૮૨ મીટર)', tradition: 'Garba / National Unity', region: 'West', tagline: "World's Tallest Colossus (182m) Dedicated to Sardar Vallabhbhai Patel", lat: 21.8380, lng: 73.7191, monumentLat: 21.8380, monumentLng: 73.7191, themeColor: '#f59e0b', vrPath: 'statue_of_unity_3d.html', videoUrl: 'https://www.youtube-nocookie.com/embed/gZjNpNuaPLw', youtubeId: 'gZjNpNuaPLw', pinTag: "WORLD'S TALLEST COLOSSUS (182M)" },
+      uttar_pradesh: { name: 'Uttar Pradesh', nameHindi: 'उत्तर प्रदेश', heritage: 'Taj Mahal', tradition: 'Kathak', region: 'North', tagline: 'The Monumental Epitaph of Translucent Marble & Eternal Love', lat: 26.84, lng: 80.94, monumentLat: 27.17, monumentLng: 78.04, themeColor: '#38bdf8', vrPath: 'taj_mahal_3d.html', videoUrl: 'https://www.youtube-nocookie.com/embed/hpKtU21PVu0', youtubeId: 'hpKtU21PVu0' },
+      west_bengal: { name: 'West Bengal', nameHindi: 'पश्चिम बंगाल', heritage: 'Victoria Memorial', tradition: 'Baul', region: 'East', tagline: 'The Grand Marble Edifice of Kolkata’s Cultural Renaissance', lat: 22.98, lng: 87.85, monumentLat: 22.54, monumentLng: 88.34, themeColor: '#818cf8', vrPath: 'victoriamemorial-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/QqJU_YpGeNs', youtubeId: 'QqJU_YpGeNs' },
+      tamil_nadu: { name: 'Tamil Nadu', nameHindi: 'तमिलनाडु', heritage: 'Brihadisvara Temple', tradition: 'Bharatanatyam', region: 'South', tagline: 'The Granitic Wonder of Chola Imperial Architecture', lat: 11.12, lng: 78.65, monumentLat: 10.78, monumentLng: 79.13, themeColor: '#fbbf24', vrPath: 'brihadisvara-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/2-9Lt01xY-k', youtubeId: '2-9Lt01xY-k' },
+      karnataka: { name: 'Karnataka', nameHindi: 'कर्नाटक', heritage: 'Hampi', tradition: 'Yakshagana', region: 'South', tagline: 'The Boulder-Strewn Capital of the Vijayanagara Empire', lat: 15.31, lng: 75.71, monumentLat: 15.33, monumentLng: 76.46, themeColor: '#34d399', vrPath: 'hampi_precise.html', videoUrl: 'https://www.youtube-nocookie.com/embed/qUYWZXHL8JU', youtubeId: 'qUYWZXHL8JU' },
+      kerala: { name: 'Kerala', nameHindi: 'केरल', heritage: 'Padmanabhapuram Palace', tradition: 'Theyyam', region: 'South', tagline: "Asia's Largest Monolithic Teak & Rosewood Palace", lat: 10.85, lng: 76.27, monumentLat: 8.25, monumentLng: 77.33, themeColor: '#f43f5e', vrPath: 'padmanabhapuram-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/lnNieCUG4G4', youtubeId: 'lnNieCUG4G4' },
+      odisha: { name: 'Odisha', nameHindi: 'ओडिशा', heritage: 'Konark Sun Temple', tradition: 'Odissi', region: 'East', tagline: 'The Black Pagoda: Cosmic Chariot of the Sun God', lat: 20.95, lng: 85.09, monumentLat: 19.88, monumentLng: 86.09, themeColor: '#a855f7', vrPath: 'odisha_precise.html', videoUrl: 'https://www.youtube-nocookie.com/embed/Uqmc0891L2U', youtubeId: 'Uqmc0891L2U' },
+      andhra_pradesh: { name: 'Andhra Pradesh', nameHindi: 'आंध्र प्रदेश', heritage: 'Lepakshi Temple', tradition: 'Kuchipudi', region: 'South', tagline: 'The 16th-Century Hanging Pillar & Monolithic Nandi Wonder', lat: 13.8044, lng: 77.6053, monumentLat: 13.8044, monumentLng: 77.6053, themeColor: '#c99a3d', vrPath: 'lepakshi_temple_3d.html', videoUrl: 'https://www.youtube-nocookie.com/embed/ko5sKNuSLbs', youtubeId: 'ko5sKNuSLbs' },
+      bihar: { name: 'Bihar', nameHindi: 'बिहार', heritage: 'Mahabodhi Temple', tradition: 'Madhubani / Mithila Art', region: 'East', tagline: "The Sacred Sanctuary of Buddha's Supreme Enlightenment", lat: 24.6961, lng: 84.9911, monumentLat: 24.6961, monumentLng: 84.9911, themeColor: '#d8b25a', vrPath: 'mahabodhi_explorer.html', videoUrl: 'https://www.youtube-nocookie.com/embed/FhvLY9ZnbzI', youtubeId: 'FhvLY9ZnbzI' },
+      goa: { name: 'Goa', nameHindi: 'गोवा', heritage: 'Basilica of Bom Jesus', tradition: 'Fugdi', region: 'West', tagline: 'UNESCO Baroque Monument & Relic Shrine of St. Francis Xavier', lat: 15.2993, lng: 74.1240, monumentLat: 15.5009, monumentLng: 73.9116, themeColor: '#06b6d4', vrPath: 'bom_jesus_vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/EokuS_QbkEM', youtubeId: 'EokuS_QbkEM' },
+      chhattisgarh: { name: 'Chhattisgarh', nameHindi: 'छत्तीसगढ़', heritage: 'Sirpur Lakshmana Temple', tradition: 'Panthi', region: 'Central', tagline: 'Sacred 7th-Century Terracotta Brick Sanctuary & Nagara Heritage', lat: 21.2787, lng: 81.8661, monumentLat: 21.3432, monumentLng: 82.1793, themeColor: '#f97316', vrPath: 'sirpur_lakshmana_vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/Qe6_Vy2hleg', youtubeId: 'Qe6_Vy2hleg' },
+      delhi: { name: 'Delhi', nameHindi: 'दिल्ली (राष्ट्रीय राजधानी)', heritage: "Lotus Temple (Bahá'í House of Worship)", heritageHindi: 'कमल मंदिर (लोटस टेम्पल)', tradition: 'Kathak & Sufi Qawwali', region: 'North', tagline: 'Imperial Capital: Pristine Marble Lotus Temple, Historic Red Fort & Qutub Minar', lat: 28.6139, lng: 77.2090, monumentLat: 28.5535, monumentLng: 77.2588, themeColor: '#38bdf8', vrPath: 'lotustemple-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/hpKtU21PVu0', youtubeId: 'hpKtU21PVu0', pinTag: 'MARBLE LOTUS OF PEACE' },
+      rajgad_fort: { name: 'Maharashtra', nameHindi: 'महाराष्ट्र (राजगड)', heritage: 'Rajgad Fort', heritageHindi: 'राजगड किल्ला (स्वराज्याची राजधानी)', tradition: 'Powada & Lavani', region: 'West', tagline: "King of Forts & First Sovereign Capital of Chhatrapati Shivaji Maharaj's Hindavi Swarajya", lat: 18.2562, lng: 73.6828, monumentLat: 18.2562, monumentLng: 73.6828, themeColor: '#f97316', vrPath: 'rajgadfort-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/Kh4MU4EonkI', youtubeId: 'Kh4MU4EonkI', pinTag: 'KING OF HILL FORTS' },
+      punjab: { name: 'Punjab', nameHindi: 'पंजाब (अमृतसर)', heritage: 'Golden Temple (Harmandir Sahib)', tradition: 'Bhangra & Giddha', region: 'North', tagline: 'The Celestial Gilded Sanctuary of Amrit Sarovar & Eternal Divine Peace', lat: 31.6200, lng: 74.8765, monumentLat: 31.6200, monumentLng: 74.8765, themeColor: '#ffd700', vrPath: 'goldentemple-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/hpKtU21PVu0', youtubeId: 'hpKtU21PVu0', pinTag: 'SACRED GOLDEN SANCTUARY' },
+      madhya_pradesh: { name: 'Madhya Pradesh', nameHindi: 'मध्य प्रदेश (साँची)', heritage: 'Great Stupa of Sanchi', tradition: 'Matki & Karma', region: 'Central', tagline: "India's Oldest Stone Sanctuary Crowned with Ashokan Torana Gateways", lat: 23.4795, lng: 77.7397, monumentLat: 23.4795, monumentLng: 77.7397, themeColor: '#10b981', vrPath: 'sanchistupa-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/hpKtU21PVu0', youtubeId: 'hpKtU21PVu0', pinTag: 'UNESCO ASHOKAN STUPA' },
+      gateway_of_india: { name: 'Maharashtra', nameHindi: 'महाराष्ट्र (मुंबई)', heritage: 'Gateway of India', heritageHindi: 'गेटवे ऑफ़ इंडिया', tradition: 'Koli & Lavani', region: 'West', tagline: 'Indo-Saracenic Triumphal Basalt Arch Overlooking the Arabian Sea', lat: 18.9220, lng: 72.8347, monumentLat: 18.9220, monumentLng: 72.8347, themeColor: '#f59e0b', vrPath: 'gatewayofindia-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/Kh4MU4EonkI', youtubeId: 'Kh4MU4EonkI', pinTag: 'HISTORIC HARBOR ARCH' },
+      lotus_temple: { name: 'Delhi', nameHindi: 'दिल्ली (लोटस टेम्पल)', heritage: "Lotus Temple (Bahá'í House of Worship)", heritageHindi: 'कमल मंदिर (लोटस टेम्पल)', tradition: 'Kathak & Sufi Qawwali', region: 'North', tagline: 'Pristine White Marble Blossom of Global Unity & Universal Meditation', lat: 28.5535, lng: 77.2588, monumentLat: 28.5535, monumentLng: 77.2588, themeColor: '#38bdf8', vrPath: 'lotustemple-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/hpKtU21PVu0', youtubeId: 'hpKtU21PVu0', pinTag: 'MARBLE LOTUS OF PEACE' },
+    };
+
+    // Enrich state metadata with rich cultural datasets if loaded
+    if (window.YUGMA_STATES_DATA) {
+      Object.keys(YUGMA_STATES).forEach(k => {
+        const cult = window.YUGMA_STATES_DATA[k];
+        if (cult) {
+          YUGMA_STATES[k].cultural = cult;
+          if (!YUGMA_STATES[k].tradition && cult.tradition) YUGMA_STATES[k].tradition = cult.tradition;
+          if (cult.videoUrl) YUGMA_STATES[k].videoUrl = cult.videoUrl;
+          if (cult.youtubeId) YUGMA_STATES[k].youtubeId = cult.youtubeId;
+        }
+      });
+    }
+
+    const GEOJSON_URLS = [
+      'https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson',
+      'https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States',
+      'https://raw.githubusercontent.com/datameet/maps/master/States/states.geojson',
+    ];
+
+    const STATE_COLORS = [
+      '#e0231c', '#c9a24a', '#ff5a3c', '#38bdf8', '#818cf8',
+      '#fbbf24', '#34d399', '#f43f5e', '#a855f7', '#059669',
+      '#0d9488', '#9333ea', '#16a34a', '#dc2626', '#7c3aed'
+    ];
+    const colorMap = new Map();
+    let colorIdx = 0;
+
+    function getColor(name) {
+      const key = normalizeKey(name);
+      if (YUGMA_STATES[key] && YUGMA_STATES[key].themeColor) return YUGMA_STATES[key].themeColor;
+      if (!colorMap.has(name)) { colorMap.set(name, STATE_COLORS[colorIdx++ % STATE_COLORS.length]); }
+      return colorMap.get(name);
+    }
+
+    function getStateName(feat) {
+      const p = feat.properties || {};
+      return p.NAME_1 || p.name || p.NAME || p.st_nm || p.state || p.ST_NM || p.dtname || 'Region';
+    }
+
+    function hexToRgba(hex, a) {
+      if (!hex || hex[0] !== '#') return `rgba(201,162,74,${a})`;
+      const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r},${g},${b},${a})`;
+    }
+
+    function normalizeKey(name) {
+      if (!name) return '';
+      const raw = String(name).toLowerCase().trim();
+      const s = raw.replace(/[^a-z0-9]/g, '_');
+            if (s === 'punjab' || s.includes('punjab') || s.includes('amritsar')) return 'punjab';
+      if (s === 'madhya_pradesh' || s.includes('sanchi') || (s.includes('madhya') && !s.includes('uttar'))) return 'madhya_pradesh';
+      if (s === 'gateway_of_india' || s.includes('gateway')) return 'gateway_of_india';
+      if (s === 'lotus_temple' || s.includes('lotus')) return 'lotus_temple';
+      if (s === 'rajgad_fort' || s.includes('rajgad')) return 'rajgad_fort';
+      if (s === 'delhi' || s.includes('delhi') || s.includes('nct')) return 'delhi';
+      if (s === 'statue_of_unity' || s.includes('unity') || s.includes('statue')) return 'statue_of_unity';
+      if (s === 'state_01' || s === 'state_1' || s.includes('maha')) return 'maharashtra';
+      if (s === 'state_02' || s === 'state_2' || s.includes('guja')) return 'gujarat';
+      if (s === 'state_03' || s === 'state_3' || s.includes('raja')) return 'rajasthan';
+      if (s === 'state_04' || s === 'state_4' || ((s.includes('uttar') || s.includes('uttar_p')) && !s.includes('uttarakhand') && !s.includes('uttaran'))) return 'uttar_pradesh';
+      if (s === 'state_05' || s === 'state_5' || s.includes('bengal')) return 'west_bengal';
+      if (s === 'state_06' || s === 'state_6' || s.includes('tamil')) return 'tamil_nadu';
+      if (s === 'state_07' || s === 'state_7' || s.includes('karna')) return 'karnataka';
+      if (s === 'state_08' || s === 'state_8' || s.includes('keral')) return 'kerala';
+      if (s === 'state_09' || s === 'state_9' || s.includes('odis') || s.includes('oris')) return 'odisha';
+      if (s === 'state_10' || s.includes('assa')) return 'assam';
+      if (s === 'state_11' || s.includes('andhra') || s.includes('lepakshi')) return 'andhra_pradesh';
+      if (s === 'state_12' || s.includes('bihar')) return 'bihar';
+      if (s === 'state_13' || s.includes('goa')) return 'goa';
+      if (s === 'state_14' || s.includes('chhattisgarh')) return 'chhattisgarh';
+      if (s.includes('uttarakhand') || s.includes('uttaran')) return 'uttarakhand';
+      if (s.includes('tripura')) return 'tripura';
+      return s;
+    }
+
+    // ── Globe Global State ───────────────────────────────────
+    let globe = null;
+    let allFeatures = [];
+    let hoveredState = null;
+    let selectedState = null;
+    let isUserInteracting = false;
+    let isAutoRotating = false; // Static by default
+    let currentPolygonAlpha = 0; // Starts at 0 (invisible on hero)
+
+    const globeWrapper = document.getElementById('globe-wrapper');
+    const globeHud = document.getElementById('globe-hud');
+    const heroContent = document.getElementById('hero-content-block');
+    const scrollHint = document.getElementById('scroll-hint');
+
+    // ── High-Performance Polygon Opacity Caching (Zero Recursive Scene Traversal) ─
+    let cachedPolygonMaterials = [];
+    function cachePolygonMaterials() {
+      if (!globe) return;
+      const scene = globe.scene ? globe.scene() : null;
+      if (!scene) return;
+      cachedPolygonMaterials = [];
+      scene.traverse(obj => {
+        if (obj.isMesh && obj.__data && (obj.__data.properties || obj.__data.geometry || obj.__data.type === 'Feature')) {
+          if (obj.material) {
+            const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+            mats.forEach(m => {
+              if (cachedPolygonMaterials.indexOf(m) === -1) {
+                cachedPolygonMaterials.push(m);
+              }
+            });
+          }
+        }
+      });
+    }
+
+    function updatePolygonSceneOpacity(alpha) {
+      if (cachedPolygonMaterials.length === 0) {
+        cachePolygonMaterials();
+      }
+      const targetOpacity = Math.min(1, alpha * 0.9);
+      const isVis = alpha > 0.01;
+      for (let i = 0; i < cachedPolygonMaterials.length; i++) {
+        const m = cachedPolygonMaterials[i];
+        m.transparent = true;
+        m.opacity = targetOpacity;
+        m.visible = isVis;
+      }
+    }
+
+    // ── Initialize Globe ─────────────────────────────────────
+    async function initGlobe() {
+      try {
+        const container = document.getElementById('globeViz');
+        if (!container || typeof Globe === 'undefined') {
+          console.warn('[YUGMA] Globe.gl not loaded or container missing');
+          dismissPreloader();
+          return;
+        }
+
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+
+        globe = Globe({ animateIn: false })(container)
+          .width(W)
+          .height(H)
+          .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+          .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+          .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+          .showAtmosphere(true)
+          .atmosphereColor('rgba(65, 185, 255, 0.45)')
+          .atmosphereAltitude(0.24)
+          .polygonAltitude(feat => {
+            const name = getStateName(feat);
+            if (name === selectedState) return 0.048;
+            if (name === hoveredState) return 0.038;
+            return 0.006;
+          })
+          .polygonCapColor(feat => {
+            const name = getStateName(feat);
+            const c = getColor(name);
+            if (name === selectedState) return hexToRgba(c, 0.22);
+            if (name === hoveredState) return hexToRgba(c, 0.14);
+            return 'rgba(0, 0, 0, 0)'; // Transparent: No solid color overlay on states
+          })
+          .polygonSideColor(feat => {
+            const name = getStateName(feat);
+            const c = getColor(name);
+            if (name === selectedState) return hexToRgba(c, 0.6);
+            if (name === hoveredState) return hexToRgba(c, 0.45);
+            return 'rgba(255, 255, 255, 0.02)';
+          })
+          .polygonStrokeColor(feat => {
+            const name = getStateName(feat);
+            if (name === selectedState) return '#ffffff';
+            if (name === hoveredState) return '#ffd700'; // Dynamic bright gold border highlight on drag/hover
+            return 'rgba(255, 255, 255, 0.35)'; // Clean subtle border
+          })
+          .polygonLabel(feat => {
+            if (currentPolygonAlpha < 0.3) return '';
+            const name = getStateName(feat);
+            const c = getColor(name);
+            const key = normalizeKey(name);
+            const meta = YUGMA_STATES[key];
+            return `
+              <div class="glob-tip">
+                <div class="glob-tip-head">
+                  <span class="glob-tip-swatch" style="background:${c}"></span>
+                  <span class="glob-tip-name">${name}</span>
+                </div>
+                <div class="glob-tip-meta">
+                  ${meta ? `🏛 <b>${meta.heritage}</b><br>🎭 <b>${meta.tradition}</b>` : `Sacred Cultural Region`}
+                </div>
+              </div>
+            `;
+          })
+          .onPolygonHover(hoverD => {
+            if (currentPolygonAlpha < 0.15) return;
+            const prev = hoveredState;
+            hoveredState = hoverD ? getStateName(hoverD) : null;
+            if (prev !== hoveredState) {
+              globe.polygonAltitude(globe.polygonAltitude());
+              globe.polygonCapColor(globe.polygonCapColor());
+              globe.polygonSideColor(globe.polygonSideColor());
+              globe.polygonStrokeColor(globe.polygonStrokeColor());
+            }
+          })
+          .onPolygonClick(feat => {
+            if (!feat || currentPolygonAlpha < 0.2) return;
+            isUserInteracting = true;
+            if (typeof closeARVRModal === 'function') closeARVRModal();
+            selectStateByGlobeName(getStateName(feat));
+          });
+
+        // Controls - static globe on hero (auto-rotate disabled)
+        const ctrl = globe.controls ? globe.controls() : null;
+        if (ctrl) {
+          ctrl.autoRotate = false;
+          ctrl.autoRotateSpeed = -0.55;
+          ctrl.enableDamping = true;
+          ctrl.dampingFactor = 0.08;
+          ctrl.zoomSpeed = 0.9;
+          ctrl.minDistance = 110;
+          ctrl.maxDistance = 900;
+        }
+
+        // Cap pixel ratio for silky 60-120fps performance on high-DPI/Retina displays
+        if (globe.renderer) {
+          const r = globe.renderer();
+          if (r && r.setPixelRatio) {
+            r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
+          }
+        }
+
+        // Initial static orbital hero POV
+        globe.pointOfView({ lat: 10, lng: 55, altitude: 0.92 }, 0);
+
+        // Resize handler with debouncing
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            if (globe && container) {
+              globe.width(window.innerWidth).height(window.innerHeight);
+            }
+          }, 120);
+        }, { passive: true });
+
+        // Controls and zoom state are efficiently driven by the unified master animation loop
+
+        // Load boundaries & Pins
+        await loadBoundaries();
+        buildPins();
+
+        console.log('[YUGMA] Orbital Globe Engine initialized successfully ✓');
+      } catch (err) {
+        console.error('[YUGMA] Globe initialization error:', err);
+      } finally {
+        dismissPreloader();
+      }
+    }
+
+    async function loadBoundaries() {
+      for (const url of GEOJSON_URLS) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data && data.features && data.features.length > 0) {
+            allFeatures = data.features;
+            globe.polygonsData(allFeatures);
+            console.log('[YUGMA] GeoJSON loaded from:', url);
+            setTimeout(() => {
+              cachePolygonMaterials();
+              updatePolygonSceneOpacity(0);
+            }, 150);
+            return;
+          }
+        } catch (e) {
+          console.warn('[YUGMA] GeoJSON mirror fallback:', url);
+        }
+      }
+    }
+
+    // ── Region Mapping Helper ───────────────────────────────
+    function getRegionForStateKey(key) {
+      if (!key) return 'Other';
+      if (['maharashtra', 'gujarat', 'statue_of_unity', 'rajgad_fort', 'gateway_of_india'].includes(key)) return 'West';
+      if (['rajasthan', 'uttar_pradesh', 'uttarakhand', 'delhi', 'punjab', 'lotus_temple'].includes(key)) return 'North';
+      if (['tamil_nadu', 'karnataka', 'kerala', 'andhra_pradesh'].includes(key)) return 'South';
+      if (['west_bengal', 'odisha', 'assam', 'tripura', 'bihar'].includes(key)) return 'East';
+      if (['chhattisgarh', 'madhya_pradesh'].includes(key)) return 'Central';
+      return 'Other';
+    }
+
+    function buildPins() {
+      const pins = Object.keys(YUGMA_STATES).map(key => {
+        const s = YUGMA_STATES[key];
+        const stateName = s.name || s.state || key;
+        const region = s.region || getRegionForStateKey(key) || 'Other';
+        return {
+          id: key,
+          name: stateName,
+          heritage: s.heritage || `${stateName} Monument`,
+          region: region,
+          lat: s.monumentLat || s.lat || 20.0,
+          lng: s.monumentLng || s.lng || 78.0,
+          color: s.themeColor || '#c9a24a',
+          pinTag: s.pinTag || (key === 'statue_of_unity' ? "WORLD'S TALLEST COLOSSUS (182M)" : 'SACRED MONUMENT')
+        };
+      });
+
+      globe
+        .htmlElementsData(pins)
+        .htmlElement(d => {
+          const el = document.createElement('div');
+          el.className = 'globe-state-pin';
+          el.dataset.id = d.id;
+          el.dataset.region = d.region;
+          el.style.setProperty('--pin-color', d.color);
+          const safeName = (d.name || 'HERITAGE').toUpperCase();
+          const safeHeritage = d.heritage || 'Sacred Heritage Site';
+          const safeTag = d.pinTag || 'SACRED MONUMENT';
+          el.innerHTML = `
+            <div class="pin-card">
+              <div class="pin-tag">${safeTag}</div>
+              <div class="pin-monument">${safeHeritage}</div>
+              <div class="pin-state">${safeName}</div>
+            </div>
+            <div class="pin-beacon">
+              <span class="pin-dot"></span>
+              <span class="pin-wave"></span>
+            </div>
+          `;
+          el.addEventListener('click', e => {
+            e.stopPropagation();
+            isUserInteracting = true;
+            // 1. Dismiss/remove the left side drawer if open
+            closeStateDrawer();
+            // 2. Open the AR/VR experience box directly
+            openARVRModal(d.id);
+          });
+          return el;
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  HIGH-PERFORMANCE SCROLL INTERPOLATION CONTROLLER
+    //  - Smooth 60-120fps hardware-accelerated transform
+    //  - Single CSS variable updates for pin opacity
+    //  - Zero CPU polygon re-generation
+    // ════════════════════════════════════════════════════════════
+
+    let currentProgress = 0;
+    let targetProgress = 0;
+    let lastAppliedProgress = -1;
+    let isScrollDrivenPOV = true;
+
+    function lerp(start, end, factor) {
+      return start + (end - start) * factor;
+    }
+
+    function updateScrollProgress() {
+      const scrollY = window.scrollY || window.pageYOffset;
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      targetProgress = Math.min(1, Math.max(0, scrollY / maxScroll));
+    }
+
+    // ── Layout-Thrash-Free HUD Title Tracking ───────────────
+    let presTitleOffsetTop = 0;
+    function updatePresTitleOffset() {
+      const presTitle = document.querySelector('.preservation-title') || document.querySelector('.preservation-header');
+      if (presTitle) {
+        const rect = presTitle.getBoundingClientRect();
+        presTitleOffsetTop = rect.top + (window.scrollY || window.pageYOffset);
+      }
+    }
+
+    function updateHudVisibility() {
+      if (!globeHud) return;
+
+      const scrollY = window.scrollY || window.pageYOffset;
+      if (presTitleOffsetTop === 0) {
+        updatePresTitleOffset();
+      }
+
+      // Pure arithmetic comparison: 0 DOM layout reflows!
+      const reachedPreservationTitle = presTitleOffsetTop > 0
+        ? (scrollY + window.innerHeight * 0.85 >= presTitleOffsetTop)
+        : false;
+
+      const isFocusingIndiaMap = currentProgress > 0.28 || scrollY > window.innerHeight * 0.45;
+
+      if (reachedPreservationTitle) {
+        if (!globeHud.classList.contains('preservation-hidden')) {
+          globeHud.classList.add('preservation-hidden');
+          globeHud.classList.remove('visible');
+          document.body.classList.add('in-preservation');
+        }
+      } else if (isFocusingIndiaMap) {
+        if (!globeHud.classList.contains('visible') || globeHud.classList.contains('preservation-hidden')) {
+          globeHud.classList.remove('preservation-hidden');
+          document.body.classList.remove('in-preservation');
+          globeHud.classList.add('visible');
+        }
+      } else {
+        if (globeHud.classList.contains('visible')) {
+          globeHud.classList.remove('preservation-hidden');
+          document.body.classList.remove('in-preservation');
+          globeHud.classList.remove('visible');
+        }
+      }
+    }
+
+    window.addEventListener('scroll', () => {
+      updateScrollProgress();
+      if (targetProgress < 0.85) {
+        isUserInteracting = false;
+        isScrollDrivenPOV = true;
+      }
+      updateHudVisibility();
+    }, { passive: true });
+
+    let lastAppliedPinAlpha = null;
+    let lastPinsPointer = null;
+    let lastInteractiveMode = null;
+    let lastZoomedState = null;
+    let zoomCheckCounter = 0;
+
+    (function unifiedMasterLoop() {
+      requestAnimationFrame(unifiedMasterLoop);
+
+      // 0. Skip processing entirely if user has backgrounded the tab to save GPU/CPU
+      if (document.hidden) return;
+
+      // 1. Always update OrbitControls momentum/damping smoothly
+      if (globe && globe.controls) {
+        globe.controls().update();
+      }
+
+      // 2. Throttled real-time zoom detection (evaluated every 6 frames = ~10Hz)
+      zoomCheckCounter++;
+      if (zoomCheckCounter % 6 === 0 && globe && globeWrapper) {
+        const pov = globe.pointOfView();
+        const isZoomed = !!(pov && typeof pov.altitude === 'number' && pov.altitude <= 1.35);
+        if (isZoomed !== lastZoomedState) {
+          lastZoomedState = isZoomed;
+          globeWrapper.classList.toggle('globe-zoomed-in', isZoomed);
+        }
+      }
+
+      // 3. Smooth lerp for scroll-driven camera & scene transitions
+      const diff = targetProgress - currentProgress;
+      if (Math.abs(diff) < 0.0003 && Math.abs(currentProgress - lastAppliedProgress) < 0.0003) {
+        return; // Idle when no scroll movement - zero CPU/GPU overhead!
+      }
+
+      currentProgress += diff * 0.095;
+      const p = currentProgress; // 0 (Hero) to 1 (Explorer)
+      lastAppliedProgress = p;
+
+      // 3a. Interactive mode and Pin opacity on full-screen wrapper across all scenes
+      if (globeWrapper) {
+        // Pins visible in Scene 3 (Explorer), smoothly dimming in Scene 4 (Preservation)
+        let pinAlpha = 0;
+        if (p <= 0.62) {
+          pinAlpha = Math.max(0, Math.min(1, (p - 0.22) / 0.35));
+        } else {
+          pinAlpha = Math.max(0, 1 - (p - 0.62) / 0.22);
+        }
+
+        const pinAlphaStr = pinAlpha.toFixed(2);
+        if (pinAlphaStr !== lastAppliedPinAlpha) {
+          lastAppliedPinAlpha = pinAlphaStr;
+          globeWrapper.style.setProperty('--pins-opacity', pinAlphaStr);
+        }
+        const pointerVal = pinAlpha > 0.4 ? 'auto' : 'none';
+        if (pointerVal !== lastPinsPointer) {
+          lastPinsPointer = pointerVal;
+          globeWrapper.style.setProperty('--pins-pointer', pointerVal);
+        }
+
+        const isInteractive = p > 0.45 && p < 0.75;
+        if (isInteractive !== lastInteractiveMode) {
+          lastInteractiveMode = isInteractive;
+          globeWrapper.classList.toggle('interactive-mode', isInteractive);
+        }
+      }
+
+      // 3b. Pure 3D Camera POV Interpolation across 4 scenes (Centered Earth in Hero & Preservation)
+      if (globe && isScrollDrivenPOV && !isUserInteracting) {
+        let curLat, curLng, curAlt;
+        if (p <= 0.60) {
+          // Hero (0.0) -> Explorer (0.60)
+          const sp = p / 0.60;
+          curLat = lerp(10, 21, sp);
+          curLng = lerp(55, 78.96, sp);
+          curAlt = lerp(0.92, 2.1, sp);
+        } else {
+          // Explorer (0.60) -> Preservation (1.0)
+          const sp = (p - 0.60) / 0.40;
+          curLat = lerp(21, 20.5, sp);
+          curLng = 78.96;
+          curAlt = lerp(2.1, 1.85, sp);
+        }
+        globe.pointOfView({ lat: curLat, lng: curLng, altitude: curAlt }, 0);
+      }
+
+      // 3c. Indian State Boundaries (Polygon Opacity)
+      let targetPolyAlpha = 0;
+      if (p <= 0.62) {
+        targetPolyAlpha = Math.max(0, Math.min(1, (p - 0.20) / 0.35));
+      } else {
+        targetPolyAlpha = Math.max(0, 1 - (p - 0.62) / 0.22);
+      }
+      if (Math.abs(currentPolygonAlpha - targetPolyAlpha) > 0.04) {
+        currentPolygonAlpha = targetPolyAlpha;
+        updatePolygonSceneOpacity(targetPolyAlpha);
+      }
+
+      // 3d. Hero Content Fade
+      if (heroContent) {
+        const heroAlpha = Math.max(0, 1 - p * 2.5);
+        const heroTranslate = -p * 60;
+        heroContent.style.opacity = heroAlpha.toFixed(2);
+        heroContent.style.transform = `translate3d(0, ${heroTranslate.toFixed(1)}px, 0)`;
+      }
+
+      if (scrollHint) {
+        scrollHint.style.opacity = Math.max(0, 1 - p * 3.5).toFixed(2);
+      }
+
+      // 3e. Floating HUD Toolbar Fade (Visible during India map view, hidden on scrolling to Preservation title)
+      updateHudVisibility();
+    })();
+
+    // Ensure HUD visibility and preservation offset are dynamically monitored on resize and load
+    window.addEventListener('resize', () => {
+      updatePresTitleOffset();
+      updateHudVisibility();
+    }, { passive: true });
+    window.addEventListener('load', () => {
+      updatePresTitleOffset();
+      updateHudVisibility();
+    }, { passive: true });
+    setTimeout(updatePresTitleOffset, 800);
+    updateHudVisibility();
+
+    // ── State Selection & Navigation ─────────────────────────
+    function selectStateByGlobeName(name) {
+      selectStateById(normalizeKey(name), name);
+    }
+
+    function selectStateById(id, displayName) {
+      let s = YUGMA_STATES[id] || (window.YUGMA_STATES_DATA ? window.YUGMA_STATES_DATA[id] : null);
+      if (!s) {
+        const rawName = displayName || id || 'India';
+        const formattedName = rawName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        s = {
+          name: formattedName,
+          nameHindi: '',
+          heritage: `${formattedName} Heritage Site`,
+          tradition: 'Folk Tradition',
+          tagline: `Explore the vibrant living culture and sacred architecture of ${formattedName}.`,
+          lat: 22.0,
+          lng: 78.0,
+          themeColor: getColor(rawName),
+          vrPath: '',
+        };
+      }
+
+      selectedState = s.name;
+      isUserInteracting = true;
+      isScrollDrivenPOV = false;
+
+      // Scroll to Scene 3 if at top
+      if (window.scrollY < window.innerHeight * 0.8) {
+        const expEl = document.getElementById('explorer');
+        if (expEl) expEl.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      // Highlight Polygon with dynamic border & elevation
+      globe.polygonAltitude(d => {
+        const n = getStateName(d);
+        return (n === s.name || normalizeKey(n) === id) ? 0.048 : 0.006;
+      });
+      globe.polygonCapColor(globe.polygonCapColor());
+      globe.polygonSideColor(globe.polygonSideColor());
+      globe.polygonStrokeColor(globe.polygonStrokeColor());
+
+      // Camera fly-to state
+      const ctrl = globe.controls();
+      if (ctrl) ctrl.autoRotate = false;
+
+      globe.pointOfView({
+        lat: s.monumentLat || s.lat || 22,
+        lng: s.monumentLng || s.lng || 78,
+        altitude: 0.85
+      }, 1200);
+
+      // Play audio cue
+      if (window.yugmaAudio) {
+        window.yugmaAudio.playGhungroo();
+      }
+
+      // Open Left-Side State Info & Heritage Sites Drawer
+      openStateDrawer(id, s);
+    }
+    window.selectStateById = selectStateById;
+    window.selectStateByGlobeName = selectStateByGlobeName;
+
+    function resetToIndia() {
+      selectedState = null;
+      hoveredState = null;
+      isUserInteracting = false;
+      document.querySelectorAll('.globe-state-pin').forEach(pin => {
+        pin.style.display = 'flex';
+      });
+      if (globe) {
+        globe.polygonAltitude(() => 0.006);
+        globe.polygonCapColor(globe.polygonCapColor());
+        globe.polygonSideColor(globe.polygonSideColor());
+        globe.polygonStrokeColor(globe.polygonStrokeColor());
+        const ctrl = globe.controls ? globe.controls() : null;
+        if (ctrl) ctrl.autoRotate = isAutoRotating;
+        globe.pointOfView({ lat: 21, lng: 78.96, altitude: 2.1 }, 1000);
+      }
+      closeStateDrawer();
+      closeARVRModal();
+    }
+
+    // ── State Languages & Regional Cultural Localization ────
+    const STATE_LANG_CONFIG = {
+      "maharashtra": {
+        "name": "Marathi",
+        "native": "मराठी",
+        "stateNameReg": "महाराष्ट्र",
+        "capitalReg": "मुंबई",
+        "capitalLabelReg": "राजधानी",
+        "regionReg": "पश्चिम भारत // पावन भूमी",
+        "taglineReg": "प्राचीन बौद्ध भित्तिचित्रे, लेणी आणि भव्य कैलास मंदिराची पावन भूमी.",
+        "traditionReg": "लावणी",
+        "heritageReg": "अजिंठा व वेरूळ लेणी",
+        "traditionLabelReg": "🎭 लोकपरंपरा",
+        "heritageLabelReg": "🏛 मुख्य स्मारक",
+        "heritageDescReg": "अजिंठा व वेरूळ लेणी ३६०° आभासी वास्तव (AR/VR) मध्ये प्रत्यक्ष अनुभवा.",
+        "traditionDescReg": "महाराष्ट्राची समृद्ध लोकपरंपरा लावणी नृत्य व ढोलकीच्या तालावर अनुभवा.",
+        "enterVrLabel": "360° AR/VR दालनात प्रवेश करा",
+        "openTradLabel": "3D नृत्य कला दालन",
+        "openBookLabel": "डिजिटल ऐतिहासिक ग्रंथ",
+        "bookTitleReg": "ऐतिहासिक दस्तऐवज संग्रह",
+        "bookDescReg": "प्राचीन हस्तलिखिते, शिलालेख आणि युनेस्को नोंदी वाचा.",
+        "sitesHeaderReg": "🏛 पावन ऐतिहासिक वारसा स्थळे",
+        "sitesCountLabelReg": "स्मारके",
+        "launchVrLabelReg": "🥽 360° AR/VR सुरू करा",
+        "returnBtnReg": "← पृथ्वीवर परत या"
+      },
+      "gujarat": {
+        "name": "Gujarati",
+        "native": "ગુજરાતી",
+        "stateNameReg": "ગુજરાત",
+        "capitalReg": "ગાંધીનગર",
+        "capitalLabelReg": "રાજધાની",
+        "regionReg": "પશ્ચિમ ભારત // પવિત્ર ભૂમિ",
+        "taglineReg": "પવિત્ર જળનું ઊંધું શિલ્પાયિત મંદિર અને સોલંકી વાસ્તુશૈલીની ધરોહર.",
+        "traditionReg": "ગરબા",
+        "heritageReg": "રાણકી વાવ",
+        "traditionLabelReg": "🎭 લોકપરંપરા",
+        "heritageLabelReg": "🏛 મુખ્ય સ્મારક",
+        "heritageDescReg": "પાટણની વર્લ્ડ હેરિટેજ રાણકી વાવને ૩૬૦° AR/VR માં માણો.",
+        "traditionDescReg": "ગુજરાતની લોકનૃત્ય પરંપરા ગરબા અને નવરાત્રીનો ઉલ્લાસ માણો.",
+        "enterVrLabel": "360° AR/VR પોર્ટલમાં પ્રવેશો",
+        "openTradLabel": "3D નૃત્ય સ્ટુડિયો",
+        "openBookLabel": "ડિજિટલ ગ્રંથ ખોલો",
+        "bookTitleReg": "ઐતિહાસિક હસ્તપ્રત સંગ્રહ",
+        "bookDescReg": "પ્રાચીન દસ્તાવેજો, શિલાલેખો અને યુનેસ્કો રેકોર્ડ્સ વાંચો.",
+        "sitesHeaderReg": "🏛 પવિત્ર ઐતિહાસિક વારસો",
+        "sitesCountLabelReg": "સ્મારકો",
+        "launchVrLabelReg": "🥽 360° AR/VR શરૂ કરો",
+        "returnBtnReg": "← પૃથ્વી પર પાછા જાઓ"
+      },
+      "rajasthan": {
+        "name": "Rajasthani",
+        "native": "राजस्थानी",
+        "stateNameReg": "राजस्थान",
+        "capitalReg": "जयपुर",
+        "capitalLabelReg": "राजधानी",
+        "regionReg": "उत्तर भारत // वीरों की भूमि",
+        "taglineReg": "शीश महलों, अरावली के विशाल दुर्गों और अमर शौर्य की पावन धरा.",
+        "traditionReg": "घूमर",
+        "heritageReg": "आमेर दुर्ग एवं महल",
+        "traditionLabelReg": "🎭 लोकपरंपरा",
+        "heritageLabelReg": "🏛 मुख्य स्मारक",
+        "heritageDescReg": "आमेर के शीश महल और राजसी राजपूत वैभव को ३६०° AR/VR में देखें.",
+        "traditionDescReg": "पारंपरिक राजपूती घूमर नृत्य और लोक वाद्यों की मधुर तान का अनुभव करें.",
+        "enterVrLabel": "360° AR/VR में प्रवेश करें",
+        "openTradLabel": "3D नृत्य स्टूडियो खोलें",
+        "openBookLabel": "डिजिटल ग्रंथ पढ़ें",
+        "bookTitleReg": "ऐतिहासिक पाण्डुलिपि संग्रह",
+        "bookDescReg": "राजपूत इतिहास, शिलालेख और यूनेस्को दस्तावेज़ पढ़ें.",
+        "sitesHeaderReg": "🏛 पावन ऐतिहासिक धरोहरें",
+        "sitesCountLabelReg": "स्मारक",
+        "launchVrLabelReg": "🥽 360° AR/VR शुरू करें",
+        "returnBtnReg": "← ग्लोब पर वापस लौटें"
+      },
+      "uttar_pradesh": {
+        "name": "Hindi",
+        "native": "हिन्दी",
+        "stateNameReg": "उत्तर प्रदेश",
+        "capitalReg": "लखनऊ",
+        "capitalLabelReg": "राजधानी",
+        "regionReg": "उत्तर भारत // गंगा-जमुनी तहज़ीब",
+        "taglineReg": "धवल संगमरमर के ताज, पावन काशी घाट और शाश्वत सांस्कृतिक चेतना.",
+        "traditionReg": "कथक",
+        "heritageReg": "ताज महल",
+        "traditionLabelReg": "🎭 शास्त्रीय परंपरा",
+        "heritageLabelReg": "🏛 मुख्य स्मारक",
+        "heritageDescReg": "विश्व के आश्चर्य मकराना संगमरमर के ताज महल को ३६०° AR/VR में देखें.",
+        "traditionDescReg": "कथक नृत्य के लयबद्ध तत्कार, भाव और ताल का सजीव अनुभव करें.",
+        "enterVrLabel": "360° AR/VR में प्रवेश करें",
+        "openTradLabel": "3D कथक स्टूडियो",
+        "openBookLabel": "डिजिटल धरोहर ग्रंथ",
+        "bookTitleReg": "प्राचीन पांडुलिपि अभिलेखागार",
+        "bookDescReg": "मुगल कालीन इतिहास, काशी और सारनाथ के ऐतिहासिक ग्रंथ पढ़ें.",
+        "sitesHeaderReg": "🏛 पावन ऐतिहासिक धरोहरें",
+        "sitesCountLabelReg": "स्मारक",
+        "launchVrLabelReg": "🥽 360° AR/VR शुरू करें",
+        "returnBtnReg": "← ग्लोब पर वापस लौटें"
+      },
+      "west_bengal": {
+        "name": "Bengali",
+        "native": "বাংলা",
+        "stateNameReg": "পশ্চিমবঙ্গ",
+        "capitalReg": "কলকাতা",
+        "capitalLabelReg": "রাজধানী",
+        "regionReg": "পূর্ব ভারত // সংস্কৃতির পুণ্যভূমি",
+        "taglineReg": "কলকাতার মার্বেল সৌধ, পোড়ামাটির মন্দির ও জীবন্ত বাউল সংগীতের পুণ্যভূমি.",
+        "traditionReg": "বাউল সংগীত",
+        "heritageReg": "ভিক্টোরিয়া মেমোরিয়াল",
+        "traditionLabelReg": "🎭 লোকপরম্পরা",
+        "heritageLabelReg": "🏛 প্রধান সৌধ",
+        "heritageDescReg": "কলকাতার ভিক্টোরিয়া মেমোরিয়াল সৌধকে ৩৬০° AR/VR ভার্চুয়াল অভিজ্ঞতায় দেখুন.",
+        "traditionDescReg": "একতারা ও বাউলের আধ্যাত্মিক সুফি লোকগানের জীবন্ত অভিজ্ঞতা উপভোগ করুন.",
+        "enterVrLabel": "৩৬০° AR/VR পোর্টালে প্রবেশ করুন",
+        "openTradLabel": "৩ডি সংগীত ও শিল্পকলা স্টুডিও",
+        "openBookLabel": "ডিজিটাল ঐতিহ্য গ্রন্থ",
+        "bookTitleReg": "ঐতিহাসিক পাণ্ডুলিপি সংগ্রহশালা",
+        "bookDescReg": "বাংলার সাহিত্য, ইতিহাস এবং টেরাকোটা স্থাপত্যের নথি পড়ুন.",
+        "sitesHeaderReg": "🏛 পবিত্র ঐতিহাসিক ঐতিহ্য ক্ষেত্র",
+        "sitesCountLabelReg": "স্মারক",
+        "launchVrLabelReg": "🥽 ৩৬০° AR/VR শুরু করুন",
+        "returnBtnReg": "← গ্লোবে ফিরে যান"
+      },
+      "tamil_nadu": {
+        "name": "Tamil",
+        "native": "தமிழ்",
+        "stateNameReg": "தமிழ்நாடு",
+        "capitalReg": "சென்னை",
+        "capitalLabelReg": "தலைநகரம்",
+        "regionReg": "தென் பாரதம் // திராவிட மரபு",
+        "taglineReg": "சோழப் பேரரசின் மாபெரும் கருங்கல் கோபுரங்களும் பரதநாட்டிய நாதமும்.",
+        "traditionReg": "பரதநாட்டியம்",
+        "heritageReg": "தஞ்சைப் பெருவுடையார் கோயில்",
+        "traditionLabelReg": "🎭 பாரம்பரியக் கலை",
+        "heritageLabelReg": "🏛 முதன்மைச் சின்னம்",
+        "heritageDescReg": "தஞ்சைப் பெருவுடையார் கோயிலின் பிரம்மாண்ட விமானத்தை 360° AR/VR இல் காண்க.",
+        "traditionDescReg": "செம்மொழித் தமிழின் செவ்வியல் பரதநாட்டிய முத்திரைகளையும் தாளங்களையும் காண்க.",
+        "enterVrLabel": "360° AR/VR தளத்தில் நுழைக",
+        "openTradLabel": "3D நாட்டிய அரங்கம்",
+        "openBookLabel": "மின் நூலகம் திறக்க",
+        "bookTitleReg": "வரலாற்றுச் சுவடிகள் காப்பகம்",
+        "bookDescReg": "சோழர் காலச் செப்பேடுகள், கல்வெட்டுகள் மற்றும் கோயில் ஆவணங்களைப் படிக்க.",
+        "sitesHeaderReg": "🏛 புனித வரலாற்றுச் சின்னங்கள்",
+        "sitesCountLabelReg": "தளங்கள்",
+        "launchVrLabelReg": "🥽 360° AR/VR தொடங்குக",
+        "returnBtnReg": "← பூமிக்குத் திரும்புக"
+      },
+      "karnataka": {
+        "name": "Kannada",
+        "native": "ಕನ್ನಡ",
+        "stateNameReg": "ಕರ್ನಾಟಕ",
+        "capitalReg": "ಬೆಂಗಳೂರು",
+        "capitalLabelReg": "ರಾಜಧಾನಿ",
+        "regionReg": "ದಕ್ಷಿಣ ಭಾರತ // ಶಿಲ್ಪಕಲೆಯ ತವರೂರು",
+        "taglineReg": "ವಿಜಯನಗರದ ಶಿಲಾ ರಥ, ಹೊಯ್ಸಳ ದೇಗುಲಗಳು ಮತ್ತು ಯಕ್ಷಗಾನದ ಗಂಡುಕಲೆ.",
+        "traditionReg": "ಯಕ್ಷಗಾನ",
+        "heritageReg": "ಹಂಪಿ ಸ್ಮಾರಕ ಸಮೂಹ",
+        "traditionLabelReg": "🎭 ಜಾನಪದ ಪರಂಪರೆ",
+        "heritageLabelReg": "🏛 ಪ್ರಮುಖ ಸ್ಮಾರಕ",
+        "heritageDescReg": "ವಿಜಯನಗರ ಸಾಮ್ರಾಜ್ಯದ ಹಂಪಿಯ ಸುಪ್ರಸಿದ್ಧ ಶಿಲಾ ರಥವನ್ನು 360° AR/VR ನಲ್ಲಿ ವೀಕ್ಷಿಸಿ.",
+        "traditionDescReg": "ಕರಾವಳಿ ಕರ್ನಾಟಕದ ಗಂಡುಕಲೆ ಯಕ್ಷಗಾನದ ವೇಷಭೂಷಣ ಮತ್ತು ರಂಗಪ್ರದರ್ಶನ ಅನುಭವಿಸಿ.",
+        "enterVrLabel": "360° AR/VR ಪೋರ್ಟಲ್ ಪ್ರವೇಶಿಸಿ",
+        "openTradLabel": "3D ಕಲಾ ಸ್ಟುಡಿಯೋ",
+        "openBookLabel": "ಡಿಜಿಟಲ್ ಗ್ರಂಥ ತೆರೆಯಿರಿ",
+        "bookTitleReg": "ಐತಿಹಾಸಿಕ ಹಸ್ತಪ್ರತಿ ಭಂಡಾರ",
+        "bookDescReg": "ಹೊಯ್ಸಳ, ಚಾಲುಕ್ಯ ಹಾಗೂ ವಿಜಯನಗರ ಕಾಲದ ಪ್ರಾಚೀನ ಶಾಸನಗಳನ್ನು ಓದಿ.",
+        "sitesHeaderReg": "🏛 ಪವಿತ್ರ ಐತಿಹಾಸಿಕ ಸ್ಮಾರಕಗಳು",
+        "sitesCountLabelReg": "ತಾಣಗಳು",
+        "launchVrLabelReg": "🥽 360° AR/VR ಪ್ರಾರಂಭಿಸಿ",
+        "returnBtnReg": "← ಗ್ಲೋಬ್‌ಗೆ ಹಿಂತಿರುಗಿ"
+      },
+      "kerala": {
+        "name": "Malayalam",
+        "native": "മലയാളം",
+        "stateNameReg": "കേരളം",
+        "capitalReg": "തിരുവനന്തപുരം",
+        "capitalLabelReg": "തലസ്ഥാനം",
+        "regionReg": "ദക്ഷിണ ഭാരതം // ദൈവത്തിന്റെ സ്വന്തം നാട്",
+        "taglineReg": "ഏഷ്യയിലെ ഏറ്റവും വലിയ തേക്ക് കൊട്ടാരവും കഥകളിയുടെ ജീവസ്സുറ്റ അഭിനയവും.",
+        "traditionReg": "കഥകളി",
+        "heritageReg": "പത്മനാഭപുരം കൊട്ടാരം",
+        "traditionLabelReg": "🎭 പാരമ്പര്യ കലാരൂപം",
+        "heritageLabelReg": "🏛 പ്രധാന സ്മാരകം",
+        "heritageDescReg": "പത്മനാഭപുരം കൊട്ടാരത്തിലെ തടി കൊത്തുപണികൾ 360° AR/VR-ൽ അനുഭവിച്ചറിയൂ.",
+        "traditionDescReg": "കഥകളിയുടെ പച്ച, കത്തി വേഷങ്ങളും മുദ്രകളും താളങ്ങളും അടുത്തറിയൂ.",
+        "enterVrLabel": "360° AR/VR-ലേക്ക് പ്രവേശിക്കൂ",
+        "openTradLabel": "3D കഥകളി സ്റ്റുഡിയോ",
+        "openBookLabel": "ഡിജിറ്റൽ പുസ്തകം തുറക്കൂ",
+        "bookTitleReg": "ചരിത്ര കൈയെഴുത്തുപ്രതി ശേഖരം",
+        "bookDescReg": "കേരളത്തിന്റെ വാസ്തുവിദ്യയും ചുവർച്ചിത്ര പൈതൃകവും വായിച്ചറിയൂ.",
+        "sitesHeaderReg": "🏛 പവിത്ര പൈതൃക കേന്ദ്രങ്ങൾ",
+        "sitesCountLabelReg": "സ്മാരകങ്ങൾ",
+        "launchVrLabelReg": "🥽 360° AR/VR ആരംഭിക്കൂ",
+        "returnBtnReg": "← ഗ്ലോബിലേക്ക് മടങ്ങുക"
+      },
+      "odisha": {
+        "name": "Odia",
+        "native": "ଓଡ଼ିଆ",
+        "stateNameReg": "ଓଡ଼ିଶା",
+        "capitalReg": "ଭୁବନେଶ୍ୱର",
+        "capitalLabelReg": "ରାଜଧାନୀ",
+        "regionReg": "ପୂର୍ବ ଭାରତ // ଉତ୍କଳ ସଂସ୍କୃତି",
+        "taglineReg": "କୋଣାର୍କର କୃଷ୍ଣ ପାଗୋଡ଼ା, ପୁରୀ ରଥଯାତ୍ରା ଏବଂ ଶାସ୍ତ୍ରୀୟ ଓଡ଼ିଶୀ ନୃତ୍ୟ.",
+        "traditionReg": "ଓଡ଼ିଶୀ",
+        "heritageReg": "କୋଣାର୍କ ସୂର୍ଯ୍ୟ ମନ୍ଦିର",
+        "traditionLabelReg": "🎭 ଶାସ୍ତ୍ରୀୟ ପରମ୍ପରା",
+        "heritageLabelReg": "🏛 ପ୍ରଧାନ କୀର୍ତ୍ତି",
+        "heritageDescReg": "କୋଣାର୍କ ସୂର୍ଯ୍ୟ ମନ୍ଦିରର ପାଷାଣ ରଥ ଚକ୍ରକୁ ୩୬୦° AR/VR ରେ ଦେଖନ୍ତୁ.",
+        "traditionDescReg": "ଓଡ଼ିଶୀ ନୃତ୍ୟର ତ୍ରିଭଙ୍ଗୀ ମୁଦ୍ରା ଓ ମର୍ଦ୍ଦଳ ତାଳର ଅନୁଭୂତି ନିଅନ୍ତୁ.",
+        "enterVrLabel": "୩୬୦° AR/VR ରେ ପ୍ରବେଶ କରନ୍ତୁ",
+        "openTradLabel": "୩D ନୃତ୍ୟ ଷ୍ଟୁଡିଓ ଖୋଲନ୍ତୁ",
+        "openBookLabel": "ଡିଜିଟାଲ ଗ୍ରନ୍ଥ ପଢ଼ନ୍ତୁ",
+        "bookTitleReg": "ପ୍ରାଚୀନ ତାଳପତ୍ର ପୋଥି ଅଭିଲେଖ",
+        "bookDescReg": "କଳିଙ୍ଗ ମନ୍ଦିର ସ୍ଥାପତ୍ୟ ଏବଂ ପ୍ରତ୍ନତାତ୍ତ୍ୱିକ ରେକର୍ଡ ପଢ଼ନ୍ତୁ.",
+        "sitesHeaderReg": "🏛 ପବିତ୍ର ଐତିହାସିକ ଧରୋହର",
+        "sitesCountLabelReg": "ସ୍ମାରକୀ",
+        "launchVrLabelReg": "🥽 ୩୬୦° AR/VR ଆରମ୍ଭ କରନ୍ତୁ",
+        "returnBtnReg": "← ଗ୍ଲୋବ୍ କୁ ଫେରନ୍ତୁ"
+      },
+      "assam": {
+        "name": "Assamese",
+        "native": "অসমীয়া",
+        "stateNameReg": "অসম",
+        "capitalReg": "দিছপুৰ",
+        "capitalLabelReg": "ৰাজধানী",
+        "regionReg": "উত্তৰ-পূব ভাৰত // ব্ৰহ্মপুত্ৰ উপত্যকা",
+        "taglineReg": "আহোম স্বৰ্গদেউসকলৰ ঐতিহাসিক ৰং ঘৰ আৰু ৰঙালী বিহুৰ নৃত্য-গীত.",
+        "traditionReg": "বিহু",
+        "heritageReg": "ৰং ঘৰ (ৰংপুৰ)",
+        "traditionLabelReg": "🎭 লোকপৰম্পৰা",
+        "heritageLabelReg": "🏛 প্ৰধান ঐতিহাসিক সৌধ",
+        "heritageDescReg": "এছিয়াৰ প্ৰাচীনতম খেল পেভিলিয়ন ৰং ঘৰ ৩৬০° AR/VR ত দৰ্শন কৰক.",
+        "traditionDescReg": "ঢোল, পেঁপা আৰু গগনাৰ সুৰত অসমীয়া বিহুৰ সজীৱ নৃত্য উপভোগ কৰক.",
+        "enterVrLabel": "৩৬০° AR/VR ত প্ৰৱেশ কৰক",
+        "openTradLabel": "৩ডি সাংস্কৃতিক ষ্টুডিঅ’",
+        "openBookLabel": "ডিজিটেল বুৰঞ্জী পুথি",
+        "bookTitleReg": "ঐতিহাসিক সাঁচিপাত পুথিভঁৰাল",
+        "bookDescReg": "আহোম ৰাজবংশৰ বুৰঞ্জী আৰু বৈষ্ণৱ সত্ৰীয়া সংস্কৃতি অধ্যয়ন কৰক.",
+        "sitesHeaderReg": "🏛 পৱিত্ৰ ঐতিহাসিক ঐতিহ্য ক্ষেত্ৰ",
+        "sitesCountLabelReg": "স্মাৰক",
+        "launchVrLabelReg": "🥽 ৩৬০° AR/VR আৰম্ভ কৰক",
+        "returnBtnReg": "← পৃথিৱীলৈ ঘূৰি যাওক"
+      },
+      "bihar": {
+        "name": "Hindi",
+        "native": "हिन्दी",
+        "stateNameReg": "बिहार",
+        "capitalReg": "पटना",
+        "capitalLabelReg": "राजधानी",
+        "regionReg": "पूर्व भारत // ज्ञान की भूमि",
+        "taglineReg": "तथागत बुद्ध की संबोधि, प्राचीन नालंदा और मधुबनी लोक कला.",
+        "traditionReg": "मधुबनी एवं छऊ",
+        "heritageReg": "महाबोधि मन्दिर",
+        "traditionLabelReg": "🎭 लोककला एवं संस्कृति",
+        "heritageLabelReg": "🏛 मुख्य स्मारक",
+        "heritageDescReg": "बोधगया के पावन महाबोधि मन्दिर और बोधि वृक्ष को ३६०° AR/VR में देखें.",
+        "traditionDescReg": "मिथिला की पारम्परिक मधुबनी चित्रकला और ओजस्वी छऊ नृत्य का अनुभव लें.",
+        "enterVrLabel": "360° AR/VR में प्रवेश करें",
+        "openTradLabel": "3D कला एवं नृत्य स्टूडियो",
+        "openBookLabel": "डिजिटल ग्रंथ खोलें",
+        "bookTitleReg": "नालंदा ऐतिहासिक अभिलेखागार",
+        "bookDescReg": "नालंदा, विक्रमशिला और मौर्य इतिहास के दुर्लभ ग्रंथ पढ़ें.",
+        "sitesHeaderReg": "🏛 पावन ऐतिहासिक धरोहरें",
+        "sitesCountLabelReg": "स्मारक",
+        "launchVrLabelReg": "🥽 360° AR/VR शुरू करें",
+        "returnBtnReg": "← ग्लोब पर वापस लौटें"
+      },
+      "andhra_pradesh": {
+        "name": "Telugu",
+        "native": "తెలుగు",
+        "stateNameReg": "ఆంధ్ర ప్రదేశ్",
+        "capitalReg": "అమరావతి",
+        "capitalLabelReg": "రాజధాని",
+        "regionReg": "దక్షిణ భారత // శిల్ప కళా వైభవం",
+        "taglineReg": "లేపాక్షి వేలాడే స్తంభం, తిరుమల వేంకటేశ్వర ధామం మరియు కూచిపూడి.",
+        "traditionReg": "కూచిపూడి",
+        "heritageReg": "లేపాక్షి వీరభద్ర దేవాలయం",
+        "traditionLabelReg": "🎭 శాస్త్రీయ నృత్యం",
+        "heritageLabelReg": "🏛 ప్రధాన స్మారకం",
+        "heritageDescReg": "లేపాక్షి వీరభద్ర దేవాలయం మరియు వేలాడే స్తంభాన్ని 360° AR/VR లో వీక్షించండి.",
+        "traditionDescReg": "కూచిపూడి నాట్య రీతులు, తరంగం మరియు లయబద్ధ అడుగులను అనుభవించండి.",
+        "enterVrLabel": "360° AR/VR లోకి ప్రవేశించండి",
+        "openTradLabel": "3D కూచిపూడి స్టూడియో",
+        "openBookLabel": "డిజిటల్ గ్రంథం తెరవండి",
+        "bookTitleReg": "చారిత్రక తాళపత్ర గ్రంథాలయం",
+        "bookDescReg": "విజయనగర, శాతవాహన కాలపు శాసనాలు మరియు పురాతన రికార్డులను చదవండి.",
+        "sitesHeaderReg": "🏛 పవిత్ర చారిత్రక వారసత్వ ప్రదేశాలు",
+        "sitesCountLabelReg": "స్మారకాలు",
+        "launchVrLabelReg": "🥽 360° AR/VR ప్రారంభించండి",
+        "returnBtnReg": "← గ్లోబ్‌కు తిరిగి వెళ్లండి"
+      },
+      "uttarakhand": {
+        "name": "Garhwali",
+        "native": "गढ़वाली",
+        "stateNameReg": "उत्तराखंड",
+        "capitalReg": "देहरादून",
+        "capitalLabelReg": "राजधानी",
+        "regionReg": "उत्तर भारत // देवभूमि",
+        "taglineReg": "हिमालयी देवदार के घने वनों में १२४ प्राचीन मंदिरों का दिव्य जागेश्वर धाम.",
+        "traditionReg": "छोलिया नृत्य",
+        "heritageReg": "जागेश्वर धाम मंदिर समूह",
+        "traditionLabelReg": "🎭 लोकनृत्य एवं संस्कृति",
+        "heritageLabelReg": "🏛 मुख्य देवालय",
+        "heritageDescReg": "देवदार वनों में स्थित १२४ प्राचीन नागर मंदिरों के जागेश्वर धाम को ३६०° AR/VR में देखें.",
+        "traditionDescReg": "कुमाऊं और गढ़वाल की तलवार-ढाल युक्त पारम्परिक छोलिया नृत्य शैली का अनुभव लें.",
+        "enterVrLabel": "360° AR/VR में प्रवेश करें",
+        "openTradLabel": "3D लोकनृत्य स्टूडियो",
+        "openBookLabel": "डिजिटल देवभूमि ग्रंथ",
+        "bookTitleReg": "प्राचीन हिमालयी अभिलेखागार",
+        "bookDescReg": "केदारनाथ, बद्रीनाथ और कत्यूरी राजवंश के ऐतिहासिक अभिलेख पढ़ें.",
+        "sitesHeaderReg": "🏛 पावन तीर्थ एवं देवालय",
+        "sitesCountLabelReg": "देवालय",
+        "launchVrLabelReg": "🥽 360° AR/VR शुरू करें",
+        "returnBtnReg": "← ग्लोब पर वापस लौटें"
+      },
+      "tripura": {
+        "name": "Bengali",
+        "native": "বাংলা",
+        "stateNameReg": "ত্রিপুরা",
+        "capitalReg": "আগরতলা",
+        "capitalLabelReg": "রাজধানী",
+        "regionReg": "উত্তর-পূর্ব ভারত // রত্নগর্ভা ভূমি",
+        "taglineReg": "রুদ্রসাগর হ্রদের জলপ্রাসাদ নীরমহল এবং ঊনকোটির সুবিশাল পাহাড়ের ভাস্কর্য.",
+        "traditionReg": "হোজাগিরি নৃত্য",
+        "heritageReg": "নীরমহল জলপ্রাসাদ (টুইজিলিকমা)",
+        "traditionLabelReg": "🎭 আদিবাসী লোকনृत्य",
+        "heritageLabelReg": "🏛 প্রধান ঐতিহাসিক সৌধ",
+        "heritageDescReg": "রুদ্রসাগর হ্রদের মাঝে নির্মিত অপূর্ব নীরমহল প্রাসাদ ৩৬০° AR/VR এ দেখুন.",
+        "traditionDescReg": "ত্রিপুরার রিয়াং সম্প্রদায়ের কলসি ও প্রদীপের ওপর ভারসাম্যযুক্ত হোজাগিরি নৃত্য উপভোগ করুন.",
+        "enterVrLabel": "৩৬০° AR/VR পোর্টালে প্রবেশ করুন",
+        "openTradLabel": "৩ডি নৃত্য স্টুডিও",
+        "openBookLabel": "ডিজিটাল ইতিহাস গ্রন্থ",
+        "bookTitleReg": "রাজমালা ঐতিহাসিক মহাফেজখানা",
+        "bookDescReg": "মাণিক্য রাজবংশের রাজমালা এবং ঊনকোটির প্রত্নতাত্ত্বিক তথ্য পড়ুন.",
+        "sitesHeaderReg": "🏛 ঐতিহাসিক ঐতিহ্যবাহী নিদর্শন",
+        "sitesCountLabelReg": "স্মারক",
+        "launchVrLabelReg": "🥽 ৩৬০° AR/VR শুরু করুন",
+        "returnBtnReg": "← গ্লোবে ফিরে যান"
+      },
+      "delhi": {
+        "name": "Hindi",
+        "native": "हिन्दी",
+        "stateNameReg": "दिल्ली (राष्ट्रीय राजधानी क्षेत्र)",
+        "capitalReg": "नई दिल्ली",
+        "capitalLabelReg": "राजधानी",
+        "regionReg": "उत्तर भारत // राष्ट्रीय राजधानी",
+        "taglineReg": "संगमरमरी कमल मंदिर (लोटस टेम्पल), लाल किला, क़ुतुब मीनार एवं हुमायूँ के मक़बरे की ऐतिहासिक धरा.",
+        "traditionReg": "कथक एवं सूफ़ी क़व्वाली",
+        "heritageReg": "कमल मंदिर (लोटस टेम्पल)",
+        "traditionLabelReg": "🎭 शास्त्रीय परंपरा",
+        "heritageLabelReg": "🏛 मुख्य स्मारक",
+        "heritageDescReg": "कमल मंदिर (लोटस टेम्पल), लाल किला एवं क़ुतुब मीनार को ३६०° आभासी वास्तव (AR/VR) में प्रत्यक्ष अनुभव करें.",
+        "traditionDescReg": "दिल्ली घराने का शास्त्रीय कथक नृत्य एवं हज़रत निज़ामुद्दीन की पावन सूफ़ी क़व्वाली परंपरा.",
+        "enterVrLabel": "360° AR/VR लोटस टेम्पल में प्रवेश करें",
+        "openTradLabel": "3D नृत्य कला दालन",
+        "openBookLabel": "डिजिटल ऐतिहासिक ग्रंथ",
+        "bookTitleReg": "दिल्ली ऐतिहासिक अभिलेखागार",
+        "bookDescReg": "प्राचीन पाण्डुलिपियां, मुगल फरमान और युनेस्को ऐतिहासिक दस्तावेज पढ़ें.",
+        "sitesHeaderReg": "🏛 दिल्ली के पावन ऐतिहासिक धरोहर स्थल",
+        "sitesCountLabelReg": "स्मारक",
+        "launchVrLabelReg": "🥽 360° AR/VR शुरू करें",
+        "returnBtnReg": "← ग्लोब पर वापस जाएं"
+      },
+      "lotus_temple": {
+        "name": "Hindi",
+        "native": "हिन्दी",
+        "stateNameReg": "दिल्ली (कमल मंदिर)",
+        "capitalReg": "नई दिल्ली",
+        "capitalLabelReg": "राजधानी",
+        "regionReg": "उत्तर भारत // शांति निकेतन",
+        "taglineReg": "२७ संगमरमरी पंखुड़ियों और ९ सरोवरों से सुसज्जित विश्व शांति एवं सर्वधर्म प्रार्थना का पावन कमल मंदिर.",
+        "traditionReg": "कथक एवं सूफ़ी क़व्वाली",
+        "heritageReg": "कमल मंदिर (लोटस टेम्पल)",
+        "traditionLabelReg": "🎭 शास्त्रीय परंपरा",
+        "heritageLabelReg": "🏛 मुख्य स्मारक",
+        "heritageDescReg": "कमल मंदिर (लोटस टेम्पल) को ३६०° आभासी वास्तव (AR/VR) में प्रत्यक्ष अनुभव करें.",
+        "traditionDescReg": "दिल्ली की समृद्ध शास्त्रीय संगीत एवं आध्यात्मिक परंपरा.",
+        "enterVrLabel": "360° AR/VR लोटस टेम्पल में प्रवेश करें",
+        "openTradLabel": "3D नृत्य कला दालन",
+        "openBookLabel": "डिजिटल ऐतिहासिक ग्रंथ",
+        "bookTitleReg": "कमल मंदिर वास्तुकला ग्रंथ",
+        "bookDescReg": "बहाई उपासना मंदिर के ऐतिहासिक एवं वास्तुशिल्प दस्तावेज पढ़ें.",
+        "sitesHeaderReg": "🏛 दिल्ली के पावन ऐतिहासिक धरोहर स्थल",
+        "sitesCountLabelReg": "स्मारक",
+        "launchVrLabelReg": "🥽 360° AR/VR शुरू करें",
+        "returnBtnReg": "← ग्लोब पर वापस जाएं"
+      }
+    };
+
+    // ── Master Cultural Heritage Sites Database ──────────────
+    const HERITAGE_SITES_BY_STATE = {
+      "maharashtra": [
+        {
+          "name": "Ajanta & Ellora Caves",
+          "nameReg": "अजिंठा व वेरूळ लेणी",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "युनेस्को जागतिक वारसा",
+          "desc": "World-renowned rock-cut cave sanctuaries featuring Buddhist wall frescoes, Bodhisattva murals, and the monolithic Kailasa Temple.",
+          "descReg": "प्राचीन बौद्ध भित्तिचित्रे, बोधिसत्व शिल्पे आणि बेसाल्ट खडकातून कोरलेले भव्य कैलास मंदिर.",
+          "isVR": true
+        },
+        {
+          "name": "Elephanta Caves",
+          "nameReg": "घारापुरी (एलिफंटा) लेणी",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "युनेस्को जागतिक वारसा",
+          "desc": "Gharapuri Island cave sanctuary enshrining the majestic 20-foot high Trimurti Sadashiva monolithic rock sculpture.",
+          "descReg": "त्रिमूर्ती सदाशिव मूर्तीसाठी जगप्रसिद्ध असलेली प्राचीन गुहा मंदिरे."
+        },
+        {
+          "name": "Raigad Fort",
+          "nameReg": "किल्ले रायगड",
+          "tag": "Historic Hill Fortress",
+          "tagReg": "ऐतिहासिक डोंगरी दुर्ग",
+          "desc": "Impregnable Sahyadri mountain citadel serving as the sovereign capital of the Maratha Empire under Chhatrapati Shivaji Maharaj.",
+          "descReg": "छत्रपती शिवाजी महाराजांच्या मराठा साम्राज्याची अजिंक्य राजधानी."
+        },
+        {
+          "name": "Chhatrapati Shivaji Maharaj Terminus",
+          "nameReg": "छत्रपती शिवाजी महाराज टर्मिनस",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "युनेस्को जागतिक वारसा",
+          "desc": "Masterpiece of Victorian Gothic Revival architecture infused with traditional Indian classical ornamentation.",
+          "descReg": "व्हिक्टोरियन गॉथिक आणि भारतीय पारंपरिक शिल्पकलेचा उत्कृष्ट संगम."
+        },
+        {
+          "name": "Pratapgad Fort",
+          "nameReg": "किल्ले प्रतापगड",
+          "tag": "Historic Hill Citadel",
+          "tagReg": "ऐतिहासिक दुर्ग",
+          "desc": "Historic mountain fortress site of the Battle of Pratapgad surrounded by misty Sahyadri valleys.",
+          "descReg": "प्रतापगडच्या ऐतिहासिक युद्धाचे साक्षीदार असलेले सह्याद्रीतील अजिंक्य दुर्ग."
+        }
+      ],
+      "gujarat": [
+        {
+          "name": "Statue of Unity (182m Colossus)",
+          "nameReg": "સ્ટેચ્યુ ઓફ યુનિટી (૧૮૨ મીટર)",
+          "tag": "World's Tallest Monument · 3D Model",
+          "tagReg": "વિશ્વની સૌથી ઊંચી પ્રતિમા · ૩ડી મોડેલ",
+          "desc": "Soaring 182 meters above the sacred Narmada River honoring Sardar Vallabhbhai Patel. Interactive 3D Model with 15-language voice guide & camera presets.",
+          "descReg": "નર્મદા નદી કિનારે સરદાર વલ્લભભાઈ પટેલની ૧૮૨ મીટર ઊંચી વિશ્વની સૌથી ભવ્ય પ્રતિમા. ૩ડી મોડેલ અને ૧૫-ભાષીય માર્ગદર્શિકા સાથે ઉપલબ્ધ.",
+          "isVR": true,
+          "vrKey": "statue_of_unity",
+          "vrPath": "statue_of_unity_3d.html"
+        },
+        {
+          "name": "Rani ki Vav (Queen's Stepwell)",
+          "nameReg": "રાણકી વાવ (પાટણ)",
+          "tag": "UNESCO World Heritage · 3D Model",
+          "tagReg": "યુનેસ્કો વિશ્વ ધરોહર · ૩ડી મોડેલ",
+          "desc": "Subterranean inverted stepped temple in Patan with over 500 principal sculptures celebrating sacred water and Lord Vishnu.",
+          "descReg": "૫૦૦થી વધુ અદભુત વિષ્ણુ મૂર્તિઓ અને શિલ્પોથી સુશોભિત ભૂગર્ભ વાવ.",
+          "isVR": true,
+          "vrKey": "gujarat",
+          "vrPath": "rani_ki_vav.html"
+        },
+        {
+          "name": "Sun Temple, Modhera",
+          "nameReg": "સૂર્ય મંદિર, મોઢેરા",
+          "tag": "Historic Temple Sanctuary",
+          "tagReg": "ઐતિહાસિક સૂર્ય મંદિર",
+          "desc": "Solanki dynasty solar architectural wonder designed so the first equinox rays illuminate the innermost Surya sanctum.",
+          "descReg": "સોલંકી વંશનું સ્થાપત્ય રત્ન જ્યાં સૂર્યનું પહેલું કિરણ ગર્ભગૃહને પ્રકાશિત કરે છે."
+        },
+        {
+          "name": "Dholavira: Harappan City",
+          "nameReg": "ધોળાવીરા: હડપ્પન નગર",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "યુનેસ્કો વિશ્વ ધરોહર",
+          "desc": "Indus Valley urban metropolis showcasing sophisticated water reservoirs, stone masonry, and master city planning.",
+          "descReg": "સિંધુ ખીણ સભ્યતાનું અત્યાધુનિક જળ સંરક્ષણ અને નગર આયોજન ધરાવતું કેન્દ્ર."
+        },
+        {
+          "name": "Champaner-Pavagadh",
+          "nameReg": "ચાંપાનેર-પાવાગઢ",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "યુનેસ્કો વિશ્વ ધરોહર",
+          "desc": "Unbroken historic continuum from prehistoric sites to Hindu fortifications and the grand 16th-century Jama Masjid.",
+          "descReg": "પ્રાચીન હિન્દુ કિલ્લાઓ અને ઐતિહાસિક જામા મસ્જિદનો સમન્વય."
+        },
+        {
+          "name": "Somnath Jyotirlinga Temple",
+          "nameReg": "સોમનાથ જ્યોતિર્લિંગ મંદિર",
+          "tag": "Sacred Coastal Shrine",
+          "tagReg": "પવિત્ર તીર્થક્ષેત્ર",
+          "desc": "First among the 12 sacred Jyotirlingas, situated at the confluence on the historic Prabhas Patan Arabian seashore.",
+          "descReg": "પ્રભાસ પાટણના અરબી સમુદ્ર કિનારે સ્થિત પ્રથમ દ્વાદશ જ્યોતિર્લિંગ."
+        }
+      ],
+      "rajasthan": [
+
+        {
+          "name": "Mehrangarh Fort",
+          "nameReg": "मेहरानगढ़ दुर्ग (जोधपुर)",
+          "tag": "Historic Citadel",
+          "tagReg": "ऐतिहासिक दुर्ग",
+          "desc": "Towering 400-foot cliff citadel in Jodhpur with burnished red sandstone palaces, intricate jalis, and royal museum.",
+          "descReg": "४०० फीट ऊंची पहाड़ी पर स्थित लाल बलुआ पत्थर का अभेद्य राजसी दुर्ग."
+        },
+        {
+          "name": "Hawa Mahal",
+          "nameReg": "हवा महल (जयपुर)",
+          "tag": "Historic Palace",
+          "tagReg": "ऐतिहासिक महल",
+          "desc": "Iconic five-story pink sandstone \"Palace of Winds\" with 953 honeycomb casements designed for natural palace cooling.",
+          "descReg": "९५३ झरोखों से सुसज्जित पांच मंजिला गुलाबी बलुआ पत्थर का अद्वितीय महल."
+        },
+        {
+          "name": "Chittorgarh Fort",
+          "nameReg": "चित्तौड़गढ़ दुर्ग",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "यूनेस्को विश्व धरोहर",
+          "desc": "The largest fort complex in Bharat, featuring the 9-story Victory Tower (Vijay Stambha) and legendary Rajput lore.",
+          "descReg": "विजय स्तंभ और अमर राजपूत शौर्य गाथाओं का साक्षी भारत का सबसे विशाल दुर्ग."
+        },
+        {
+          "name": "Jaisalmer Fort (Sonar Qila)",
+          "nameReg": "जैसलमेर दुर्ग (सोनार किला)",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "यूनेस्को विश्व धरोहर",
+          "desc": "Living yellow sandstone desert fort glowing golden at twilight, housing thousands of residents and Jain temples.",
+          "descReg": "थार मरुस्थल में सुनहरी आभा बिखेरता जीवंत पीत प्रस्तर दुर्ग."
+        }
+      ],
+      "uttar_pradesh": [
+        {
+          "name": "Taj Mahal",
+          "nameReg": "ताज महल (आगरा)",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "यूनेस्को विश्व धरोहर",
+          "desc": "Mughal architectural zenith crafted from translucent Makrana white marble inlaid with semi-precious pietra dura gems.",
+          "descReg": "मकराना के श्वेत संगमरमर और पच्चीकारी नक्काशी से निर्मित विश्वप्रसिद्ध स्मारक.",
+          "isVR": true
+        },
+        {
+          "name": "Agra Fort",
+          "nameReg": "आगरा का लाल किला",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "यूनेस्को विश्व धरोहर",
+          "desc": "Monumental red sandstone fortified palace city containing Jahangiri Mahal, Diwan-i-Khas, and imperial riverfront pavilions.",
+          "descReg": "जहाँगीरी महल, दीवान-ए-खास और यमुना तट पर स्थित विशाल मुग़ल दुर्ग."
+        },
+        {
+          "name": "Fatehpur Sikri",
+          "nameReg": "फ़तेहपुर सीकरी",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "यूनेस्को विश्व धरोहर",
+          "desc": "Akbar's red sandstone royal city, home to the colossal Buland Darwaza and the pearl-white marble tomb of Salim Chishti.",
+          "descReg": "बुलंद दरवाज़ा और सूफी संत शेख सलीम चिश्ती की दरगाह से युक्त ऐतिहासिक नगरी."
+        },
+        {
+          "name": "Varanasi Ghats & Kashi Vishwanath",
+          "nameReg": "काशी विश्वनाथ व गंगा घाट",
+          "tag": "Living Sacred Sanctuary",
+          "tagReg": "जीवंत आध्यात्मिक धरोहर",
+          "desc": "Eternal sacred riverfront along the holy Ganga, spiritual heart of Bharat with timeless evening Ganga Aarti ceremonies.",
+          "descReg": "गंगा तट पर संध्या महाआरती और भगवान शिव का पावन ज्योतिर्लिंग धाम."
+        },
+        {
+          "name": "Sarnath Deer Park & Dhamek Stupa",
+          "nameReg": "सारनाथ एवं धमेक स्तूप",
+          "tag": "Sacred Buddhist Site",
+          "tagReg": "पवित्र बौद्ध तीर्थ",
+          "desc": "Sanctuary where Lord Buddha taught his first sermon (Dhammacakkappavattana Sutta) and Ashoka erected the Lion Capital.",
+          "descReg": "जहाँ भगवान बुद्ध ने प्रथम उपदेश दिया तथा अशोक का सिंह स्तम्भ स्थित है."
+        }
+      ],
+      "west_bengal": [
+        {
+          "name": "Victoria Memorial",
+          "nameReg": "ভিক্টোরিয়া মেমোরিয়াল",
+          "tag": "Historic Landmark",
+          "tagReg": "ঐতিহাসিক স্মৃতিসৌধ",
+          "desc": "Stately white Makrana marble monument in Kolkata blending Indo-Saracenic, British, and Mughal architectural idioms.",
+          "descReg": "শ্বেত মাকরানা মার্বেলে নির্মিত ইন্দো-সারাসেনিক স্থাপত্যের রাজকীয় নিদর্শন.",
+          "isVR": true
+        },
+        {
+          "name": "Bishnupur Terracotta Temples",
+          "nameReg": "বিষ্ণুপুরের টেরাকোটা মন্দির",
+          "tag": "Historic Complex",
+          "tagReg": "ঐতিহাসিক মন্দির চত্বর",
+          "desc": "Malla kingdom terracotta temples renowned for curved Bengali \"chala\" roofs and thousands of carved epic panels.",
+          "descReg": "মল্ল রাজাদের অপূর্ব পোড়ামাটির কারুকার্য ও চালা স্থাপত্যের মন্দির."
+        },
+        {
+          "name": "Darjeeling Himalayan Railway",
+          "nameReg": "দার্জিলিং হিমালয়ান রেলওয়ে",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "ইউনেস্কো বিশ্ব ঐতিহ্য",
+          "desc": "Historic mountain narrow-gauge \"Toy Train\" traversing breathtaking Himalayan loops and alpine batasia spirals.",
+          "descReg": "হিমালয়ের নয়নাভিরাম বাঁক ও বাতাসিয়া লুপ অতিক্রমকারী ঐতিহাসিক খেলনা ট্রেন."
+        },
+        {
+          "name": "Sundarbans National Park",
+          "nameReg": "সুন্দরবন জাতীয় উদ্যান",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "ইউনেস্কো প্রাকৃতিক ঐতিহ্য",
+          "desc": "World's largest tidal mangrove delta forest, sanctuary of the Royal Bengal Tiger and pristine estuarine ecology.",
+          "descReg": "রয়েল বেঙ্গল টাইগারের প্রাকৃতিক আবাসভূমি বিশ্বের বৃহত্তম জোয়ারভাটার বাদাবন."
+        },
+        {
+          "name": "Santiniketan",
+          "nameReg": "শান্তিনিকেতন",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "ইউনেস্কো বিশ্ব ঐতিহ্য",
+          "desc": "Rabindranath Tagore's open-air ashram university fusing pan-Asian modernist education with rural Indian heritage.",
+          "descReg": "বিশ্বকবি রবীন্দ্রনাথ ঠাকুর প্রতিষ্ঠিত উন্মুক্ত আশ্রমিক বিশ্ববিদ্যালয়."
+        }
+      ],
+      "tamil_nadu": [
+        {
+          "name": "Brihadisvara Temple, Thanjavur",
+          "nameReg": "பெருவுடையார் கோயில் (தஞ்சாவூர்)",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "யுனெஸ்கோ உலகப் பாரம்பரியம்",
+          "desc": "Peruvudaiyar Kovil: Rajaraja Chola I's grand granite temple with a towering 216-foot vimana and monolithic Nandi.",
+          "descReg": "ராஜராஜ சோழனால் கட்டப்பட்ட 216 அடி உயர விமானமும் நந்தியும் கொண்ட கருங்கல் அதிசயம்.",
+          "isVR": true
+        },
+        {
+          "name": "Group of Monuments, Mahabalipuram",
+          "nameReg": "மாமல்லபுரம் சிற்பங்கள்",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "யுனெஸ்கோ உலகப் பாரம்பரியம்",
+          "desc": "Pallava coastal marvels including the Shore Temple, monolithic Pancha Rathas, and the colossal Arjuna's Penance relief.",
+          "descReg": "பல்லவர் கால கடற்கரைக் கோயில், பஞ்ச ரதங்கள் மற்றும் பாறைச் சிற்பங்கள்."
+        },
+        {
+          "name": "Meenakshi Amman Temple, Madurai",
+          "nameReg": "மீனாட்சி அம்மன் கோயில்",
+          "tag": "Sacred Dravidian Sanctuary",
+          "tagReg": "புனித திராவிட ஆலயம்",
+          "desc": "Fourteen monumental gopurams encrusted with thousands of vibrant polychrome sculptures and the Thousand Pillar Hall.",
+          "descReg": "ஆயிரங்கால் மண்டபமும் வர்ணச் சிற்பங்கள் நிறைந்த பிரம்மாண்ட கோபுரங்களும்."
+        },
+        {
+          "name": "Gangaikonda Cholapuram",
+          "nameReg": "கங்கைகொண்ட சோழபுரம்",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "யுனெஸ்கோ உலகப் பாரம்பரியம்",
+          "desc": "Rajendra Chola I's capital temple with graceful curvilinear vimana contours and peerless bronze iconography.",
+          "descReg": "ராஜேந்திர சோழனின் கலைநயமிக்க வளைந்த விமான அமைப்பும் சிற்பங்களும்."
+        },
+        {
+          "name": "Airavatesvara Temple, Darasuram",
+          "nameReg": "ஐராவதேஸ்வரர் கோயில் (தாராசுரம்)",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "யுனெஸ்கோ உலகப் பாரம்பரியம்",
+          "desc": "Great Living Chola temple celebrated as a \"stone sculptor's dream\" with musical stepping stones and chariot mandapams.",
+          "descReg": "இசைப் படிகளும் தேர் மண்டபமும் கொண்ட கல்லில் செதுக்கப்பட்ட சிற்பக்கலை கனவு."
+        }
+      ],
+      "karnataka": [
+        {
+          "name": "Group of Monuments at Hampi",
+          "nameReg": "ಹಂಪಿ ಸ್ಮಾರಕ ಸಮೂಹ",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "ಯುನೆಸ್ಕೋ ವಿಶ್ವ ಪರಂಪರೆ",
+          "desc": "Capital ruins of the Vijayanagara Empire along the Tungabhadra River, featuring the iconic Stone Chariot and musical pillars.",
+          "descReg": "ವಿಜಯನಗರ ಸಾಮ್ರಾಜ್ಯದ ವೈಭವಯುತ ರಾಜಧಾನಿ, ಸುಪ್ರಸಿದ್ಧ ಶಿಲಾ ರಥ ಮತ್ತು ಸಂಗೀತ ಕಂಬಗಳು.",
+          "isVR": true
+        },
+        {
+          "name": "Pattadakal & Badami Caves",
+          "nameReg": "ಪಟ್ಟದಕಲ್ಲು ಮತ್ತು ಬಾದಾಮಿ ಗುಹೆಗಳು",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "ಯುನೆಸ್ಕೋ ವಿಶ್ವ ಪರಂಪರೆ",
+          "desc": "Chalukya dynasty rock-cut cave shrines and temple sanctuaries harmonizing northern Nagara and southern Dravida styles.",
+          "descReg": "ಚಾಲುಕ್ಯ ವಂಶದ ನಾಗರ ಮತ್ತು ದ್ರಾವಿಡ ಶೈಲಿಯ ಅಪೂರ್ವ ಶಿಲಾ ಗುಹಾ ದೇವಾಲಯಗಳು."
+        },
+        {
+          "name": "Hoysala Sacred Ensembles (Belur & Halebidu)",
+          "nameReg": "ಹೊಯ್ಸಳ ದೇವಾಲಯಗಳು (ಬೇಲೂರು-ಹಳೇಬೀಡು)",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "ಯುನೆಸ್ಕೋ ವಿಶ್ವ ಪರಂಪರೆ",
+          "desc": "Soapstone star-shaped temples with intricate jewel-like sculptural filigree, madanikas, and celestial friezes.",
+          "descReg": "ನಕ್ಷತ್ರಾಕಾರದ ಸೋಪ್‌ಸ್ಟೋನ್ ಮದನಿಕಾ ಶಿಲ್ಪಗಳು ಮತ್ತು ಸೂಕ್ಷ್ಮ ಕೆತ್ತನೆಗಳ ದೇಗುಲಗಳು."
+        },
+        {
+          "name": "Mysore Palace (Amba Vilas)",
+          "nameReg": "ಮೈಸೂರು ಅರಮನೆ (ಅಂಬಾವಿಲಾಸ)",
+          "tag": "Royal Heritage",
+          "tagReg": "ರಾಜವಂಶದ ಪರಂಪರೆ",
+          "desc": "Opulent Indo-Saracenic palace of the Wadiyar dynasty with stained glass ceilings, gilded pillars, and royal courtyards.",
+          "descReg": "ಒಡೆಯರ್ ರಾಜವಂಶದ ಇಂಡೋ-ಸಾರ್ಸೆನಿಕ್ ಶೈಲಿಯ ಭವ್ಯ ಅರಮನೆ."
+        },
+        {
+          "name": "Gol Gumbaz, Vijayapura",
+          "nameReg": "ಗೋಳ ಗುಮ್ಮಟ (ವಿಜಯಪುರ)",
+          "tag": "Historic Monument",
+          "tagReg": "ಐತಿಹಾಸಿಕ ಸ್ಮಾರಕ",
+          "desc": "Mausoleum of Mohammed Adil Shah featuring the second largest unsupported dome in the world and an acoustic whispering gallery.",
+          "descReg": "ವಿಶ್ವದ ಎರಡನೇ ಅತಿ ದೊಡ್ಡ ಆಧಾರರಹಿತ ಗುಮ್ಮಟ ಮತ್ತು ಪಿಸುಗುಟ್ಟುವ ಗ್ಯಾಲರಿ."
+        }
+      ],
+      "kerala": [
+        {
+          "name": "Padmanabhapuram Palace",
+          "nameReg": "പത്മനാഭപുരം കൊട്ടാരം",
+          "tag": "Historic Royal Palace",
+          "tagReg": "ചരിത്രപരമായ രാജകൊട്ടാരം",
+          "desc": "Asia's largest monolithic teak and rosewood palace complex exhibiting traditional Kerala timber architecture and murals.",
+          "descReg": "പരമ്പരാഗത കേരള തച്ചുശാസ്ത്രത്തിൽ നിർമ്മിച്ച ഏഷ്യയിലെ ഏറ്റവും വലിയ തടി കൊട്ടാരം.",
+          "isVR": true
+        },
+        {
+          "name": "Mattancherry Palace (Dutch Palace)",
+          "nameReg": "മട്ടാഞ്ചേരി കൊട്ടാരം (ഡച്ച് പാലസ്)",
+          "tag": "Historic Monument",
+          "tagReg": "ചരിത്ര സ്മാരകം",
+          "desc": "Kochi royal palace famed for some of India's finest 16th-century Ramayana and Mahabharata mythological tempera murals.",
+          "descReg": "രാമായണ-മഹാഭാരത ഇതിഹാസ ചിത്രങ്ങൾ ആലേഖനം ചെയ്ത ചുവർചിത്ര കൊട്ടാരം."
+        },
+        {
+          "name": "Bekal Fort",
+          "nameReg": "ബേക്കൽ കോട്ട (കാസർഗോഡ്)",
+          "tag": "Coastal Fortress",
+          "tagReg": "തീരദേശ കോട്ട",
+          "desc": "Sprawling sea-facing red laterite citadel in Kasaragod with an observation tower overlooking the crashing Arabian Sea.",
+          "descReg": "അറബിക്കടലിന്റെ തീരത്ത് തലയുയർത്തി നിൽക്കുന്ന കൂറ്റൻ ചെങ്കൽ കോട്ട."
+        },
+        {
+          "name": "Vadakkunnathan Temple, Thrissur",
+          "nameReg": "വടക്കുംനാഥൻ ക്ഷേത്രം (തൃശ്ശൂർ)",
+          "tag": "National Heritage",
+          "tagReg": "ദേശീയ പൈതൃകം",
+          "desc": "Ancient Shiva temple showcase of pure Kerala architectural design, surrounded by a massive stone perimeter.",
+          "descReg": "ശുദ്ധമായ കേരള വാസ്തുവിദ്യയിൽ പണിതീർത്ത പുരാതന ശിവക്ഷേത്രം."
+        },
+        {
+          "name": "Edakkal Caves, Wayanad",
+          "nameReg": "എടക്കൽ ഗുഹകൾ (വയനാട്)",
+          "tag": "Prehistoric Rock Art",
+          "tagReg": "പ്രാചീന ശിലാചിത്രങ്ങൾ",
+          "desc": "High-altitude rock shelter containing Neolithic petroglyphs and human-animal engravings dating back 8,000 years.",
+          "descReg": "നവീന ശിലായുഗ കാലത്തെ കൊത്തുപണികളും ഗുഹാചിത്രങ്ങളും അടങ്ങിയ പുരാതന ഗുഹകൾ."
+        }
+      ],
+      "odisha": [
+        {
+          "name": "Konark Sun Temple",
+          "nameReg": "କୋଣାର୍କ ସୂର୍ଯ୍ୟ ମନ୍ଦିର",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "ୟୁନେସ୍କୋ ବିଶ୍ୱ ଐତିହ୍ୟ",
+          "desc": "The \"Black Pagoda\": monumental 24-wheeled chariot of Surya drawn by seven galloping horses carved along the Bay of Bengal.",
+          "descReg": "ଚବିଶ ଚକ ଓ ସାତ ଅଶ୍ୱ ଦ୍ୱାରା ଟଣା ହୋଇଥିବା ସୂର୍ଯ୍ୟ ରଥର ପାଷାଣ ଅଦ୍ଭୁତ କଳାକୃତି.",
+          "isVR": true
+        },
+        {
+          "name": "Jagannath Temple, Puri",
+          "nameReg": "ଜଗନ୍ନାଥ ମନ୍ଦିର (ପୁରୀ)",
+          "tag": "Sacred Char Dham",
+          "tagReg": "ପବିତ୍ର ଚାରିଧାମ",
+          "desc": "Towering Kalinga style sanctum of Lord Jagannath, Balabhadra, and Subhadra, epicenter of the world-famous annual Rath Yatra.",
+          "descReg": "ଚତୁର୍ଦ୍ଧାମୂର୍ତ୍ତିଙ୍କ ପବିତ୍ର ଧାମ ଏବଂ ବିଶ୍ୱପ୍ରସିଦ୍ଧ ବାର୍ଷିକ ରଥଯାତ୍ରାର କେନ୍ଦ୍ରସ୍ଥଳୀ."
+        },
+        {
+          "name": "Lingaraj Temple, Bhubaneswar",
+          "nameReg": "ଲିଙ୍ଗରାଜ ମନ୍ଦିର (ଭୁବନେଶ୍ୱର)",
+          "tag": "Historic Sanctuary",
+          "tagReg": "କଳିଙ୍ଗ ସ୍ଥାପତ୍ୟ କୀର୍ତ୍ତି",
+          "desc": "Apex of classical Kalinga temple architecture with a 180-foot deula spire rising above the sacred Bindu Sagar tank.",
+          "descReg": "୧୮୦ ଫୁଟ ଉଚ୍ଚ ଦେଉଳ ବିଶିଷ୍ଟ କଳିଙ୍ଗ ମନ୍ଦିର ସ୍ଥାପତ୍ୟର ଶ୍ରେଷ୍ଠ ନିଦର୍ଶନ."
+        },
+        {
+          "name": "Udayagiri and Khandagiri Caves",
+          "nameReg": "ଉଦୟଗିରି ଓ ଖଣ୍ଡଗିରି ଗୁମ୍ଫା",
+          "tag": "Archaeological Complex",
+          "tagReg": "ପ୍ରତ୍ନତାତ୍ତ୍ୱିକ ସ୍ମାରକ",
+          "desc": "Rock-cut monastic shelters built by King Kharavela for Jain monks, inscribed with the historic Hathigumpha inscription.",
+          "descReg": "ସମ୍ରାଟ ଖାରବେଳଙ୍କ ହାତୀଗୁମ୍ଫା ଶିଳାଲେଖ ଯୁକ୍ତ ପ୍ରାଚୀନ ଜୈନ ଶୈଳୋତ୍କୀର୍ଣ୍ଣ ଗୁମ୍ଫା."
+        },
+        {
+          "name": "Dhauli Shanti Stupa",
+          "nameReg": "ଧଉଳି ଶାନ୍ତି ସ୍ତୂପ",
+          "tag": "Historic Peace Memorial",
+          "tagReg": "ଐତିହାସିକ ଶାନ୍ତି ସ୍ମାରକ",
+          "desc": "Site of the historic Kalinga War where Emperor Ashoka embraced non-violence (Ahimsa), marked by royal rock edicts.",
+          "descReg": "କଳିଙ୍ଗ ଯୁଦ୍ଧ ପରେ ସମ୍ରାଟ ଅଶୋକଙ୍କ ଅହିଂସା ବାର୍ତ୍ତା ବହନ କରୁଥିବା ଶାନ୍ତି ପୀଠ."
+        }
+      ],
+      "assam": [
+
+        {
+          "name": "Kaziranga National Park",
+          "nameReg": "কাজিৰঙা ৰাষ্ট্ৰীয় উদ্যান",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "ইউনেস্কো বিশ্ব ঐতিহ্য",
+          "desc": "Floodplain grassland sanctuary along the Brahmaputra River hosting two-thirds of the world's great one-horned rhinoceroses.",
+          "descReg": "ব্ৰহ্মপুত্ৰৰ উপত্যকাত অৱস্থিত এশিঙীয়া গঁড়ৰ প্ৰধান বাসস্থান."
+        },
+        {
+          "name": "Kamakhya Temple, Guwahati",
+          "nameReg": "কামাখ্যা মন্দিৰ (গুৱাহাটী)",
+          "tag": "Sacred Shakti Peetha",
+          "tagReg": "পৱিত্ৰ শক্তিপীঠ",
+          "desc": "Venerable Nilachal hill shrine venerating the divine mother goddess, celebrated during the sacred annual Ambubachi Mela.",
+          "descReg": "নীলাচল পাহাৰৰ ঐতিহাসিক দেৱী মন্দিৰ আৰু প্ৰসিদ্ধ অম্বুবাচী মেলা."
+        },
+        {
+          "name": "Talatal Ghar & Kareng Ghar",
+          "nameReg": "তলাতল ঘৰ আৰু কাৰেং ঘৰ",
+          "tag": "Ahom Military Palace",
+          "tagReg": "আহোম সামৰিক ৰাজপ্ৰসাদ",
+          "desc": "Multi-story brick palace with subterranean escape tunnels and upper military cantonments of the 600-year Ahom Kingdom.",
+          "descReg": "ভূগৰ্ভস্থ সুৰংগ আৰু সেনা শিবিৰযুক্ত আহোম ৰাজ্যৰ অনন্য ইটাৰ স্থাপত্য."
+        },
+        {
+          "name": "Majuli River Island & Satras",
+          "nameReg": "মাজুলী নদীদ্বীপ আৰু সত্ৰসমূহ",
+          "tag": "Cultural Sanctuary",
+          "tagReg": "সাংস্কৃতিক তীৰ্থ",
+          "desc": "World's largest inhabited river island, cradle of Assamese Neo-Vaishnavite culture, classical Sattriya dance, and mask art.",
+          "descReg": "বিশ্বৰ সৰ্ববৃহৎ জনবসতিপূৰ্ণ নদীদ্বীপ, সত্ৰীয়া নৃত্য আৰু মুখাশিল্পৰ কেন্দ্ৰ."
+        }
+      ],
+      "bihar": [
+        {
+          "name": "Mahabodhi Temple Complex",
+          "nameReg": "महाबोधि मन्दिर (बोधगया)",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "यूनेस्को विश्व धरोहर",
+          "desc": "Supreme Buddhist sanctuary in Bodh Gaya where Gautama Buddha attained enlightenment beneath the sacred Bodhi Tree.",
+          "descReg": "जहाँ भगवान बुद्ध को पवित्र बोधि वृक्ष के नीचे परम ज्ञान की प्राप्ति हुई.",
+          "isVR": true
+        },
+        {
+          "name": "Nalanda Mahavihara",
+          "nameReg": "नालंदा महाविहार के भग्नावशेष",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "यूनेस्को विश्व धरोहर",
+          "desc": "Ancient international monastic university ruins that educated over 10,000 scholars from across Asia in philosophy and science.",
+          "descReg": "प्राचीन विश्वप्रसिद्ध विश्वविद्यालय जहाँ १०,००० से अधिक विद्वान अध्ययन करते थे."
+        },
+        {
+          "name": "Vikramashila University Ruins",
+          "nameReg": "विक्रमशिला विश्वविद्यालय",
+          "tag": "Historic Monastic Center",
+          "tagReg": "ऐतिहासिक बौद्ध केंद्र",
+          "desc": "Premier Pala dynasty Buddhist center of esoteric learning and tantric studies, founded by Emperor Dharmapala.",
+          "descReg": "पाल वंश के सम्राट धर्मपाल द्वारा स्थापित तंत्रयान और दर्शन का महान बौद्ध केंद्र."
+        }
+      ],
+      "delhi": [
+        {
+          "name": "Lotus Temple (Bahá'í House of Worship)",
+          "nameReg": "कमल मंदिर (लोटस टेम्पल)",
+          "tag": "Iconic Modern Wonder",
+          "tagReg": "आधुनिक वास्तुकला",
+          "desc": "Magnificent lotus flower sanctuary open to all humanity for meditation and inner peace.",
+          "descReg": "२७ संगमरमरी पंखुड़ियों से निर्मित शांति और सर्वधर्म प्रार्थना का अद्वितीय केंद्र.",
+          "isVR": true
+        },
+        {
+          "name": "Qutub Minar & Iron Pillar",
+          "nameReg": "क़ुतुब मीनार एवं लौह स्तम्भ",
+          "tag": "UNESCO World Heritage",
+          "tagReg": "यूनेस्को विश्व धरोहर",
+          "desc": "World's tallest brick minaret standing 72.5 meters tall alongside the rust-resistant 1600-year Gupta iron pillar.",
+          "descReg": "७२.५ मीटर ऊंची भव्य मीनार एवं गुप्तकालीन जंग-रहित लौह स्तम्भ."
+        },
+        {
+          "name": "India Gate & National War Memorial",
+          "nameReg": "इण्डिया गेट एवं राष्ट्रीय समर स्मारक",
+          "tag": "National Memorial",
+          "tagReg": "राष्ट्रीय स्मारक",
+          "desc": "Triumphal arch standing at the ceremonial Rajpath axis, commemorating fallen Indian soldiers.",
+          "descReg": "४२ मीटर ऊंचा भव्य विजय मेहराब एवं अमर जवान ज्योति का पावन स्थल."
+        }
+      ]
+    };
+console.log(Object.keys(YUGMA_STATES));

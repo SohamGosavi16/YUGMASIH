@@ -1,0 +1,707 @@
+/* =============================================================
+   MAIN APPLICATION LAYOUT & KAGE STATE MENU STYLES
+   ============================================================= */
+
+/* Preloader */
+#preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s var(--ease), visibility 0.8s;
+}
+
+#preloader.done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pre-in {
+  width: min(440px, 80vw);
+  text-align: center;
+}
+
+.pre-mark {
+  margin: 0 auto 24px;
+  width: 52px;
+  height: 52px;
+}
+
+.pre-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pre-sanskrit {
+  font-size: 14px;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  margin-bottom: 20px;
+  text-shadow: 0 0 16px var(--gold-glow);
+}
+
+.pre-bar {
+  position: relative;
+  height: 1px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.pre-bar i {
+  position: absolute;
+  inset: 0 0 0 0;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--vermilion));
+  animation: preloader-fill 1.8s var(--ease-io) infinite;
+}
+
+@keyframes preloader-fill {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.pre-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* =============================================================
+   NAVIGATION BAR
+   ============================================================= */
+.main-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--nav-h);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--pad);
+  background: rgba(5, 7, 10, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: var(--bone);
+}
+
+.brand-icon svg {
+  width: 38px;
+  height: 38px;
+  display: block;
+}
+
+.brand-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  gap: 3px;
+}
+
+.brand-title {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  color: var(--bone);
+}
+
+.brand-tag {
+  font-size: 8.5px;
+  letter-spacing: 0.32em;
+  color: var(--gold);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.state-quick-select {
+  padding: 8px 16px;
+  background: rgba(12, 16, 20, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  color: var(--bone);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  outline: none;
+  backdrop-filter: blur(12px);
+}
+
+.state-quick-select option {
+  background: var(--ink-2);
+  color: var(--bone);
+}
+
+/* =============================================================
+   HERO INTRO CINEMATIC SECTION
+   ============================================================= */
+.hero-intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(5, 7, 10, 0.72) 0%, rgba(5, 7, 10, 0.94) 80%);
+  padding: var(--pad);
+  transition: opacity 0.9s var(--ease), visibility 0.9s;
+}
+
+.hero-intro-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.hero-intro-card {
+  max-width: 680px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.hero-prelude {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  background: rgba(201, 162, 74, 0.1);
+  border: 1px solid rgba(201, 162, 74, 0.3);
+  border-radius: 100px;
+  color: var(--gold);
+}
+
+.hero-prelude .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--vermilion);
+  box-shadow: 0 0 10px var(--vermilion);
+}
+
+.hero-main-title {
+  font-size: clamp(42px, 6.2vw, 84px);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  margin: 0;
+  line-height: 1.0;
+  background: linear-gradient(180deg, #ffffff 20%, var(--bone) 70%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 4px 34px rgba(201, 162, 74, 0.25);
+}
+
+.hero-sanskrit-quote {
+  font-size: clamp(14px, 1.4vw, 18px);
+  letter-spacing: 0.28em;
+  color: var(--gold);
+  margin: 0;
+  opacity: 0.9;
+}
+
+.hero-body-text {
+  font-size: clamp(14px, 1.1vw, 16px);
+  line-height: 1.7;
+  color: var(--bone-dim);
+  max-width: 54ch;
+  margin: 0 auto;
+}
+
+.btn-enter-sacred {
+  margin-top: 14px;
+  padding: 14px 34px;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  border-color: var(--gold);
+  background: rgba(201, 162, 74, 0.14);
+}
+
+.btn-enter-sacred:hover {
+  background: var(--gold);
+  color: var(--ink);
+  box-shadow: 0 0 30px rgba(201, 162, 74, 0.6);
+}
+
+/* =============================================================
+   GLOBE CANVAS & TOOLTIP
+   ============================================================= */
+.globe-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* Globe is always rendered; hero-intro sits on top with higher z-index */
+.globe-viewport.globe-active canvas {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Globe.gl internal canvas override */
+#globe-canvas-container > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.globe-hud-overlay {
+  position: fixed;
+  bottom: 24px;
+  left: var(--pad);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.globe-instruction {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  background: rgba(5, 7, 10, 0.6);
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--line-soft);
+  backdrop-filter: blur(10px);
+}
+
+/* ── 3D Globe HTML Element State Pinpoints ── */
+.globe-state-pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 25;
+  transition: opacity 0.25s ease;
+  will-change: transform;
+}
+
+.globe-state-pin:hover {
+  z-index: 50;
+}
+
+.pin-beacon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pin-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pin-color, #c9a24a);
+  box-shadow: 0 0 10px var(--pin-color, #c9a24a), 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+.pin-wave {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--pin-color, #c9a24a);
+  animation: none;
+}
+
+.interactive-mode .pin-wave {
+  animation: pin-pulse 2.2s infinite ease-out;
+}
+
+@keyframes pin-pulse {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.pin-card {
+  margin-bottom: 6px;
+  background: rgba(8, 12, 18, 0.94);
+  border: 1px solid rgba(201, 162, 74, 0.4);
+  padding: 6px 12px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 12px rgba(201, 162, 74, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  white-space: nowrap;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.globe-state-pin:hover .pin-card {
+  border-color: var(--gold);
+  background: rgba(12, 16, 26, 0.98);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(201, 162, 74, 0.5);
+}
+
+.pin-tag {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.pin-monument {
+  font-family: var(--serif);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.pin-state {
+  font-size: 8.5px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* ── Globe Tooltip Card (Globe.gl) ── */
+.globe-tooltip-card {
+  background: rgba(6, 10, 20, 0.92);
+  border: 1px solid var(--gold);
+  border-radius: 14px;
+  padding: 12px 18px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(201, 162, 74, 0.35);
+  color: var(--bone);
+  font-family: var(--sans);
+  pointer-events: none;
+  min-width: 180px;
+}
+
+.globe-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: 6px;
+}
+
+.globe-tooltip-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+.globe-tooltip-title {
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.globe-tooltip-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--bone-dim);
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.globe-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 300;
+  pointer-events: none;
+  background: rgba(6, 9, 13, 0.9);
+  border: 1px solid var(--gold);
+  padding: 14px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 34px -8px rgba(0, 0, 0, 0.8), 0 0 20px var(--gold-glow);
+  opacity: 0;
+  transform: translate3d(-999px, -999px, 0);
+  transition: opacity 0.3s var(--ease);
+}
+
+.globe-tooltip.visible {
+  opacity: 1;
+}
+
+.tooltip-state {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--bone);
+  margin-bottom: 4px;
+}
+
+.tooltip-hindi {
+  color: var(--gold);
+  font-size: 13px;
+  margin-left: 6px;
+}
+
+.tooltip-heritage, .tooltip-tradition {
+  font-size: 12px;
+  color: var(--bone-dim);
+  margin-bottom: 2px;
+}
+
+.tooltip-cta {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 8px;
+}
+
+/* =============================================================
+   STATE MENU HUD MODAL
+   ============================================================= */
+.state-menu-container {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--pad);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease), visibility 0.6s;
+}
+
+.state-menu-container.active {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+}
+
+.state-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 7, 10, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.state-menu-panel {
+  position: relative;
+  z-index: 10;
+  width: min(1080px, 94vw);
+  background: rgba(10, 14, 18, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: clamp(24px, 4vh, 44px) clamp(20px, 3.4vw, 44px);
+  box-shadow: 0 34px 80px -20px rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3vh, 32px);
+}
+
+.state-menu-header {
+  text-align: center;
+}
+
+.header-prelude {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.header-prelude .dot-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+}
+
+.state-menu-title {
+  font-size: clamp(26px, 3.4vw, 44px);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  margin: 0 0 6px 0;
+  color: var(--bone);
+}
+
+.state-hindi {
+  color: var(--gold);
+  font-size: 0.75em;
+  margin-left: 10px;
+}
+
+.state-menu-tagline {
+  font-size: 13px;
+  color: var(--bone-dim);
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+/* 3 Dynamic Action Cards */
+.state-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(14px, 2vw, 24px);
+}
+
+.kage-card {
+  position: relative;
+  background: rgba(14, 19, 24, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: clamp(20px, 2.8vh, 32px) clamp(16px, 2vw, 24px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 220px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.5s var(--ease-out), border-color 0.5s var(--ease), box-shadow 0.5s;
+}
+
+.kage-card:hover {
+  transform: translate3d(0, -6px, 0);
+  border-color: var(--gold);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 24px var(--gold-glow);
+}
+
+.card-glass-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(201, 162, 74, 0.14), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+
+.kage-card:hover .card-glass-glow {
+  opacity: 1;
+}
+
+.card-eyebrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.card-tag {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.card-badge {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  background: rgba(223, 231, 224, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: var(--bone);
+}
+
+.card-main-title {
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  margin: 0 0 6px 0;
+  color: #fff;
+}
+
+.card-action-label {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0 0 20px 0;
+}
+
+.card-footer-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-top: 1px solid var(--line-soft);
+  padding-top: 12px;
+  transition: color 0.3s;
+}
+
+.kage-card:hover .card-footer-action {
+  color: #fff;
+}
+
+.arrow-icon {
+  font-size: 14px;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.kage-card:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+.state-menu-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-back-globe {
+  font-size: 11px;
+  padding: 10px 24px;
+}
+
+/* =============================================================
+   RESPONSIVE LAYOUT
+   ============================================================= */
+@media (max-width: 860px) {
+  .state-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .kage-card {
+    min-height: auto;
+  }
+  .state-menu-panel {
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+}
