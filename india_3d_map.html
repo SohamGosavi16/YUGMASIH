@@ -1605,24 +1605,41 @@
 
     // ── GeoJSON Data Loading ──────────────────────────────────────────────
     const GEOJSON_URLS = [
+      'data/india-states.min.geojson',
       'https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson',
       'https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States',
-      'https://raw.githubusercontent.com/datameet/maps/master/States/states.geojson',
     ];
 
     async function loadIndiaGeoJSON() {
-      for (const url of GEOJSON_URLS) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) continue;
-          const data = await res.json();
-          if (data && data.features && data.features.length > 0) {
-            console.log(`Loaded GeoJSON from: ${url}`);
-            return data;
+      // 1. In-memory / cross-navigation cache check (zero network, zero parsing)
+      if (window._yugmaGeoJSONCache && Array.isArray(window._yugmaGeoJSONCache.features) && window._yugmaGeoJSONCache.features.length > 0) {
+        return window._yugmaGeoJSONCache;
+      }
+
+      // 2. Shared singleton promise to avoid duplicate in-flight requests
+      if (!window._yugmaGeoJSONPromise) {
+        window._yugmaGeoJSONPromise = (async () => {
+          for (const url of GEOJSON_URLS) {
+            try {
+              const res = await fetch(url);
+              if (!res.ok) continue;
+              const data = await res.json();
+              if (data && Array.isArray(data.features) && data.features.length > 0) {
+                window._yugmaGeoJSONCache = data;
+                console.log(`[YUGMA 3D Map] GeoJSON loaded from: ${url}`);
+                return data;
+              }
+            } catch (e) {
+              console.warn(`[YUGMA 3D Map] Failed source ${url}:`, e.message);
+            }
           }
-        } catch (e) {
-          console.warn(`Failed source ${url}:`, e.message);
-        }
+          return null;
+        })();
+      }
+
+      const data = await window._yugmaGeoJSONPromise;
+      if (data && Array.isArray(data.features) && data.features.length > 0) {
+        return data;
       }
       throw new Error('Unable to load India GeoJSON from any mirror.');
     }

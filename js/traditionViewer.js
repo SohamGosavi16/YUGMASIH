@@ -746,19 +746,20 @@ class YugmaTraditionViewer {
   ensureThree() {}
   startAnimation() {}
   stopAnimation() {}
-  disposeCurrentModel() {}
   showLoading() {}
-  processModelLoading() {}
   resetView() {}
   toggleAutoRotate() {}
   toggleCinemaMode() {}
 
   /* ==========================================================
-     3D MODEL LOADING & PROCEDURAL FALLBACK
+     3D MODEL LOADING & PROCEDURAL FALLBACK (CACHED & ASYNC)
      ========================================================== */
   async processModelLoading(key, stateData) {
     const meta = this.STATE_MAP[key] || this.STATE_MAP.maharashtra;
     let modelLoadedSuccessfully = false;
+
+    // Dispose old model and its GPU resources before loading next
+    this.disposeCurrentModel();
 
     // Check if modelPath is provided (non-null and non-empty)
     if (stateData.modelPath && typeof stateData.modelPath === 'string') {
@@ -791,17 +792,32 @@ class YugmaTraditionViewer {
   }
 
   async loadGLTFModel(url) {
+    // 1. Check in-memory static cache to avoid repeated network downloads
+    YugmaTraditionViewer._modelCache = YugmaTraditionViewer._modelCache || new Map();
+    YugmaTraditionViewer._activeLoads = YugmaTraditionViewer._activeLoads || new Map();
+
+    if (YugmaTraditionViewer._modelCache.has(url)) {
+      console.log(`[YUGMA 3D Studio] Serving 3D model from in-memory cache: ${url}`);
+      const cached = YugmaTraditionViewer._modelCache.get(url);
+      return { scene: cached.scene.clone(true) };
+    }
+
+    if (YugmaTraditionViewer._activeLoads.has(url)) {
+      console.log(`[YUGMA 3D Studio] Joining existing in-flight download for: ${url}`);
+      const result = await YugmaTraditionViewer._activeLoads.get(url);
+      return { scene: result.scene.clone(true) };
+    }
+
+    // 2. Initialize loader if needed
     if (!this.modelLoader) {
       if (window.THREE && window.THREE.GLTFLoader) {
         this.modelLoader = new window.THREE.GLTFLoader();
       } else {
         try {
-          // 1. Try standard importmap addon resolution
           const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
           this.modelLoader = new GLTFLoader();
         } catch (e1) {
           try {
-            // 2. Fallback to direct CDN import
             const module = await import('https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js');
             this.modelLoader = new module.GLTFLoader();
           } catch (e2) {
@@ -811,11 +827,41 @@ class YugmaTraditionViewer {
         }
       }
     }
-    return new Promise((resolve, reject) => {
+
+    // 3. Configure MeshoptDecoder for compressed models if available
+    if (this.modelLoader && !this.modelLoader._meshoptConfigured) {
+      this.modelLoader._meshoptConfigured = true;
+      if (typeof MeshoptDecoder !== 'undefined') {
+        this.modelLoader.setMeshoptDecoder(MeshoptDecoder);
+      } else if (window.MeshoptDecoder) {
+        this.modelLoader.setMeshoptDecoder(window.MeshoptDecoder);
+      } else {
+        try {
+          const mod = await import('three/addons/libs/meshopt_decoder.module.js');
+          if (mod && (mod.MeshoptDecoder || mod.default)) {
+            this.modelLoader.setMeshoptDecoder(mod.MeshoptDecoder || mod.default);
+          }
+        } catch (mErr1) {
+          try {
+            const mod = await import('https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/libs/meshopt_decoder.module.js');
+            if (mod && (mod.MeshoptDecoder || mod.default)) {
+              this.modelLoader.setMeshoptDecoder(mod.MeshoptDecoder || mod.default);
+            }
+          } catch (mErr2) {
+            console.warn('[YUGMA 3D Studio] MeshoptDecoder could not be loaded dynamically:', mErr2);
+          }
+        }
+      }
+    }
+
+    // 4. Download and parse model with caching
+    const loadPromise = new Promise((resolve, reject) => {
       this.modelLoader.load(
         url,
         gltf => {
           console.log(`[YUGMA 3D Studio] Successfully loaded 3D model from ${url}`);
+          YugmaTraditionViewer._modelCache.set(url, gltf);
+          YugmaTraditionViewer._activeLoads.delete(url);
           resolve(gltf);
         },
         xhr => {
@@ -826,10 +872,15 @@ class YugmaTraditionViewer {
         },
         err => {
           console.warn(`[YUGMA 3D Studio] Error loading model from ${url}:`, err);
+          YugmaTraditionViewer._activeLoads.delete(url);
           reject(err);
         }
       );
     });
+
+    YugmaTraditionViewer._activeLoads.set(url, loadPromise);
+    const loadedGltf = await loadPromise;
+    return { scene: loadedGltf.scene.clone(true) };
   }
 
   normalizeAndCenterModel(object) {
@@ -1163,17 +1214,28 @@ class YugmaTraditionViewer {
     this.camera = new THREE.PerspectiveCamera(40, aspect, 0.1, 100);
     this.camera.position.set(0, 0.8, this.zoom);
 
-    // 3. Renderer
+    // 3. Renderer with Adaptive Device Optimization
+    const isMobile = /Android|iPhone|iPad|iPod|webOS|Windows Phone/i.test(navigator.userAgent) || (window.innerWidth <= 768);
+    const isLowEnd = isMobile || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+    this.isLowEndDevice = isLowEnd;
+
     this.renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: true,
+      antialias: !this.isLowEndDevice,
       alpha: true,
-      powerPreference: 'high-performance'
+      powerPreference: this.isLowEndDevice ? 'default' : 'high-performance'
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    
+    // Adaptive DPR clamping: 1.25 on mobile/low-end prevents GPU fill-rate throttling
+    const maxDpr = this.isLowEndDevice ? 1.25 : 2;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    // Enable shadows selectively: disable on low-end mobile devices to save frame budgets
+    this.renderer.shadowMap.enabled = !this.isLowEndDevice;
+    if (this.renderer.shadowMap.enabled) {
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
 
     this.clock = new THREE.Clock();
 
@@ -1198,16 +1260,20 @@ class YugmaTraditionViewer {
     this.scene.add(ambient);
     this.lights.push(ambient);
 
-    // Key Directional Light with Soft Shadows
+    // Key Directional Light with Adaptive Shadows
     const keyLight = new THREE.DirectionalLight(0xffeed0, 3.2);
     keyLight.position.set(5, 8, 6);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 25;
-    keyLight.shadow.bias = -0.0005;
-    keyLight.shadow.radius = 4;
+    if (!this.isLowEndDevice) {
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.width = 1024;
+      keyLight.shadow.mapSize.height = 1024;
+      keyLight.shadow.camera.near = 0.5;
+      keyLight.shadow.camera.far = 25;
+      keyLight.shadow.bias = -0.0005;
+      keyLight.shadow.radius = 3;
+    } else {
+      keyLight.castShadow = false;
+    }
     this.scene.add(keyLight);
     this.lights.push(keyLight);
 
@@ -1225,7 +1291,7 @@ class YugmaTraditionViewer {
   }
 
   setupFloor() {
-    const geo = new THREE.CircleGeometry(5.0, 96);
+    const geo = new THREE.CircleGeometry(5.0, this.isLowEndDevice ? 36 : 72);
     const mat = new THREE.MeshStandardMaterial({
       color: 0x070b12,
       roughness: 0.65,

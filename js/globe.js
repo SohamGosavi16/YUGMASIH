@@ -204,10 +204,16 @@ class YugmaGlobe {
 
   async _loadBoundaries() {
     const GEOJSON_URLS = [
+      'data/india-states.min.geojson',
       'https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson',
-      'https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States',
-      'https://raw.githubusercontent.com/datameet/maps/master/States/states.geojson'
+      'https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States'
     ];
+
+    if (window._yugmaGeoJSONCache && Array.isArray(window._yugmaGeoJSONCache.features) && window._yugmaGeoJSONCache.features.length > 0) {
+      this.allFeatures = window._yugmaGeoJSONCache.features;
+      this.globe.polygonsData(this.allFeatures);
+      return;
+    }
 
     let loaded = false;
     for (const url of GEOJSON_URLS) {
@@ -215,7 +221,8 @@ class YugmaGlobe {
         const res = await fetch(url);
         if (!res.ok) continue;
         const data = await res.json();
-        if (data && data.features && data.features.length > 0) {
+        if (data && Array.isArray(data.features) && data.features.length > 0) {
+          window._yugmaGeoJSONCache = data;
           this.allFeatures = data.features;
           this.globe.polygonsData(this.allFeatures);
           loaded = true;

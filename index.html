@@ -4979,9 +4979,9 @@
     }
 
     const GEOJSON_URLS = [
+      'data/india-states.min.geojson',
       'https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson',
       'https://raw.githubusercontent.com/Subhash9325/GeoJson-Data-of-Indian-States/master/Indian_States',
-      'https://raw.githubusercontent.com/datameet/maps/master/States/states.geojson',
     ];
 
     const STATE_COLORS = [
@@ -5222,24 +5222,50 @@
     }
 
     async function loadBoundaries() {
-      for (const url of GEOJSON_URLS) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) continue;
-          const data = await res.json();
-          if (data && data.features && data.features.length > 0) {
-            allFeatures = data.features;
-            globe.polygonsData(allFeatures);
-            console.log('[YUGMA] GeoJSON loaded from:', url);
-            setTimeout(() => {
-              cachePolygonMaterials();
-              updatePolygonSceneOpacity(0);
-            }, 150);
-            return;
+      // 1. In-memory / cross-navigation cache check (zero network, zero parsing)
+      if (window._yugmaGeoJSONCache && Array.isArray(window._yugmaGeoJSONCache.features) && window._yugmaGeoJSONCache.features.length > 0) {
+        allFeatures = window._yugmaGeoJSONCache.features;
+        globe.polygonsData(allFeatures);
+        setTimeout(() => {
+          cachePolygonMaterials();
+          updatePolygonSceneOpacity(0);
+        }, 80);
+        return;
+      }
+
+      // 2. Fetch using shared singleton promise to avoid duplicate in-flight requests
+      if (!window._yugmaGeoJSONPromise) {
+        window._yugmaGeoJSONPromise = (async () => {
+          for (const url of GEOJSON_URLS) {
+            try {
+              const res = await fetch(url);
+              if (!res.ok) continue;
+              const data = await res.json();
+              if (data && Array.isArray(data.features) && data.features.length > 0) {
+                window._yugmaGeoJSONCache = data;
+                console.log('[YUGMA] GeoJSON loaded from:', url);
+                return data;
+              }
+            } catch (e) {
+              console.warn('[YUGMA] GeoJSON fallback mirror:', url, e.message);
+            }
           }
-        } catch (e) {
-          console.warn('[YUGMA] GeoJSON mirror fallback:', url);
+          return null;
+        })();
+      }
+
+      try {
+        const data = await window._yugmaGeoJSONPromise;
+        if (data && Array.isArray(data.features) && data.features.length > 0) {
+          allFeatures = data.features;
+          globe.polygonsData(allFeatures);
+          setTimeout(() => {
+            cachePolygonMaterials();
+            updatePolygonSceneOpacity(0);
+          }, 120);
         }
+      } catch (err) {
+        console.error('[YUGMA] Failed to load boundaries:', err);
       }
     }
 

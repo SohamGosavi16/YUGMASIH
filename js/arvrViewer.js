@@ -174,9 +174,12 @@ class YugmaARVRViewer {
     this.camera = new THREE.PerspectiveCamera(75, width / height, 1, 1100);
     this.camera.target = new THREE.Vector3(0, 0, 0);
 
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true });
+    const isMobile = /Android|iPhone|iPad|iPod|webOS|Windows Phone/i.test(navigator.userAgent) || (window.innerWidth <= 768);
+    const maxDpr = isMobile ? 1.25 : 2;
+
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: !isMobile, alpha: true, powerPreference: isMobile ? 'default' : 'high-performance' });
     this.renderer.setSize(width, height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
 
     // Setup Lighting
     this.ambientLight = new THREE.AmbientLight(0x403020, 1.2);
@@ -652,10 +655,13 @@ class YugmaStandaloneARVR {
     this.camera = new THREE.PerspectiveCamera(75, W / H, 1, 1100);
     this.camera.target = new THREE.Vector3(0, 0, 0);
 
-    // 2. Renderer
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true });
+    // 2. Renderer with Adaptive Device Optimization
+    const isMobile = /Android|iPhone|iPad|iPod|webOS|Windows Phone/i.test(navigator.userAgent) || (window.innerWidth <= 768);
+    const maxDpr = isMobile ? 1.25 : 2;
+
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: !isMobile, alpha: true, powerPreference: isMobile ? 'default' : 'high-performance' });
     this.renderer.setSize(W, H);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
 
     // 3. Lighting
     this.ambientLight = new THREE.AmbientLight(0x403020, 1.4);
