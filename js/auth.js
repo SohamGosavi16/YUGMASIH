@@ -37,6 +37,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('signup') === 'true' || urlParams.get('mode') === 'signup' || urlParams.get('auth') === 'signup') {
         showSignup();
+    } else if (urlParams.get('forgot') === 'true' || urlParams.get('mode') === 'forgot' || urlParams.get('auth') === 'forgot') {
+        showForgot();
     } else if (urlParams.get('login') === 'true' || urlParams.get('mode') === 'login' || urlParams.get('auth') === 'login') {
         showLogin();
     }
@@ -78,8 +80,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 function showSignup() {
     const login = document.querySelector(".login-section");
     const signup = document.querySelector(".signup-section");
+    const forgot = document.querySelector(".forgot-section");
 
     if (login) login.classList.remove("active");
+    if (forgot) forgot.classList.remove("active");
     if (signup) signup.classList.add("active");
 }
 
@@ -89,9 +93,30 @@ function showSignup() {
 function showLogin() {
     const login = document.querySelector(".login-section");
     const signup = document.querySelector(".signup-section");
+    const forgot = document.querySelector(".forgot-section");
 
     if (signup) signup.classList.remove("active");
+    if (forgot) forgot.classList.remove("active");
     if (login) login.classList.add("active");
+}
+
+/* =========================================
+   SWITCH TO FORGOT PASSWORD
+========================================= */
+function showForgot() {
+    const login = document.querySelector(".login-section");
+    const signup = document.querySelector(".signup-section");
+    const forgot = document.querySelector(".forgot-section");
+
+    if (login) login.classList.remove("active");
+    if (signup) signup.classList.remove("active");
+    if (forgot) forgot.classList.add("active");
+
+    const loginEmail = document.getElementById("loginEmail")?.value?.trim();
+    const forgotEmail = document.getElementById("forgotEmail");
+    if (forgotEmail && loginEmail) forgotEmail.value = loginEmail;
+    const alertEl = document.getElementById("forgot-alert");
+    if (alertEl) alertEl.style.display = "none";
 }
 
 /* =========================================
@@ -293,29 +318,81 @@ if (loginFormEl) {
 /* =========================================
    FORGOT PASSWORD
 ========================================= */
-async function forgotPassword() {
-    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+function forgotPassword() {
+    showForgot();
+}
 
-    if (!email) {
-        alert("Please enter your email address first, then click Forgot password.");
-        document.getElementById("loginEmail").focus();
-        return;
-    }
+const forgotFormEl = document.getElementById("forgotForm");
+if (forgotFormEl) {
+    forgotFormEl.addEventListener("submit", async function(event) {
+        event.preventDefault();
+        const emailInput = document.getElementById("forgotEmail");
+        const submitBtn = document.getElementById("forgotSubmit");
+        const alertEl = document.getElementById("forgot-alert");
+        const email = emailInput ? emailInput.value.trim().toLowerCase() : "";
 
-    if (supabaseClient && supabaseClient.auth) {
-        try {
-            const redirectTo = `${window.location.origin}/index.html`;
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
-            if (!error) {
-                alert("Password reset instructions have been sent to your email.");
-                return;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+            if (alertEl) {
+                alertEl.style.display = "block";
+                alertEl.style.background = "rgba(239, 68, 68, 0.15)";
+                alertEl.style.border = "1px solid rgba(239, 68, 68, 0.4)";
+                alertEl.style.color = "#fca5a5";
+                alertEl.textContent = "Please enter a valid email address.";
             }
-        } catch (e) {
-            console.warn("Reset email notice:", e);
+            if (emailInput) emailInput.focus();
+            return;
         }
-    }
 
-    alert("Password recovery: If an account exists for " + email + ", password reset instructions have been initiated.");
+        submitBtn.disabled = true;
+        submitBtn.dataset.origText = submitBtn.innerHTML;
+        submitBtn.innerHTML = "SENDING RECOVERY LINK… <span>⏳</span>";
+        if (alertEl) alertEl.style.display = "none";
+
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        const redirectTo = isLocal ? `${window.location.origin}/reset-password.html` : "https://yugmaa.netlify.app/reset-password.html";
+
+        let requestSent = false;
+        let errorNotice = null;
+
+        if (supabaseClient && supabaseClient.auth) {
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: redirectTo
+                });
+                if (error) {
+                    console.warn("Supabase resetPasswordForEmail notice:", error.message || error);
+                    errorNotice = error.message;
+                } else {
+                    requestSent = true;
+                }
+            } catch (err) {
+                console.warn("Supabase resetPasswordForEmail exception:", err);
+                errorNotice = "Network error. Please check your internet connection.";
+            }
+        } else {
+            requestSent = true;
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = submitBtn.dataset.origText;
+
+        if (alertEl) {
+            alertEl.style.display = "block";
+            if (requestSent || !errorNotice) {
+                alertEl.style.background = "rgba(34, 197, 94, 0.15)";
+                alertEl.style.border = "1px solid rgba(34, 197, 94, 0.4)";
+                alertEl.style.color = "#86efac";
+                alertEl.innerHTML = "<strong>Password reset link sent!</strong><br>If an account exists for this email, you will receive password reset instructions shortly. Please check your inbox and spam folder.";
+                if (emailInput) emailInput.value = "";
+            } else {
+                alertEl.style.background = "rgba(239, 68, 68, 0.15)";
+                alertEl.style.border = "1px solid rgba(239, 68, 68, 0.4)";
+                alertEl.style.color = "#fca5a5";
+                alertEl.textContent = errorNotice || "Unable to send password recovery instructions. Please try again later.";
+            }
+        }
+    });
 }
 
 /* =========================================

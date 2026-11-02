@@ -4185,6 +4185,38 @@
               </p>
 
             </form>
+            <!-- FORGOT PASSWORD FORM -->
+            <form id="yugma-forgot-form" class="auth-form" autocomplete="on" style="display: none;">
+
+              <div class="auth-field">
+                <label for="yugma-forgot-email">
+                  Registered Email Address
+                </label>
+                <input id="yugma-forgot-email" type="email" placeholder="you@example.com" autocomplete="email" required>
+              </div>
+
+              <div id="yugma-forgot-alert" class="auth-alert" style="display: none; margin: 12px 0; padding: 12px 14px; border-radius: 6px; font-size: 13px; line-height: 1.5;"></div>
+
+              <button class="auth-submit" type="submit" id="yugma-forgot-submit">
+                SEND RECOVERY LINK →
+              </button>
+
+              <div class="auth-row" style="justify-content: center; margin-top: 14px;">
+                <button class="auth-link" type="button" id="yugma-forgot-back" style="color: #c9a24a; font-weight: 500;">
+                  ← Back to Sign In
+                </button>
+              </div>
+
+              <div class="auth-divider">
+                <span>ACCOUNT RECOVERY</span>
+              </div>
+
+              <p class="auth-note">
+                A password reset link will be sent to your registered email address.
+              </p>
+
+            </form>
+
 
             <div class="auth-guest-bypass" style="margin: 16px 0 10px; text-align: center;">
               <div style="font-size: 10px; color: #8895a7; margin-bottom: 8px; letter-spacing: 0.12em;">OR EXPLORE
@@ -8862,19 +8894,52 @@
         setMode('signup');
       }
 
+      const forgotForm = document.getElementById('yugma-forgot-form');
+
       function setMode(mode) {
         const login = mode === 'login';
+        const forgot = mode === 'forgot';
 
         loginTab.classList.toggle('active', login);
-        signupTab.classList.toggle('active', !login);
-        loginForm.classList.toggle('active', login);
-        signupForm.classList.toggle('active', !login);
+        signupTab.classList.toggle('active', !login && !forgot);
 
-        eyebrow.textContent = login ? 'WELCOME BACK' : 'CREATE YOUR ACCOUNT';
-        title.textContent = login ? 'Enter YUGMA' : 'Join YUGMA';
-        subtitle.textContent = login
-          ? "Continue your journey through India's sacred geography."
-          : 'Create your profile and step inside the digital museum.';
+        if (forgot) {
+          loginForm.classList.remove('active');
+          loginForm.style.display = 'none';
+          signupForm.classList.remove('active');
+          signupForm.style.display = 'none';
+          if (forgotForm) {
+            forgotForm.classList.add('active');
+            forgotForm.style.display = 'block';
+          }
+          eyebrow.textContent = 'ACCOUNT RECOVERY';
+          title.textContent = 'Reset Password';
+          subtitle.textContent = "Enter your registered email and we'll send you a secure link to reset your password.";
+        } else if (login) {
+          if (forgotForm) {
+            forgotForm.classList.remove('active');
+            forgotForm.style.display = 'none';
+          }
+          loginForm.classList.add('active');
+          loginForm.style.display = 'block';
+          signupForm.classList.remove('active');
+          signupForm.style.display = 'none';
+          eyebrow.textContent = 'WELCOME BACK';
+          title.textContent = 'Enter YUGMA';
+          subtitle.textContent = "Continue your journey through India's sacred geography.";
+        } else {
+          if (forgotForm) {
+            forgotForm.classList.remove('active');
+            forgotForm.style.display = 'none';
+          }
+          loginForm.classList.remove('active');
+          loginForm.style.display = 'none';
+          signupForm.classList.add('active');
+          signupForm.style.display = 'block';
+          eyebrow.textContent = 'CREATE YOUR ACCOUNT';
+          title.textContent = 'Join YUGMA';
+          subtitle.textContent = 'Create your profile and step inside the digital museum.';
+        }
       }
 
       function closeAuthModal() {
@@ -9142,32 +9207,97 @@
       });
 
       // ── FORGOT PASSWORD ─────────────────────────────────────
-      document.getElementById('yugma-forgot').addEventListener('click', async () => {
-        const email = document.getElementById('yugma-login-email').value.trim().toLowerCase();
-
-        if (!email) {
-          alert('Enter your email address first, then click Forgot password.');
-          document.getElementById('yugma-login-email').focus();
-          return;
-        }
-
-        if (supabaseClient && supabaseClient.auth) {
-          try {
-            const redirectTo = `${window.location.origin}${window.location.pathname}`;
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-              redirectTo
-            });
-
-            if (error) throw error;
-            alert('Password reset email sent. Please check your inbox.');
-          } catch (error) {
-            console.error('YUGMA password reset error:', error);
-            alert(error.message || 'Unable to send the password reset email.');
+      const forgotBtn = document.getElementById('yugma-forgot');
+      if (forgotBtn) {
+        forgotBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const loginEmailVal = document.getElementById('yugma-login-email')?.value?.trim();
+          const forgotEmailInput = document.getElementById('yugma-forgot-email');
+          if (forgotEmailInput && loginEmailVal) {
+            forgotEmailInput.value = loginEmailVal;
           }
-        } else {
-          alert('Password reset request recorded for: ' + email);
-        }
-      });
+          const alertEl = document.getElementById('yugma-forgot-alert');
+          if (alertEl) alertEl.style.display = 'none';
+          setMode('forgot');
+        });
+      }
+
+      const forgotBackBtn = document.getElementById('yugma-forgot-back');
+      if (forgotBackBtn) {
+        forgotBackBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          setMode('login');
+        });
+      }
+
+      if (forgotForm) {
+        forgotForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const emailInput = document.getElementById('yugma-forgot-email');
+          const submitBtn = document.getElementById('yugma-forgot-submit');
+          const alertEl = document.getElementById('yugma-forgot-alert');
+          const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!email || !emailRegex.test(email)) {
+            if (alertEl) {
+              alertEl.style.display = 'block';
+              alertEl.style.background = 'rgba(239, 68, 68, 0.15)';
+              alertEl.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+              alertEl.style.color = '#fca5a5';
+              alertEl.textContent = 'Please enter a valid email address.';
+            }
+            if (emailInput) emailInput.focus();
+            return;
+          }
+
+          setButtonLoading(submitBtn, true, 'SENDING RECOVERY LINK…');
+          if (alertEl) alertEl.style.display = 'none';
+
+          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          const redirectTo = isLocal ? `${window.location.origin}/reset-password.html` : 'https://yugmaa.netlify.app/reset-password.html';
+
+          let requestSent = false;
+          let errorMessage = null;
+
+          if (supabaseClient && supabaseClient.auth) {
+            try {
+              const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: redirectTo
+              });
+              if (error) {
+                console.warn('Supabase resetPasswordForEmail notice:', error.message || error);
+                errorMessage = error.message;
+              } else {
+                requestSent = true;
+              }
+            } catch (err) {
+              console.warn('Supabase resetPasswordForEmail network exception:', err);
+              errorMessage = 'Network connection issue. Please check your internet connection.';
+            }
+          } else {
+            requestSent = true;
+          }
+
+          setButtonLoading(submitBtn, false);
+
+          if (alertEl) {
+            alertEl.style.display = 'block';
+            if (requestSent || !errorMessage) {
+              alertEl.style.background = 'rgba(34, 197, 94, 0.15)';
+              alertEl.style.border = '1px solid rgba(34, 197, 94, 0.4)';
+              alertEl.style.color = '#86efac';
+              alertEl.innerHTML = '<strong>Password reset link sent!</strong><br>If an account exists for ' + email.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) + ', you will receive an email shortly with instructions to reset your password. Please check your inbox and spam folder.';
+              if (emailInput) emailInput.value = '';
+            } else {
+              alertEl.style.background = 'rgba(239, 68, 68, 0.15)';
+              alertEl.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+              alertEl.style.color = '#fca5a5';
+              alertEl.textContent = errorMessage || 'Unable to send recovery email at this time. Please try again later.';
+            }
+          }
+        });
+      }
 
 
       // ── SESSION RESTORATION ON PAGE LOAD ────────────────────
@@ -9242,6 +9372,8 @@
         const monReq = urlParams.get('monument');
         if (authReq === 'signup') {
           setTimeout(() => window.yugmaAuth && window.yugmaAuth.openSignup(), 100);
+        } else if (authReq === 'forgot') {
+          setTimeout(() => window.yugmaAuth && window.yugmaAuth.openForgot(), 100);
         } else if (authReq === 'login') {
           setTimeout(() => window.yugmaAuth && window.yugmaAuth.openLogin(), 100);
         }

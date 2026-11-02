@@ -147,7 +147,7 @@
                         <button
                             type="button"
                             class="forgot"
-                            onclick="forgotPassword()"
+                            onclick="showForgot()"
                         >
                             Forgot password?
                         </button>
@@ -334,7 +334,61 @@
                 </div>
 
             </div>
+            <!-- FORGOT PASSWORD -->
+            <div class="auth-section forgot-section">
 
+                <div class="section-tag">
+                    ● &nbsp; YUGMA // RECOVERY
+                </div>
+
+                <h1>
+                    RESET<br>
+                    <span>PASSWORD</span>
+                </h1>
+
+                <p class="description">
+                    Enter your registered email and we will send you a secure link to reset your password.
+                </p>
+
+                <div id="forgot-alert" style="display: none; margin: 14px 0; padding: 12px 14px; border-radius: 6px; font-size: 13px; line-height: 1.5;"></div>
+
+                <form id="forgotForm">
+
+                    <div class="field">
+                        <label>REGISTERED EMAIL ADDRESS</label>
+                        <input
+                            type="email"
+                            id="forgotEmail"
+                            placeholder="you@example.com"
+                            required
+                        >
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="enter-button"
+                        id="forgotSubmit"
+                    >
+                        SEND RECOVERY LINK
+                        <span>↗</span>
+                    </button>
+
+                </form>
+
+                <div class="switch">
+                    REMEMBERED YOUR PASSWORD?
+                    <button type="button" onclick="showLogin()">
+                        SIGN IN
+                    </button>
+                </div>
+
+                <div style="margin-top: 14px; text-align: center;">
+                    <a href="index.html?guest=true" class="enter-button" style="display: block; text-decoration: none; text-align: center; background: linear-gradient(135deg, rgba(56,189,248,0.25), rgba(201,162,74,0.3)); border: 1px solid #38bdf8; color: #e0f2fe; padding: 13px;">
+                        CONTINUE AS GUEST →
+                    </a>
+                </div>
+
+            </div>
         </div>
 
     </main>
