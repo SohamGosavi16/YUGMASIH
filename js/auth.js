@@ -349,8 +349,7 @@ if (forgotFormEl) {
         submitBtn.innerHTML = "SENDING RECOVERY LINK… <span>⏳</span>";
         if (alertEl) alertEl.style.display = "none";
 
-        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        const redirectTo = isLocal ? `${window.location.origin}/reset-password.html` : "https://yugmaa.netlify.app/reset-password.html";
+        const redirectTo = `${window.location.origin}/reset-password.html`;
 
         let requestSent = false;
         let errorNotice = null;
