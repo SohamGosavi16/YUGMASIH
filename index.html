@@ -41,7 +41,7 @@
   </script>
   <style>
     /* Prevent flash of auth overlay when session exists */
-    html.yugma-session-restored #yugma-auth {
+    html.yugma-session-restored #yugma-auth:not(.auth-active) {
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
@@ -63,6 +63,8 @@
   <script src="https://unpkg.com/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
   <!-- Supabase Auth -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/voiceGuideAccess.css">
+  <script src="js/voiceGuideAccess.js"></script>
 
   <!-- YUGMA Translator & Google Translate API -->
   <script src="js/translator.js"></script>
@@ -1556,13 +1558,14 @@
     .globe-state-pin {
       position: absolute;
       cursor: pointer;
-      pointer-events: var(--pins-pointer, none);
+      pointer-events: var(--pins-pointer, auto);
       display: flex;
       flex-direction: column;
       align-items: center;
       transition: opacity 0.25s ease;
       opacity: var(--pins-opacity, 0);
       contain: layout style;
+      z-index: 20;
     }
 
     .globe-state-pin:hover {
@@ -1635,21 +1638,34 @@
 
     .pin-beacon {
       position: relative;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: transform 0.2s ease;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    /* Generous 44px x 44px clickable touch & mouse hit-target */
+    .pin-beacon::after {
+      content: '';
+      position: absolute;
+      inset: -14px;
+      border-radius: 50%;
+      cursor: pointer;
+      pointer-events: auto;
     }
 
     .pin-dot {
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--pin-color, #c9a24a);
-      box-shadow: 0 0 8px var(--pin-color, #c9a24a);
+      box-shadow: 0 0 10px var(--pin-color, #c9a24a);
       z-index: 2;
+      pointer-events: auto;
     }
 
     .pin-wave {
@@ -1659,6 +1675,13 @@
       border-radius: 50%;
       opacity: 0.8;
       animation: none;
+      pointer-events: none;
+    }
+
+    /* Prevent any hover tooltips from capturing pointer clicks intended for pins/canvas */
+    .scene-tooltip,
+    .globe-tooltip {
+      pointer-events: none !important;
     }
 
     /* Only run pulsing wave animations when pins are actually interactive/visible */
@@ -4820,6 +4843,7 @@
     </div>
   </aside>
 
+  
   <!-- AR/VR Modal -->
   <div class="yugma-modal" id="arvr-modal">
     <div class="modal-inner">
@@ -4838,7 +4862,7 @@
           zoom, and click glowing hotspots to unlock historical lore and architectural details.</p>
 
 
-        <div id="arvr-multi-models" style="display:none; margin: 15px 0;"></div>
+                <div id="arvr-multi-models" style="display:none; margin: 15px 0;"></div>
         <a class="vr-launch-btn" id="arvr-launch-btn" href="#" target="_blank">
           🥽 LAUNCH FULL 3D VR EXPERIENCE
         </a>
@@ -4963,6 +4987,8 @@
       lotus_temple: { name: 'Delhi', nameHindi: 'दिल्ली (लोटस टेम्पल)', heritage: "Lotus Temple (Bahá'í House of Worship)", heritageHindi: 'कमल मंदिर (लोटस टेम्पल)', tradition: 'Kathak & Sufi Qawwali', region: 'North', tagline: 'Pristine White Marble Blossom of Global Unity & Universal Meditation', lat: 28.5535, lng: 77.2588, monumentLat: 28.5535, monumentLng: 77.2588, themeColor: '#38bdf8', vrPath: 'lotustemple-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/hpKtU21PVu0', youtubeId: 'hpKtU21PVu0', pinTag: 'MARBLE LOTUS OF PEACE' },
       rajasthan: { name: 'Rajasthan', nameHindi: 'राजस्थान', heritage: 'Amber Fort & Palace', heritageHindi: 'आमेर दुर्ग एवं महल', tradition: 'Kalbelia', region: 'North-West', tagline: 'The Crown Jewel of Rajput Architecture & Sheesh Mahal Grandeur', lat: 27.0238, lng: 74.2179, monumentLat: 26.9855, monumentLng: 75.8513, themeColor: '#ff5a3c', vrPath: 'amberfort-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/hpKtU21PVu0', youtubeId: 'hpKtU21PVu0', pinTag: 'MAJESTIC RAJPUT CITADEL' },
       assam: { name: 'Assam', nameHindi: 'অসম (ৰং ঘৰ)', heritage: 'Rang Ghar', heritageHindi: 'ৰং ঘৰ (আহোম ৰাজবংশ)', tradition: 'Bihu', region: 'North-East', tagline: "Asia's Oldest Royal Amphitheater & Crown of the Ahom Dynasty", lat: 26.2006, lng: 92.9376, monumentLat: 26.9634, monumentLng: 94.6315, themeColor: '#059669', vrPath: 'rang_ghar_3d.html', videoUrl: 'https://www.youtube-nocookie.com/embed/QqJU_YpGeNs', youtubeId: 'QqJU_YpGeNs', pinTag: "ASIA'S OLDEST AMPHITHEATER" },
+      uttarakhand: { name: 'Uttarakhand', nameHindi: 'उत्तराखंड', heritage: 'Jageshwar Dham', heritageHindi: 'जागेश्वर धाम', tradition: 'Chholiya Dance', region: 'North', tagline: 'Ancient Deodar Valley of 124 8th-Century Nagara Stone Temples', lat: 29.6416, lng: 79.8517, monumentLat: 29.6416, monumentLng: 79.8517, themeColor: '#dfa753', vrPath: 'jageshwar-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/hpKtU21PVu0', youtubeId: 'hpKtU21PVu0', pinTag: 'NAGARA TEMPLE CLUSTER' },
+      tripura: { name: 'Tripura', nameHindi: 'ত্রিপুরা', heritage: 'Neermahal Palace', heritageHindi: 'नीरमहल (ট্বিজিলিকমা)', tradition: 'Hojagiri Dance', region: 'East', tagline: 'Royal 1930s Lake Palace (Twijilikma) in Rudrasagar Lake', lat: 23.5186, lng: 91.3195, monumentLat: 23.5186, monumentLng: 91.3195, themeColor: '#14b8a6', vrPath: 'neermahal-vr.html', videoUrl: 'https://www.youtube-nocookie.com/embed/QqJU_YpGeNs', youtubeId: 'QqJU_YpGeNs', pinTag: 'ROYAL LAKE PALACE' },
     };
 
     // Enrich state metadata with rich cultural datasets if loaded
@@ -5299,6 +5325,9 @@
 
       globe
         .htmlElementsData(pins)
+        .htmlLat(d => d.lat)
+        .htmlLng(d => d.lng)
+        .htmlAltitude(0.018)
         .htmlElement(d => {
           const el = document.createElement('div');
           el.className = 'globe-state-pin';
@@ -5321,9 +5350,15 @@
           `;
           el.addEventListener('click', e => {
             e.stopPropagation();
+            e.preventDefault();
             isUserInteracting = true;
             selectStateById(d.id);
           });
+          el.addEventListener('touchend', e => {
+            e.stopPropagation();
+            isUserInteracting = true;
+            selectStateById(d.id);
+          }, { passive: true });
           return el;
         });
     }
@@ -5409,7 +5444,8 @@
 
     window.addEventListener('scroll', () => {
       updateScrollProgress();
-      if (targetProgress < 0.85) {
+      const isDrawerOpen = document.body.classList.contains('drawer-open') || !!document.querySelector('.state-drawer.active');
+      if (targetProgress < 0.20 && !isDrawerOpen && !selectedState) {
         isUserInteracting = false;
         isScrollDrivenPOV = true;
       }
@@ -5459,23 +5495,26 @@
         // Pins visible in Scene 3 (Explorer), smoothly dimming in Scene 4 (Preservation)
         let pinAlpha = 0;
         if (p <= 0.62) {
-          pinAlpha = Math.max(0, Math.min(1, (p - 0.22) / 0.35));
+          pinAlpha = Math.max(0, Math.min(1, (p - 0.20) / 0.32));
         } else {
           pinAlpha = Math.max(0, 1 - (p - 0.62) / 0.22);
         }
 
-        const pinAlphaStr = pinAlpha.toFixed(2);
+        const isDrawerOpen = document.body.classList.contains('drawer-open') || !!document.querySelector('.state-drawer.active');
+        const isMapFocused = (p >= 0.26 && p <= 0.88) || isUserInteracting || isDrawerOpen || !!selectedState;
+
+        const pinAlphaStr = isMapFocused ? Math.max(pinAlpha, 0.9).toFixed(2) : pinAlpha.toFixed(2);
         if (pinAlphaStr !== lastAppliedPinAlpha) {
           lastAppliedPinAlpha = pinAlphaStr;
           globeWrapper.style.setProperty('--pins-opacity', pinAlphaStr);
         }
-        const pointerVal = pinAlpha > 0.4 ? 'auto' : 'none';
+        const pointerVal = isMapFocused ? 'auto' : (pinAlpha > 0.1 ? 'auto' : 'none');
         if (pointerVal !== lastPinsPointer) {
           lastPinsPointer = pointerVal;
           globeWrapper.style.setProperty('--pins-pointer', pointerVal);
         }
 
-        const isInteractive = p > 0.45 && p < 0.75;
+        const isInteractive = isMapFocused;
         if (isInteractive !== lastInteractiveMode) {
           lastInteractiveMode = isInteractive;
           globeWrapper.classList.toggle('interactive-mode', isInteractive);
@@ -6854,6 +6893,9 @@
 
       // Render view
       renderStateDrawerContent(key, currentDrawerLang);
+      if (typeof setupModalVoiceGuide === 'function') {
+        setupModalVoiceGuide(key, s);
+      }
 
       const drawer = document.getElementById('state-drawer');
       if (drawer) {
@@ -6872,7 +6914,7 @@
 
     function closeStateDrawer() {
       document.body.classList.remove('drawer-open');
-      const drawer = document.getElementById('state-drawer');
+        const drawer = document.getElementById('state-drawer');
       if (drawer) {
         drawer.classList.remove('active');
         drawer.setAttribute('inert', '');
@@ -7754,6 +7796,10 @@
 
     function setupModalVoiceGuide(key, s) {
       stopModalVoiceGuide();
+      const modal = document.getElementById('arvr-modal');
+      if (modal) modal.dataset.currentMonument = key;
+      const card = document.getElementById('arvr-vg-card');
+      if (card) card.dataset.currentMonument = key;
       const statusEl = document.getElementById('arvr-vg-status');
       const langSel = document.getElementById('arvr-vg-lang');
       const subEl = document.getElementById('arvr-vg-subtitles');
@@ -7761,18 +7807,33 @@
       if (progEl) progEl.style.width = '0%';
 
       if (langSel) {
-        // If state has specific regional language, auto-suggest
-        if (key === 'statue_of_unity' || key === 'gujarat') modalVgCurrentLang = 'gu';
+        let preferred = 'en';
+        if (window.YugmaVoiceGuideAccess && typeof window.YugmaVoiceGuideAccess.getPreferredLanguage === 'function') {
+          preferred = window.YugmaVoiceGuideAccess.getPreferredLanguage();
+        }
+        if (preferred && preferred !== 'en' && ARVR_SUPPORTED_LANGS.some(l => l.key === preferred)) {
+          modalVgCurrentLang = preferred;
+        } else if (key === 'statue_of_unity' || key === 'gujarat') modalVgCurrentLang = 'gu';
         else if (key === 'maharashtra' || key === 'rajgad_fort') modalVgCurrentLang = 'mr';
         else if (key === 'tamil_nadu') modalVgCurrentLang = 'ta';
         else if (key === 'punjab') modalVgCurrentLang = 'pa';
-        else modalVgCurrentLang = 'en';
+        else modalVgCurrentLang = preferred || 'en';
         langSel.value = modalVgCurrentLang;
+      }
+
+      if (window.YugmaVoiceGuideAccess) {
+        window.YugmaVoiceGuideAccess.updateUIElements(modal, key);
+        const check = window.YugmaVoiceGuideAccess.canPlay(key);
+        if (!check.allowed && check.reason === 'limit_reached') {
+          updateModalPlayControls(false, false, true);
+        } else {
+          updateModalPlayControls(false, false, false);
+        }
       }
 
       const script = getModalMonumentScript(key, modalVgCurrentLang);
       if (subEl) subEl.textContent = script.substring(0, 150) + (script.length > 150 ? '…' : '');
-      if (statusEl) statusEl.textContent = `Ready · ${getModalLangLabel(modalVgCurrentLang)}`;
+      if (statusEl) statusEl.textContent = 'Ready · ' + getModalLangLabel(modalVgCurrentLang);
     }
 
     function getModalLangLabel(code) {
@@ -7846,21 +7907,44 @@
         return;
       }
 
+      const card = document.getElementById('arvr-vg-card');
+      const modal = document.getElementById('arvr-modal');
+      const key = (card && card.dataset.currentMonument) || (modal && (modal.dataset.currentMonument || modal.dataset.stateId)) || currentDrawerStateKey || 'statue_of_unity';
+      const langSel = document.getElementById('arvr-vg-lang');
+      modalVgCurrentLang = langSel ? langSel.value : 'en';
+
+      // ── Entitlement & Limit Check ──
+      if (window.YugmaVoiceGuideAccess) {
+        const check = window.YugmaVoiceGuideAccess.canPlay(key);
+        if (!check.allowed && check.reason === 'limit_reached') {
+          // Block 4th tour for guests, show registration modal
+          window.YugmaVoiceGuideAccess.showRegistrationModal({
+            monumentKey: key,
+            language: modalVgCurrentLang,
+            triggerReason: 'limit_reached',
+            onSuccess: () => {
+              setupModalVoiceGuide(key);
+              playModalVoiceGuide();
+            }
+          });
+          return;
+        }
+
+        // Record tour start (distinct tour consumed)
+        window.YugmaVoiceGuideAccess.recordTourStart(key, modalVgCurrentLang);
+        window.YugmaVoiceGuideAccess.updateUIElements(modal, key);
+      }
+
       stopModalVoiceGuide();
       modalVgSessionId++;
       const session = modalVgSessionId;
-
-      const modal = document.getElementById('arvr-modal');
-      const key = (modal && modal.dataset.stateId) || 'statue_of_unity';
-      const langSel = document.getElementById('arvr-vg-lang');
-      modalVgCurrentLang = langSel ? langSel.value : 'en';
 
       const script = getModalMonumentScript(key, modalVgCurrentLang);
       modalVgAllWords = script.trim().split(/\s+/);
 
       const subEl = document.getElementById('arvr-vg-subtitles');
       if (subEl) {
-        subEl.innerHTML = modalVgAllWords.map((w, i) => `<span id="mvg-w-${i}" class="mvg-word" style="transition:color 0.15s ease;">${escapeHtmlModal(w)} </span>`).join('');
+        subEl.innerHTML = modalVgAllWords.map((w, i) => '<span id="mvg-w-' + i + '" class="mvg-word" style="transition:color 0.15s ease;">' + escapeHtmlModal(w) + ' </span>').join('');
       }
 
       modalVgIsPlaying = true;
@@ -7871,10 +7955,10 @@
       const nativeVoice = getModalNativeVoice(modalVgCurrentLang);
 
       if (nativeVoice) {
-        if (statusEl) statusEl.textContent = `🔊 Playing (${nativeVoice.name}) · Synced Subtitles`;
+        if (statusEl) statusEl.textContent = '🔊 Playing (' + nativeVoice.name + ') · Synced Subtitles';
         playModalNativeSynthesis(script, nativeVoice, session);
       } else {
-        if (statusEl) statusEl.textContent = `☁️ Streaming ${getModalLangLabel(modalVgCurrentLang)} · Cloud Audio`;
+        if (statusEl) statusEl.textContent = '☁️ Streaming ' + getModalLangLabel(modalVgCurrentLang) + ' · Cloud Audio';
         playModalCloudAudio(script, session);
       }
     }
@@ -7926,6 +8010,11 @@
         const progress = modalVgAudio.currentTime / modalVgAudio.duration;
         const wIdx = Math.min(chunk.wordCount - 1, Math.floor(progress * chunk.wordCount));
         updateModalHighlights(chunk.startWord + wIdx);
+        if (window.YugmaVoiceGuideAccess) {
+          const m = document.getElementById('arvr-modal');
+          const k = (m && (m.dataset.currentMonument || m.dataset.stateId)) || 'statue_of_unity';
+          window.YugmaVoiceGuideAccess.saveTourProgress(k, modalVgCurrentLang, chunk.startWord + wIdx, modalVgAllWords.length);
+        }
       };
 
       modalVgAudio.onended = () => {
@@ -8083,15 +8172,34 @@
       const prog = document.getElementById('arvr-vg-progress');
       if (prog) prog.style.width = '100%';
       const statusEl = document.getElementById('arvr-vg-status');
-      if (statusEl) statusEl.textContent = `Narration Complete · ${getModalLangLabel(modalVgCurrentLang)}`;
+      if (statusEl) statusEl.textContent = 'Narration Complete · ' + getModalLangLabel(modalVgCurrentLang);
+
+      const modal = document.getElementById('arvr-modal');
+      const key = (modal && (modal.dataset.currentMonument || modal.dataset.stateId)) || 'statue_of_unity';
+      if (window.YugmaVoiceGuideAccess) {
+        window.YugmaVoiceGuideAccess.recordTourComplete(key, modalVgCurrentLang);
+        window.YugmaVoiceGuideAccess.updateUIElements(modal, key);
+      }
     }
 
-    function updateModalPlayControls(playing, paused) {
+    function updateModalPlayControls(playing, paused, isLocked) {
       const playBtn = document.getElementById('arvr-vg-play');
       const icon = document.getElementById('arvr-vg-play-icon');
       const lbl = document.getElementById('arvr-vg-play-label');
       const stopBtn = document.getElementById('arvr-vg-stop');
       if (!playBtn) return;
+
+      if (isLocked) {
+        if (icon) icon.textContent = '🔒';
+        if (lbl) lbl.textContent = 'Tour Limit Reached · Unlock Free';
+        if (stopBtn) stopBtn.disabled = true;
+        playBtn.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.85), rgba(185, 28, 28, 0.95))';
+        playBtn.style.boxShadow = '0 4px 16px rgba(239, 68, 68, 0.35)';
+        return;
+      }
+
+      playBtn.style.background = '';
+      playBtn.style.boxShadow = '';
 
       if (playing) {
         if (icon) icon.textContent = '⏸';
@@ -8227,6 +8335,7 @@
 
       const modal = document.getElementById('arvr-modal');
       if (modal) {
+        modal.dataset.currentMonument = key;
         modal.dataset.stateId = (key === 'statue_of_unity' ? 'gujarat' : (key === 'rajgad_fort' ? 'maharashtra' : key));
         modal.classList.add('active');
         setupModalVoiceGuide(key, s);
@@ -8236,7 +8345,7 @@
     function closeARVRModal() {
       const modal = document.getElementById('arvr-modal');
       if (modal) modal.classList.remove('active');
-      stopModalVoiceGuide();
+      // Voice Guide operates independently of 3D drawer
     }
     window.openStateDrawer = openStateDrawer;
     window.closeStateDrawer = closeStateDrawer;
@@ -8273,6 +8382,9 @@
         const was = modalVgIsPlaying;
         stopModalVoiceGuide();
         modalVgCurrentLang = arvrLangSel.value;
+        if (window.YugmaVoiceGuideAccess) {
+          window.YugmaVoiceGuideAccess.savePreferredLanguage(modalVgCurrentLang);
+        }
         const modal = document.getElementById('arvr-modal');
         const k = (modal && modal.dataset.stateId) || 'statue_of_unity';
         const sc = getModalMonumentScript(k, modalVgCurrentLang);
@@ -8612,6 +8724,16 @@
         if (window.yugmaTranslator) {
           window.yugmaTranslator.setLanguage(userData.language);
         }
+
+        if (!userData.isGuest && window.YugmaVoiceGuideAccess) {
+          window.YugmaVoiceGuideAccess._setVerifiedUser(userData);
+          window.YugmaVoiceGuideAccess.savePreferredLanguage(userData.language);
+          const modal = document.getElementById('arvr-modal');
+          if (modal && modal.dataset.currentMonument) {
+            window.YugmaVoiceGuideAccess.updateUIElements(modal, modal.dataset.currentMonument);
+            setupModalVoiceGuide(modal.dataset.currentMonument);
+          }
+        }
       }
 
       function continueAsGuest() {
@@ -8636,6 +8758,14 @@
             supabaseClient.auth.signOut();
           } catch (e) {
             console.warn('Supabase sign out error:', e);
+          }
+        }
+        if (window.YugmaVoiceGuideAccess) {
+          window.YugmaVoiceGuideAccess._setGuestUser();
+          const modal = document.getElementById('arvr-modal');
+          if (modal && modal.dataset.currentMonument) {
+            window.YugmaVoiceGuideAccess.updateUIElements(modal, modal.dataset.currentMonument);
+            setupModalVoiceGuide(modal.dataset.currentMonument);
           }
         }
         updateNavUserState(null);
@@ -8690,6 +8820,8 @@
       function openExperience() {
         document.body.classList.remove('yugma-screen-locked');
         auth.classList.add('auth-hidden');
+        auth.classList.remove('auth-active');
+        document.documentElement.classList.add('yugma-session-restored');
 
         setTimeout(() => {
           auth.style.display = 'none';
@@ -8848,10 +8980,6 @@
 
         const selectedLang = window.yugmaTranslator ? window.yugmaTranslator.getLanguage() : (localStorage.getItem('yugmaUserLanguage') || 'en');
 
-        // Always save locally to multi-user registry so login is never blocked
-        const localUser = { name, email, password, language: selectedLang };
-        saveUserToRegistry(localUser);
-
         if (supabaseClient && supabaseClient.auth) {
           try {
             const { data, error } = await supabaseClient.auth.signUp({
@@ -8869,13 +8997,13 @@
               console.warn('Supabase signup notice:', error.message);
             }
           } catch (error) {
-            console.warn('YUGMA Supabase signup fallback:', error);
+            console.warn('YUGMA Supabase signup notice:', error);
           }
         }
 
         setButtonLoading(button, false);
-        markUserLoggedIn({ name, email, language: selectedLang });
-        alert('Welcome to YUGMA, ' + name + '! Your profile has been created.');
+        markUserLoggedIn({ name, email, language: selectedLang, isGuest: false });
+        alert('Welcome to YUGMA, ' + name + '! Your free account is created and unlimited voice guided tours are unlocked.');
         openExperience();
       });
 
@@ -8909,62 +9037,28 @@
               loginSuccess = true;
               authenticatedUser = {
                 name: (data.user.user_metadata && data.user.user_metadata.full_name) || email.split('@')[0],
-                email: data.user.email
+                email: data.user.email,
+                language: (data.user.user_metadata && data.user.user_metadata.language) || 'en',
+                isGuest: false
               };
             }
           } catch (error) {
-            console.warn('Supabase sign-in exception:', error);
+            console.warn('Supabase sign-in notice:', error);
           }
         }
 
-
-
-
-
-
-
-
-
-        // 2. Check Multi-User Local Storage Registry
+        // 2. Check Built-in Demo Accounts (Strict Exact Password Match Only)
         if (!loginSuccess) {
-          const allUsers = getStoredUsers();
-          const singleUser = JSON.parse(localStorage.getItem('yugmaUser') || 'null');
-          if (singleUser) allUsers.push(singleUser);
-
-          const match = allUsers.find(u => u && u.email && u.email.toLowerCase() === email && u.password === password);
-          if (match) {
-            loginSuccess = true;
-            authenticatedUser = {
-              name: match.name || email.split('@')[0],
-              email: match.email
-            };
-          }
-        }
-
-
-        // 3. Check Built-in Demo Accounts
-        if (!loginSuccess) {
-          const demoMatch = DEMO_USERS.find(u => u.email.toLowerCase() === email && (u.password === password || password.length >= 4));
+          const demoMatch = DEMO_USERS.find(u => u.email.toLowerCase() === email && u.password === password);
           if (demoMatch) {
             loginSuccess = true;
             authenticatedUser = {
               name: demoMatch.name,
-              email: demoMatch.email
+              email: demoMatch.email,
+              language: 'en',
+              isGuest: false
             };
-            saveUserToRegistry({ ...demoMatch, password });
           }
-        }
-
-
-        // 4. Smart Seamless Auto-Activation: Never dead-end or lock the user
-        if (!loginSuccess && email && password.length >= 4) {
-          const friendlyName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          authenticatedUser = {
-            name: friendlyName,
-            email: email
-          };
-          saveUserToRegistry({ name: friendlyName, email, password });
-          loginSuccess = true;
         }
 
         setButtonLoading(button, false);
@@ -8975,10 +9069,9 @@
           markUserLoggedIn(authenticatedUser);
           openExperience();
         } else {
-          alert('Please enter a valid password (at least 4 characters) to sign in or explore as Guest.');
+          alert('Invalid email or password. Please verify your credentials or click "Explore as Guest".');
         }
       });
-
 
       // ── FORGOT PASSWORD ─────────────────────────────────────
       document.getElementById('yugma-forgot').addEventListener('click', async () => {
@@ -9072,6 +9165,19 @@
 
 
       restoreSession();
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const authReq = urlParams.get('auth');
+        const monReq = urlParams.get('monument');
+        if (authReq === 'signup') {
+          setTimeout(() => window.yugmaAuth && window.yugmaAuth.openSignup(), 100);
+        } else if (authReq === 'login') {
+          setTimeout(() => window.yugmaAuth && window.yugmaAuth.openLogin(), 100);
+        }
+        if (monReq && typeof setupModalVoiceGuide === 'function') {
+          setTimeout(() => setupModalVoiceGuide(monReq), 150);
+        }
+      } catch (e) {}
 
 
       // Keep session fresh
@@ -9097,7 +9203,31 @@
         continueAsGuest,
         logoutUser,
         openExperience,
-        closeAuthModal
+        closeAuthModal,
+        openSignup: () => {
+          document.documentElement.classList.remove('yugma-session-restored');
+          auth.classList.remove('auth-hidden');
+          auth.classList.add('auth-active');
+          auth.style.display = 'flex';
+          auth.style.opacity = '1';
+          auth.style.visibility = 'visible';
+          auth.style.pointerEvents = 'auto';
+          document.body.classList.add('yugma-screen-locked');
+          showAuth();
+          setMode('signup');
+        },
+        openLogin: () => {
+          document.documentElement.classList.remove('yugma-session-restored');
+          auth.classList.remove('auth-hidden');
+          auth.classList.add('auth-active');
+          auth.style.display = 'flex';
+          auth.style.opacity = '1';
+          auth.style.visibility = 'visible';
+          auth.style.pointerEvents = 'auto';
+          document.body.classList.add('yugma-screen-locked');
+          showAuth();
+          setMode('login');
+        }
       };
     })();
     // Launch on DOM ready

@@ -1,6 +1,7 @@
-/* =========================================
-   YUGMA AUTHENTICATION
-========================================= */
+/* ==========================================================================
+   YUGMA AUTHENTICATION MODULE
+   Secure Supabase Auth Integration & User Session Management
+   ========================================================================== */
 
 const SUPABASE_URL = 'https://eynqtscwrepndronybwp.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ioQVRqBT2tQd7hlCWB5Rbg_MEXJ_4_M';
@@ -24,14 +25,46 @@ if (window.supabase && typeof window.supabase.createClient === 'function') {
     }
 }
 
+// Share client globally for voice guide access
+window.yugmaSupabase = supabaseClient;
+window.supabaseClient = supabaseClient;
+
 /* =========================================
    CHECK IF ALREADY LOGGED IN
 ========================================= */
-window.addEventListener('DOMContentLoaded', () => {
-    const isLoggedIn = localStorage.getItem('yugmaLoggedIn') === 'true';
-    const currentUser = JSON.parse(localStorage.getItem('yugmaCurrentUser') || 'null');
+window.addEventListener('DOMContentLoaded', async () => {
+    // Check URL query parameters for requested auth mode (?signup=true or ?login=true)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('signup') === 'true' || urlParams.get('mode') === 'signup' || urlParams.get('auth') === 'signup') {
+        showSignup();
+    } else if (urlParams.get('login') === 'true' || urlParams.get('mode') === 'login' || urlParams.get('auth') === 'login') {
+        showLogin();
+    }
+    let currentUser = null;
 
-    if (isLoggedIn && currentUser) {
+    // Verify session with Supabase
+    if (supabaseClient && supabaseClient.auth) {
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session && session.user && !session.user.is_anonymous) {
+                currentUser = {
+                    name: (session.user.user_metadata && session.user.user_metadata.full_name) || session.user.email.split('@')[0],
+                    email: session.user.email
+                };
+            }
+        } catch (e) {
+            console.warn('Supabase getSession notice:', e);
+        }
+    }
+
+    if (!currentUser && localStorage.getItem('yugmaLoggedIn') === 'true' && localStorage.getItem('yugmaIsGuest') !== 'true') {
+        const cached = JSON.parse(localStorage.getItem('yugmaCurrentUser') || 'null');
+        if (cached && cached.email) {
+            currentUser = cached;
+        }
+    }
+
+    if (currentUser) {
         const desc = document.querySelector('.description');
         if (desc) {
             desc.innerHTML = `Signed in as <strong>${currentUser.name || currentUser.email}</strong>.<br><a href="index.html" style="color:#c9a24a; font-weight:600; text-decoration:none; display:inline-block; margin-top:8px;">CONTINUE TO 3D GLOBE →</a> or sign in with another account below:`;
@@ -42,7 +75,6 @@ window.addEventListener('DOMContentLoaded', () => {
 /* =========================================
    SWITCH TO SIGNUP
 ========================================= */
-
 function showSignup() {
     const login = document.querySelector(".login-section");
     const signup = document.querySelector(".signup-section");
@@ -54,7 +86,6 @@ function showSignup() {
 /* =========================================
    SWITCH TO LOGIN
 ========================================= */
-
 function showLogin() {
     const login = document.querySelector(".login-section");
     const signup = document.querySelector(".signup-section");
@@ -66,7 +97,6 @@ function showLogin() {
 /* =========================================
    SHOW / HIDE PASSWORD
 ========================================= */
-
 function togglePassword(inputId, button) {
     const input = document.getElementById(inputId);
     if (!input) return;
@@ -81,11 +111,9 @@ function togglePassword(inputId, button) {
 }
 
 /* =========================================
-   SIGN UP
-/* =========================================
-   LOCAL USER REGISTRY & DEMO ACCOUNTS
+   OFFICIAL DEMO ACCOUNTS (EXACT PASSWORDS ONLY)
+   Note: Passwords are NEVER stored in localStorage
 ========================================= */
-
 const DEMO_USERS = [
     { email: 'demo@yugma.com', password: 'demo123', name: 'Demo Explorer' },
     { email: 'admin@yugma.in', password: 'admin123', name: 'Museum Curator' },
@@ -93,35 +121,9 @@ const DEMO_USERS = [
     { email: 'user@yugma.com', password: 'yugma123', name: 'Cultural Pilgrim' }
 ];
 
-function getStoredUsers() {
-    try {
-        const users = JSON.parse(localStorage.getItem('yugmaUsers') || '[]');
-        return Array.isArray(users) ? users : [];
-    } catch (e) {
-        return [];
-    }
-}
-
-function saveUserToRegistry(user) {
-    try {
-        const users = getStoredUsers();
-        const existingIdx = users.findIndex(u => u && u.email && u.email.toLowerCase() === user.email.toLowerCase());
-        if (existingIdx >= 0) {
-            users[existingIdx] = { ...users[existingIdx], ...user };
-        } else {
-            users.push(user);
-        }
-        localStorage.setItem('yugmaUsers', JSON.stringify(users));
-        localStorage.setItem('yugmaUser', JSON.stringify(user));
-    } catch (e) {
-        console.warn('Local user save notice:', e);
-    }
-}
-
 /* =========================================
    SIGN UP
 ========================================= */
-
 const signupFormEl = document.getElementById("signupForm");
 if (signupFormEl) {
     signupFormEl.addEventListener("submit", async function(event) {
@@ -132,13 +134,13 @@ if (signupFormEl) {
         const password = document.getElementById("signupPassword").value;
         const confirmPassword = document.getElementById("confirmPassword").value;
 
-        /* CHECK PASSWORD */
-        if (password.length < 4) {
-            alert("Password must contain at least 4 characters.");
+        /* CHECK PASSWORD LENGTH */
+        if (password.length < 6) {
+            alert("Password must contain at least 6 characters.");
             return;
         }
 
-        /* CONFIRM PASSWORD */
+        /* CONFIRM PASSWORD MATCH */
         if (password !== confirmPassword) {
             alert("Passwords do not match. Please verify both password fields.");
             return;
@@ -146,19 +148,17 @@ if (signupFormEl) {
 
         const selectedLang = window.yugmaTranslator ? window.yugmaTranslator.getLanguage() : (localStorage.getItem('yugmaUserLanguage') || 'en');
 
-        /* CREATE USER IN LOCAL STORAGE REGISTRY */
-        const user = {
+        let signupSuccess = false;
+        let createdUser = {
             name: name,
             email: email,
-            password: password,
             language: selectedLang
         };
-        saveUserToRegistry(user);
 
         /* ATTEMPT SUPABASE SIGNUP */
-        if (supabaseClient) {
+        if (supabaseClient && supabaseClient.auth) {
             try {
-                await supabaseClient.auth.signUp({
+                const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
                     options: {
@@ -168,31 +168,47 @@ if (signupFormEl) {
                         }
                     }
                 });
+
+                if (error) {
+                    console.warn("Supabase signup notice:", error.message);
+                } else if (data && data.user) {
+                    signupSuccess = true;
+                }
             } catch (err) {
-                console.warn("Supabase signup error (local fallback saved):", err);
+                console.warn("Supabase signup network notice:", err);
             }
         }
 
-        /* ESTABLISH SESSION */
+        // Establish session (NEVER storing plaintext passwords in localStorage)
         localStorage.setItem("yugmaLoggedIn", "true");
         localStorage.setItem("yugmaIsGuest", "false");
-        localStorage.setItem("yugmaCurrentUser", JSON.stringify({
-            name: name,
-            email: email,
-            language: selectedLang
-        }));
+        localStorage.setItem("yugmaCurrentUser", JSON.stringify(createdUser));
 
-        alert("Welcome to YUGMA, " + name + ". Your profile is active and your journey begins now.");
+        // Sync with Voice Guide Access Manager
+        if (window.YugmaVoiceGuideAccess) {
+            window.YugmaVoiceGuideAccess.savePreferredLanguage(selectedLang);
+            window.YugmaVoiceGuideAccess._setVerifiedUser(createdUser);
+        }
 
-        /* ENTER YUGMA */
-        window.location.href = "index.html";
+        alert("Welcome to YUGMA, " + name + ". Your free account is created and unlimited voice-guided heritage tours are now unlocked!");
+
+        // Return to monument or returnUrl
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl');
+        const monument = urlParams.get('monument');
+        if (returnUrl) {
+            window.location.href = decodeURIComponent(returnUrl);
+        } else if (monument) {
+            window.location.href = "index.html?monument=" + encodeURIComponent(monument);
+        } else {
+            window.location.href = "index.html";
+        }
     });
 }
 
 /* =========================================
    LOGIN
 ========================================= */
-
 const loginFormEl = document.getElementById("loginForm");
 if (loginFormEl) {
     loginFormEl.addEventListener("submit", async function(event) {
@@ -209,8 +225,8 @@ if (loginFormEl) {
         let loginSuccess = false;
         let authenticatedUser = null;
 
-        /* 1. TRY SUPABASE */
-        if (supabaseClient) {
+        /* 1. TRY SUPABASE AUTHENTICATION */
+        if (supabaseClient && supabaseClient.auth) {
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
@@ -221,7 +237,8 @@ if (loginFormEl) {
                     loginSuccess = true;
                     authenticatedUser = {
                         name: (data.user.user_metadata && data.user.user_metadata.full_name) || email.split('@')[0],
-                        email: data.user.email
+                        email: data.user.email,
+                        language: (data.user.user_metadata && data.user.user_metadata.language) || 'en'
                     };
                 }
             } catch (err) {
@@ -229,48 +246,20 @@ if (loginFormEl) {
             }
         }
 
-        /* 2. TRY MULTI-USER LOCAL STORAGE REGISTRY */
+        /* 2. CHECK VERIFIED DEMO ACCOUNTS (EXACT PASSWORD ONLY) */
         if (!loginSuccess) {
-            const allUsers = getStoredUsers();
-            const singleUser = JSON.parse(localStorage.getItem("yugmaUser") || "null");
-            if (singleUser) allUsers.push(singleUser);
-
-            const match = allUsers.find(u => u && u.email && u.email.toLowerCase() === email && u.password === password);
-            if (match) {
-                loginSuccess = true;
-                authenticatedUser = {
-                    name: match.name || email.split('@')[0],
-                    email: match.email
-                };
-            }
-        }
-
-        /* 3. CHECK DEMO ACCOUNTS */
-        if (!loginSuccess) {
-            const demoMatch = DEMO_USERS.find(u => u.email.toLowerCase() === email && (u.password === password || password.length >= 4));
+            const demoMatch = DEMO_USERS.find(u => u.email.toLowerCase() === email && u.password === password);
             if (demoMatch) {
                 loginSuccess = true;
                 authenticatedUser = {
                     name: demoMatch.name,
-                    email: demoMatch.email
+                    email: demoMatch.email,
+                    language: 'en'
                 };
-                saveUserToRegistry({ ...demoMatch, password });
             }
         }
 
-        /* 4. SMART AUTO-ACTIVATION: NEVER DEAD-END THE USER */
-        if (!loginSuccess && email && password.length >= 4) {
-            const friendlyName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            authenticatedUser = {
-                name: friendlyName,
-                email: email
-            };
-            saveUserToRegistry({ name: friendlyName, email, password });
-            loginSuccess = true;
-        }
-
         if (loginSuccess && authenticatedUser) {
-            /* LOGIN SUCCESS */
             const selectedLang = window.yugmaTranslator ? window.yugmaTranslator.getLanguage() : (localStorage.getItem('yugmaUserLanguage') || 'en');
             authenticatedUser.language = selectedLang;
 
@@ -278,10 +267,25 @@ if (loginFormEl) {
             localStorage.setItem("yugmaIsGuest", "false");
             localStorage.setItem("yugmaCurrentUser", JSON.stringify(authenticatedUser));
 
-            /* ENTER YUGMA */
-            window.location.href = "index.html";
+            // Sync with Voice Guide Access Manager
+            if (window.YugmaVoiceGuideAccess) {
+                window.YugmaVoiceGuideAccess.savePreferredLanguage(selectedLang);
+                window.YugmaVoiceGuideAccess._setVerifiedUser(authenticatedUser);
+            }
+
+            // Return to monument or returnUrl
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnUrl = urlParams.get('returnUrl');
+            const monument = urlParams.get('monument');
+            if (returnUrl) {
+                window.location.href = decodeURIComponent(returnUrl);
+            } else if (monument) {
+                window.location.href = "index.html?monument=" + encodeURIComponent(monument);
+            } else {
+                window.location.href = "index.html";
+            }
         } else {
-            alert("Please enter a valid password (at least 4 characters) to sign in or explore as Guest.");
+            alert("Invalid email or password. Please check your credentials or click 'Continue as Guest'.");
         }
     });
 }
@@ -289,7 +293,6 @@ if (loginFormEl) {
 /* =========================================
    FORGOT PASSWORD
 ========================================= */
-
 async function forgotPassword() {
     const email = document.getElementById("loginEmail").value.trim().toLowerCase();
 
@@ -299,7 +302,7 @@ async function forgotPassword() {
         return;
     }
 
-    if (supabaseClient) {
+    if (supabaseClient && supabaseClient.auth) {
         try {
             const redirectTo = `${window.location.origin}/index.html`;
             const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
@@ -312,20 +315,14 @@ async function forgotPassword() {
         }
     }
 
-    const localUser = JSON.parse(localStorage.getItem("yugmaUser") || "null");
-    if (localUser && localUser.email === email) {
-        alert(`Account found for ${email}. Please use your saved password or sign up with a new account.`);
-    } else {
-        alert("Password recovery: If an account exists for this email, you will receive reset details.");
-    }
+    alert("Password recovery: If an account exists for " + email + ", password reset instructions have been initiated.");
 }
 
 /* =========================================
    GOOGLE LOGIN
 ========================================= */
-
 async function googleLogin() {
-    if (supabaseClient) {
+    if (supabaseClient && supabaseClient.auth) {
         try {
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
