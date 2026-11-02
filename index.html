@@ -8643,6 +8643,7 @@
 
       function saveUserToRegistry(user) {
         try {
+          if (!user || !user.email) return;
           const users = getStoredUsers();
           const existingIdx = users.findIndex(u => u && u.email && u.email.toLowerCase() === user.email.toLowerCase());
           if (existingIdx >= 0) {
@@ -8690,6 +8691,7 @@
           }
           if (logoutBtn) {
             logoutBtn.textContent = user.isGuest ? 'EXIT GUEST' : 'LOGOUT';
+            logoutBtn.title = user.isGuest ? 'Exit Guest Mode / Sign In' : 'Sign Out of YUGMA';
           }
           if (loginBtn) {
             if (user.isGuest) {
@@ -8711,12 +8713,15 @@
       }
 
       function markUserLoggedIn(user) {
+        if (!user) return;
         localStorage.setItem('yugmaLoggedIn', 'true');
+        const isGuest = !!user.isGuest;
+        localStorage.setItem('yugmaIsGuest', isGuest ? 'true' : 'false');
         const selectedLang = window.yugmaTranslator ? window.yugmaTranslator.getLanguage() : (localStorage.getItem('yugmaUserLanguage') || 'en');
         const userData = {
-          name: user.name || (user.user_metadata && user.user_metadata.full_name) || (user.email ? user.email.split('@')[0] : (user.isGuest ? 'Guest Explorer' : 'Explorer')),
+          name: user.name || (user.user_metadata && user.user_metadata.full_name) || (user.email ? user.email.split('@')[0] : (isGuest ? 'Guest Explorer' : 'Explorer')),
           email: user.email || '',
-          isGuest: !!user.isGuest,
+          isGuest: isGuest,
           language: user.language || selectedLang
         };
         localStorage.setItem('yugmaCurrentUser', JSON.stringify(userData));
@@ -8725,15 +8730,50 @@
           window.yugmaTranslator.setLanguage(userData.language);
         }
 
-        if (!userData.isGuest && window.YugmaVoiceGuideAccess) {
-          window.YugmaVoiceGuideAccess._setVerifiedUser(userData);
-          window.YugmaVoiceGuideAccess.savePreferredLanguage(userData.language);
+        if (window.YugmaVoiceGuideAccess) {
+          if (!userData.isGuest) {
+            window.YugmaVoiceGuideAccess._setVerifiedUser(userData);
+            window.YugmaVoiceGuideAccess.savePreferredLanguage(userData.language);
+          } else {
+            window.YugmaVoiceGuideAccess._setGuestUser();
+          }
           const modal = document.getElementById('arvr-modal');
           if (modal && modal.dataset.currentMonument) {
             window.YugmaVoiceGuideAccess.updateUIElements(modal, modal.dataset.currentMonument);
-            setupModalVoiceGuide(modal.dataset.currentMonument);
+            if (typeof setupModalVoiceGuide === 'function') {
+              setupModalVoiceGuide(modal.dataset.currentMonument);
+            }
           }
         }
+      }
+
+      function restoreGuestExplorerMode() {
+        const selectedLang = window.yugmaTranslator ? window.yugmaTranslator.getLanguage() : (localStorage.getItem('yugmaUserLanguage') || 'en');
+        const guestUser = {
+          name: 'Guest Explorer',
+          email: '',
+          isGuest: true,
+          language: selectedLang
+        };
+
+        localStorage.setItem('yugmaLoggedIn', 'true');
+        localStorage.setItem('yugmaIsGuest', 'true');
+        localStorage.setItem('yugmaCurrentUser', JSON.stringify(guestUser));
+
+        updateNavUserState(guestUser);
+
+        if (window.YugmaVoiceGuideAccess) {
+          window.YugmaVoiceGuideAccess._setGuestUser();
+          const modal = document.getElementById('arvr-modal');
+          if (modal && modal.dataset.currentMonument) {
+            window.YugmaVoiceGuideAccess.updateUIElements(modal, modal.dataset.currentMonument);
+            if (typeof setupModalVoiceGuide === 'function') {
+              setupModalVoiceGuide(modal.dataset.currentMonument);
+            }
+          }
+        }
+
+        openExperience();
       }
 
       function continueAsGuest() {
@@ -8749,37 +8789,65 @@
         openExperience();
       }
 
-      function logoutUser() {
-        localStorage.removeItem('yugmaLoggedIn');
-        localStorage.removeItem('yugmaCurrentUser');
-        localStorage.removeItem('yugmaIsGuest');
-        if (supabaseClient && supabaseClient.auth) {
-          try {
-            supabaseClient.auth.signOut();
-          } catch (e) {
-            console.warn('Supabase sign out error:', e);
-          }
+      let isLoggingOut = false;
+
+      async function logoutUser() {
+        if (isLoggingOut) return;
+        isLoggingOut = true;
+
+        const logoutBtn = document.getElementById('btn-nav-logout');
+        if (logoutBtn) {
+          logoutBtn.disabled = true;
+          logoutBtn.textContent = 'LOGGING OUT…';
+          logoutBtn.style.opacity = '0.7';
+          logoutBtn.style.cursor = 'wait';
         }
-        if (window.YugmaVoiceGuideAccess) {
-          window.YugmaVoiceGuideAccess._setGuestUser();
-          const modal = document.getElementById('arvr-modal');
-          if (modal && modal.dataset.currentMonument) {
-            window.YugmaVoiceGuideAccess.updateUIElements(modal, modal.dataset.currentMonument);
-            setupModalVoiceGuide(modal.dataset.currentMonument);
+
+        try {
+          if (supabaseClient && supabaseClient.auth) {
+            try {
+              // Sign out from local session on this device
+              const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
+              if (error) {
+                console.warn('Supabase local sign out notice:', error.message || error);
+              }
+            } catch (err) {
+              console.warn('Supabase sign out request exception:', err);
+            }
           }
+
+          // Clear registered user credentials only; NEVER wipe guest tours, language, or general preferences
+          localStorage.removeItem('yugmaUser');
+
+          // Seamlessly restore Guest Explorer mode without page refresh or screen lock
+          restoreGuestExplorerMode();
+
+        } catch (err) {
+          console.error('Error during logout processing:', err);
+          restoreGuestExplorerMode();
+        } finally {
+          if (logoutBtn) {
+            logoutBtn.disabled = false;
+            logoutBtn.style.opacity = '';
+            logoutBtn.style.cursor = '';
+          }
+          isLoggingOut = false;
         }
-        updateNavUserState(null);
-        auth.style.display = 'flex';
-        auth.classList.remove('auth-hidden');
-        document.body.classList.add('yugma-screen-locked');
-        showWelcome();
       }
 
       const btnNavLogout = document.getElementById('btn-nav-logout');
       if (btnNavLogout) {
-        btnNavLogout.addEventListener('click', (e) => {
+        btnNavLogout.addEventListener('click', async (e) => {
           e.preventDefault();
-          logoutUser();
+          const currentUser = JSON.parse(localStorage.getItem('yugmaCurrentUser') || 'null');
+          if (currentUser && currentUser.isGuest) {
+            // In guest mode, clicking EXIT GUEST opens login modal to authenticate
+            if (window.yugmaAuth && typeof window.yugmaAuth.openLogin === 'function') {
+              window.yugmaAuth.openLogin();
+            }
+            return;
+          }
+          await logoutUser();
         });
       }
 
@@ -9128,12 +9196,15 @@
         if (!activeUser && supabaseClient && supabaseClient.auth) {
           try {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session && session.user) {
+            if (session && session.user && !session.user.is_anonymous) {
               activeUser = {
-                name: (session.user.user_metadata && session.user.user_metadata.full_name) || session.user.email?.split('@')[0],
-                email: session.user.email
+                name: (session.user.user_metadata && session.user.user_metadata.full_name) || (session.user.email ? session.user.email.split('@')[0] : 'Explorer'),
+                email: session.user.email || '',
+                language: (session.user.user_metadata && session.user.user_metadata.language) || localStorage.getItem('yugmaUserLanguage') || 'en',
+                isGuest: false
               };
               localStorage.setItem('yugmaLoggedIn', 'true');
+              localStorage.setItem('yugmaIsGuest', 'false');
             }
           } catch (e) {
             console.warn('Session check notice:', e);
@@ -9180,17 +9251,25 @@
       } catch (e) {}
 
 
-      // Keep session fresh
+      // Keep session fresh & handle auth state transitions safely
       if (supabaseClient && supabaseClient.auth) {
         supabaseClient.auth.onAuthStateChange((event, session) => {
-          if (event === 'SIGNED_OUT') {
-            logoutUser();
-          } else if (event === 'SIGNED_IN' && session) {
-            const user = {
-              name: (session.user.user_metadata && session.user.user_metadata.full_name) || session.user.email?.split('@')[0],
-              email: session.user.email
-            };
-            markUserLoggedIn(user);
+          try {
+            if (event === 'SIGNED_OUT') {
+              if (!isLoggingOut) {
+                restoreGuestExplorerMode();
+              }
+            } else if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && session.user && !session.user.is_anonymous) {
+              const user = {
+                name: (session.user.user_metadata && session.user.user_metadata.full_name) || (session.user.email ? session.user.email.split('@')[0] : 'Explorer'),
+                email: session.user.email || '',
+                language: (session.user.user_metadata && session.user.user_metadata.language) || localStorage.getItem('yugmaUserLanguage') || 'en',
+                isGuest: false
+              };
+              markUserLoggedIn(user);
+            }
+          } catch (e) {
+            console.warn('onAuthStateChange handler notice:', e);
           }
         });
       }
@@ -9201,6 +9280,7 @@
         isSessionActive,
         markUserLoggedIn,
         continueAsGuest,
+        restoreGuestExplorerMode,
         logoutUser,
         openExperience,
         closeAuthModal,

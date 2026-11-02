@@ -182,7 +182,7 @@
 
       try {
         client.auth.onAuthStateChange(function (event, session) {
-          if (event === 'SIGNED_IN' && session && session.user && !session.user.is_anonymous) {
+          if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && session.user && !session.user.is_anonymous) {
             self._setVerifiedUser({
               id: session.user.id,
               email: session.user.email,
