@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YUGMA | Smart Heritage Journey Planner — Plan Custom Trips Across 22 Monuments</title>
+  <meta name="description" content="Personalized geospatial travel planner for India's 22 sacred sanctuaries, imperial forts, and ancient architectural wonders. Generates day-wise smart itineraries, distance estimates, and interactive 3D monument tours.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- YUGMA Theme & Journey Planner CSS -->
+  <link rel="stylesheet" href="css/kage-theme.css">
+  <link rel="stylesheet" href="css/journeyPlanner.css">
+  <link rel="stylesheet" href="css/aiVisualizer.css">
+</head>
+<body class="planner-body">
+
+  <!-- Background starry ambiance -->
+  <div class="cosmos-bg"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="planner-nav">
+    <a href="index.html" class="nav-brand-group" title="Return to YUGMA Heritage Archive">
+      <div class="brand-icon-box">
+        <svg viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <circle cx="22" cy="22" r="18" stroke="#c9a24a" stroke-width="1.2" />
+          <path d="M22 6v32M6 22h32M11 11l22 22M11 33L33 11" stroke="#c9a24a" stroke-width="0.8" stroke-opacity="0.6" />
+          <circle cx="22" cy="22" r="6" fill="#e0231c" fill-opacity="0.9" />
+        </svg>
+      </div>
+      <div class="brand-meta-box">
+        <span class="brand-main-title">YUGMA</span>
+        <span class="brand-sub-tag">JOURNEY PLANNER</span>
+      </div>
+    </a>
+
+    <div class="nav-links-cluster">
+      <a href="index.html" class="nav-action-btn" title="Explore Interactive 3D India Globe">
+        <i class="fa-solid fa-earth-asia"></i>
+        <span>3D GLOBE</span>
+      </a>
+
+      <a href="all_3d_models.html" class="nav-action-btn" title="Explore 3D Heritage Models Vault">
+        <i class="fa-solid fa-cube"></i>
+        <span>3D VAULT</span>
+      </a>
+
+      <a href="journey-planner.html" class="nav-action-btn active" title="Smart Heritage Journey Planner">
+        <i class="fa-solid fa-route"></i>
+        <span>JOURNEY PLANNER</span>
+      </a>
+
+      <button type="button" class="nav-action-btn btn-saved" id="btn-open-saved-journeys" title="View Saved Itineraries">
+        <i class="fa-regular fa-bookmark"></i>
+        <span>SAVED</span>
+        <span class="saved-counter-badge" id="saved-journeys-count-badge" style="display:none;">0</span>
+      </button>
+
+      <!-- Auth Pill -->
+      <div class="user-auth-pill" id="user-auth-pill">
+        <span class="user-status-dot guest" id="user-status-dot"></span>
+        <span id="user-badge-name" style="font-weight:600; color:#dfe7e0;">GUEST EXPLORER</span>
+        <a href="auth.html?mode=login" id="nav-auth-login-link" style="color:#c9a24a; text-decoration:none; margin-left:4px; font-weight:700;">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="planner-main">
+
+    <!-- Hero Header -->
+    <section class="planner-hero-banner">
+      <div class="hero-sanskrit-tag">✦ GEOSPATIAL HERITAGE EXPEDITION // यात्रा परिकल्पना ✦</div>
+      <h1 class="hero-main-title">SMART HERITAGE JOURNEY PLANNER</h1>
+      <p class="hero-desc">
+        Curate personalized, geographically optimized travel itineraries across India's 22 sacred sanctuaries, imperial forts, and architectural wonders. Seamlessly calculates sensible travel distances, generates day-wise schedules, and unlocks interactive 3D monument tours and multilingual audio guides.
+      </p>
+    </section>
+
+    <!-- Mobile View Switcher (Visible on mobile/tablet) -->
+    <div class="mobile-view-tabs">
+      <button type="button" class="mobile-tab-btn active" data-view="builder">
+        <i class="fa-solid fa-sliders"></i> Builder
+      </button>
+      <button type="button" class="mobile-tab-btn" data-view="schedule">
+        <i class="fa-solid fa-calendar-days"></i> Schedule
+      </button>
+      <button type="button" class="mobile-tab-btn" data-view="map">
+        <i class="fa-solid fa-map-location-dot"></i> Map
+      </button>
+      <button type="button" class="mobile-tab-btn" onclick="document.getElementById('btn-open-saved-journeys').click()">
+        <i class="fa-regular fa-bookmark"></i> Saved
+      </button>
+    </div>
+
+    <!-- Main Split Grid -->
+    <div class="planner-grid-layout">
+
+      <!-- LEFT COLUMN: Trip Builder & Schedule -->
+      <div class="planner-panel-column">
+
+        <!-- STEP 1: Trip Parameters Card -->
+        <section class="config-card" id="step-config-card">
+          <div class="card-title-row">
+            <div class="card-title-group">
+              <span class="step-num-pill">1</span>
+              <div>
+                <h2 class="card-heading">TRIP CONFIGURATION</h2>
+                <span class="card-subtext">Select starting origin, duration, and exploration pace</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Starting Location -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="origin-hub-select">
+              <i class="fa-solid fa-location-dot"></i> Starting Origin City
+            </label>
+            <div class="input-with-button">
+              <select class="form-select" id="origin-hub-select">
+                <option value="delhi" selected>New Delhi (Indira Gandhi International Hub)</option>
+                <option value="mumbai">Mumbai (Chhatrapati Shivaji Maharaj Hub)</option>
+                <option value="bengaluru">Bengaluru (Kempegowda Hub)</option>
+                <option value="kolkata">Kolkata (Netaji Subhash Chandra Bose Hub)</option>
+                <option value="jaipur">Jaipur (Pink City Airport Hub)</option>
+                <option value="chennai">Chennai (Meenambakkam Hub)</option>
+                <option value="hyderabad">Hyderabad (Rajiv Gandhi Hub)</option>
+                <option value="ahmedabad">Ahmedabad (Sardar Vallabhbhai Patel Hub)</option>
+                <option value="kochi">Kochi (Cochin International Hub)</option>
+                <option value="amritsar">Amritsar (Sri Guru Ram Dass Jee Hub)</option>
+                <option value="varanasi">Varanasi (Lal Bahadur Shastri Hub)</option>
+                <option value="pune">Pune (Lohegaon Hub)</option>
+                <option value="custom">✦ Custom Location / My GPS...</option>
+              </select>
+              <button type="button" class="btn-inline-action" id="btn-use-geolocation" title="Detect Current GPS Location">
+                <i class="fa-solid fa-location-crosshairs"></i> Use GPS
+              </button>
+            </div>
+            <input type="text" class="form-input" id="origin-custom-input" placeholder="Type city or airport name (e.g., Lucknow, Chandigarh)..." style="display:none; margin-top:8px;">
+          </div>
+
+          <!-- Trip Duration, Pace, Mode -->
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="trip-duration-select">
+                <i class="fa-regular fa-calendar"></i> Trip Duration
+              </label>
+              <select class="form-select" id="trip-duration-select">
+                <option value="1">1 Day (Express Sprint)</option>
+                <option value="3" selected>3 Days (Weekend Circuit)</option>
+                <option value="5">5 Days (Golden Odyssey)</option>
+                <option value="7">7 Days (Grand Heritage Week)</option>
+                <option value="10">10 Days (Comprehensive Tour)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="trip-pace-select">
+                <i class="fa-solid fa-gauge-high"></i> Travel Pace
+              </label>
+              <select class="form-select" id="trip-pace-select">
+                <option value="relaxed">Relaxed (1-2 sites/day)</option>
+                <option value="balanced" selected>Balanced (2-3 sites/day)</option>
+                <option value="intensive">Intensive (3-4 sites/day)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 22px;">
+            <label class="form-label" for="trip-mode-select">
+              <i class="fa-solid fa-car"></i> Preferred Travel Mode
+            </label>
+            <select class="form-select" id="trip-mode-select">
+              <option value="car" selected>Private Vehicle / Taxi (Roadway Routing)</option>
+              <option value="transit">Indian Railways & Transit (Scenic Corridors)</option>
+              <option value="flight">Flight + Local Cab (Inter-regional Connectors)</option>
+              <option value="walking">Two-Wheeler / Trekking (Cluster Exploration)</option>
+            </select>
+          </div>
+
+          <!-- STEP 2: Destination Monuments Selection -->
+          <div class="card-title-row" style="margin-top: 12px;">
+            <div class="card-title-group">
+              <span class="step-num-pill">2</span>
+              <div>
+                <h2 class="card-heading">DESTINATION SELECTION</h2>
+                <span class="card-subtext">Choose from 22 verified Indian heritage destinations</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="presets-row">
+            <button type="button" class="preset-chip" data-preset="all">
+              <i class="fa-solid fa-globe"></i> All 22 Sites
+            </button>
+            <button type="button" class="preset-chip" data-preset="unesco">
+              <i class="fa-solid fa-award"></i> UNESCO Highlights (8)
+            </button>
+            <button type="button" class="preset-chip active" data-preset="north">
+              <i class="fa-solid fa-compass"></i> North Circuit (5)
+            </button>
+            <button type="button" class="preset-chip" data-preset="south">
+              <i class="fa-solid fa-temple"></i> South Temples (4)
+            </button>
+            <button type="button" class="preset-chip" data-preset="west">
+              <i class="fa-solid fa-landmark"></i> West Forts & Caves (6)
+            </button>
+            <button type="button" class="preset-chip" data-preset="east_northeast">
+              <i class="fa-solid fa-mountain-sun"></i> East & Northeast (5)
+            </button>
+            <button type="button" class="preset-chip" data-preset="spiritual">
+              <i class="fa-solid fa-om"></i> Sacred Spiritual Trail
+            </button>
+          </div>
+
+          <!-- Search & Select Toolbar -->
+          <div class="selection-toolbar">
+            <div class="search-box-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" class="search-input" id="monuments-search-input" placeholder="Search monuments by name, city, state...">
+            </div>
+            <div class="selection-actions">
+              <button type="button" class="btn-mini-tool" id="btn-select-all-monuments">Select All</button>
+              <button type="button" class="btn-mini-tool" id="btn-clear-all-monuments">Clear</button>
+              <span class="selected-counter-text" id="selected-counter-text">Selected: 3 of 22</span>
+            </div>
+          </div>
+
+          <!-- Grid of Monument Select Cards -->
+          <div class="monuments-selector-grid" id="monuments-selector-grid">
+            <!-- Dynamically populated by journeyPlanner.js -->
+          </div>
+
+          <!-- Generate Action Button -->
+          <button type="button" class="btn-generate-itinerary" id="btn-generate-itinerary">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Generate Smart Itinerary</span>
+          </button>
+        </section>
+
+        <!-- STEP 3: Generated Itinerary Timeline Container -->
+        <section class="itinerary-output-container" id="itinerary-output-container">
+
+          <!-- Summary Hero Banner -->
+          <div class="itinerary-summary-hero">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+              <div>
+                <span style="font-size:10px; letter-spacing:0.2em; color:var(--jp-gold); font-weight:700; text-transform:uppercase;">
+                  ✦ GEOGRAPHICALLY CLUSTERED EXPEDITION ✦
+                </span>
+                <h3 style="font-family:var(--jp-font-heading); font-size:22px; color:#ffffff; margin-top:4px;">
+                  Your Personalized Heritage Expedition
+                </h3>
+                <p style="font-size:12.5px; color:var(--jp-bone-dim); margin-top:4px;">
+                  Optimized route minimizing transit zigzags with real coordinates and realistic travel durations.
+                </p>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="itinerary-actions-bar">
+                <button type="button" class="btn-action-primary" id="btn-save-journey">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Save Journey
+                </button>
+                <button type="button" class="btn-action-secondary" id="btn-print-itinerary">
+                  <i class="fa-solid fa-print"></i> Print / PDF
+                </button>
+                <button type="button" class="btn-action-secondary" id="btn-export-json">
+                  <i class="fa-solid fa-file-arrow-down"></i> Export JSON
+                </button>
+              </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="itinerary-meta-grid">
+              <div class="summary-stat-box">
+                <span class="stat-label">Destinations</span>
+                <span class="stat-value" id="stat-total-sites">0</span>
+              </div>
+              <div class="summary-stat-box">
+                <span class="stat-label">Duration</span>
+                <span class="stat-value" id="stat-total-days">0 Days</span>
+              </div>
+              <div class="summary-stat-box">
+                <span class="stat-label">Est. Travel</span>
+                <span class="stat-value" id="stat-total-distance">0 km</span>
+              </div>
+              <div class="summary-stat-box">
+                <span class="stat-label">Exploration Time</span>
+                <span class="stat-value" id="stat-total-hours">0 hrs</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Day Filter Tabs -->
+          <div class="day-filter-tabs" id="itinerary-day-tabs">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Day-by-Day Cards List -->
+          <div id="itinerary-days-container">
+            <!-- Dynamically populated by journeyPlanner.js -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Sticky Interactive Leaflet Map -->
+      <aside class="planner-map-column">
+        <div class="map-wrapper-card">
+          <div class="map-header-toolbar">
+            <span class="map-title-label">
+              <i class="fa-solid fa-map-location-dot" style="color:var(--jp-gold);"></i>
+              <span>INTERACTIVE ROUTE MAP</span>
+            </span>
+            <div class="map-toolbar-actions">
+              <select id="map-style-select" class="btn-map-control" style="cursor:pointer;" title="Switch CARTO Basemap Style">
+                <option value="voyager" selected>🗺️ CARTO Voyager</option>
+                <option value="dark_matter">🌙 CARTO Dark</option>
+                <option value="positron">☀️ CARTO Light</option>
+              </select>
+              <button type="button" class="btn-map-control" id="btn-map-fit-bounds" title="Fit all stops in view">
+                <i class="fa-solid fa-compress"></i> Fit All
+              </button>
+            </div>
+          </div>
+
+          <!-- Map Element -->
+          <div id="journey-leaflet-map"></div>
+
+          <!-- Day Color Legend Bar -->
+          <div class="map-legend-bar">
+            <span style="color:#ffffff; font-weight:700;">ROUTE LEGEND:</span>
+            <div class="legend-item"><span class="legend-dot" style="background:#c9a24a;"></span> Day 1</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#e0231c;"></span> Day 2</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> Day 3</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Day 4</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#a855f7;"></span> Day 5</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Day 6</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f43f5e;"></span> Day 7</div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- MODALS -->
+
+  <!-- 1. Saved Journeys Modal -->
+  <div class="planner-modal-backdrop" id="saved-journeys-modal">
+    <div class="planner-modal-dialog">
+      <div class="modal-header-bar">
+        <h3 class="modal-title"><i class="fa-solid fa-bookmark" style="color:var(--jp-gold); margin-right:8px;"></i> My Saved Journeys</h3>
+        <button type="button" class="btn-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-content-body">
+        <div id="saved-journeys-list" class="saved-journeys-list">
+          <!-- Populated by journeyPlanner.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Monument Lore Modal -->
+  <div class="planner-modal-backdrop" id="monument-lore-modal">
+    <div class="planner-modal-dialog">
+      <div class="modal-header-bar">
+        <h3 class="modal-title" id="lore-modal-title">Monument Details</h3>
+        <button type="button" class="btn-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-content-body" id="lore-modal-body">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Voice Guide Player Modal -->
+  <div class="planner-modal-backdrop" id="voice-guide-player-modal">
+    <div class="planner-modal-dialog">
+      <div class="modal-header-bar">
+        <h3 class="modal-title" id="vg-modal-title">Voice Guide</h3>
+        <button type="button" class="btn-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-content-body" id="vg-modal-body">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer-bar" style="text-align:center; padding:32px 16px; border-top:1px solid var(--jp-border); margin-top:40px; font-size:11.5px; color:var(--jp-muted);">
+    <div style="font-family:var(--jp-font-heading); color:var(--jp-gold); letter-spacing:0.18em; margin-bottom:6px;">
+      YUGMA DIGITAL HERITAGE MUSEUM
+    </div>
+    <div>Preserving Civilizational Memory • 22 Master Cultural Sanctuaries • Open Access</div>
+  </footer>
+
+  <!-- Scripts -->
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- YUGMA Voice Guide Access Controller -->
+  <script src="js/voiceGuideAccess.js"></script>
+
+  <!-- Master Journey Planner Engine -->
+  <script src="js/journeyPlanner.js"></script>
+
+  <!-- YUGMA AI Companion & Audio Visualizer -->
+  <script src="js/aiVisualizer.js"></script>
+</body>
+</html>
+

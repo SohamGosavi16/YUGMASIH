@@ -1,0 +1,1454 @@
+/* =============================================================================
+   YUGMA SMART HERITAGE JOURNEY PLANNER - STYLESHEET
+   Luxury Dark Heritage Aesthetic matching YUGMA Museum Design System
+   ============================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --jp-ink: #05070a;
+  --jp-ink-2: #0a0e13;
+  --jp-ink-3: #111720;
+  --jp-card-bg: rgba(14, 20, 29, 0.82);
+  --jp-card-hover: rgba(22, 31, 45, 0.92);
+  --jp-border: rgba(201, 162, 74, 0.24);
+  --jp-border-bright: #c9a24a;
+  --jp-border-soft: rgba(223, 231, 224, 0.1);
+  --jp-gold: #c9a24a;
+  --jp-gold-bright: #dfa753;
+  --jp-gold-glow: rgba(201, 162, 74, 0.35);
+  --jp-vermilion: #e0231c;
+  --jp-vermilion-glow: rgba(224, 35, 28, 0.35);
+  --jp-bone: #dfe7e0;
+  --jp-bone-dim: #aab4ad;
+  --jp-muted: #748077;
+  --jp-cyan: #38bdf8;
+  --jp-emerald: #10b981;
+  --jp-amethyst: #a855f7;
+  --jp-amber: #f59e0b;
+  --jp-rose: #f43f5e;
+
+  --jp-font-heading: 'Cinzel', serif;
+  --jp-font-serif: 'Cormorant Garamond', Georgia, serif;
+  --jp-font-body: 'Outfit', system-ui, -apple-system, sans-serif;
+
+  --jp-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --jp-glass: blur(14px);
+  --jp-radius: 8px;
+  --jp-radius-lg: 14px;
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.planner-body {
+  background-color: var(--jp-ink);
+  color: var(--jp-bone);
+  font-family: var(--jp-font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  background-image: 
+    radial-gradient(circle at 18% 12%, rgba(201, 162, 74, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 82% 78%, rgba(224, 35, 28, 0.05) 0%, transparent 45%),
+    linear-gradient(180deg, #05070a 0%, #080c11 100%);
+  background-attachment: fixed;
+}
+
+/* Cosmic background canvas / star dust */
+.cosmos-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+  background-image: radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 40px 70px, rgba(201,162,74,0.6), rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+                    radial-gradient(1.5px 1.5px at 150px 120px, #c9a24a, rgba(0,0,0,0));
+  background-size: 200px 200px;
+}
+
+/* ── Top Navigation Bar ────────────────────────────────────────────── */
+.planner-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 72px;
+  padding: 0 clamp(16px, 3.5vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(8, 12, 17, 0.88);
+  backdrop-filter: var(--jp-glass);
+  -webkit-backdrop-filter: var(--jp-glass);
+  border-bottom: 1px solid var(--jp-border);
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.65);
+}
+
+.nav-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-icon-box {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--jp-border);
+  background: radial-gradient(circle, rgba(201, 162, 74, 0.2) 0%, rgba(5, 7, 10, 0.8) 100%);
+  box-shadow: 0 0 14px var(--jp-gold-glow);
+}
+
+.brand-icon-box svg {
+  width: 24px;
+  height: 24px;
+}
+
+.brand-meta-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-main-title {
+  font-family: var(--jp-font-heading);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.brand-sub-tag {
+  font-size: 9.5px;
+  letter-spacing: 0.26em;
+  color: var(--jp-gold);
+  text-transform: uppercase;
+}
+
+.nav-links-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-family: var(--jp-font-body);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--jp-bone);
+  background: rgba(17, 23, 32, 0.7);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.nav-action-btn:hover {
+  border-color: var(--jp-gold);
+  color: var(--jp-gold-bright);
+  box-shadow: 0 0 12px var(--jp-gold-glow);
+  transform: translateY(-1px);
+}
+
+.nav-action-btn.active {
+  background: rgba(201, 162, 74, 0.16);
+  border-color: var(--jp-gold);
+  color: var(--jp-gold-bright);
+}
+
+.nav-action-btn.btn-saved {
+  background: rgba(201, 162, 74, 0.1);
+  border-color: rgba(201, 162, 74, 0.4);
+}
+
+.saved-counter-badge {
+  background: var(--jp-gold);
+  color: #05070a;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.user-auth-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  background: rgba(17, 24, 34, 0.85);
+  border: 1px solid var(--jp-border);
+  border-radius: 20px;
+}
+
+.user-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--jp-emerald);
+  box-shadow: 0 0 6px var(--jp-emerald);
+}
+
+.user-status-dot.guest {
+  background: var(--jp-amber);
+  box-shadow: 0 0 6px var(--jp-amber);
+}
+
+/* ── Main Container ────────────────────────────────────────────────── */
+.planner-main {
+  position: relative;
+  z-index: 1;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 24px clamp(16px, 3.5vw, 40px) 60px;
+}
+
+/* Hero Header */
+.planner-hero-banner {
+  text-align: center;
+  margin-bottom: 28px;
+  padding: 24px 16px 20px;
+}
+
+.hero-sanskrit-tag {
+  font-family: var(--jp-font-heading);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: var(--jp-gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.hero-main-title {
+  font-family: var(--jp-font-heading);
+  font-size: clamp(24px, 3.8vw, 42px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  text-shadow: 0 2px 20px rgba(201, 162, 74, 0.25);
+  margin-bottom: 10px;
+}
+
+.hero-desc {
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--jp-bone-dim);
+  font-weight: 300;
+}
+
+/* Mobile tab switcher */
+.mobile-view-tabs {
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 20px;
+  background: var(--jp-ink-2);
+  padding: 6px;
+  border-radius: var(--jp-radius);
+  border: 1px solid var(--jp-border-soft);
+}
+
+.mobile-tab-btn {
+  padding: 10px 4px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  text-align: center;
+  background: transparent;
+  color: var(--jp-bone-dim);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mobile-tab-btn.active {
+  background: var(--jp-gold);
+  color: #05070a;
+}
+
+/* ── Split Layout Grid ─────────────────────────────────────────────── */
+.planner-grid-layout {
+  display: grid;
+  grid-template-columns: minmax(480px, 1.25fr) minmax(420px, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+/* ── Left Column: Config & Timeline ────────────────────────────────── */
+.planner-panel-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Section Card */
+.config-card {
+  background: var(--jp-card-bg);
+  backdrop-filter: var(--jp-glass);
+  -webkit-backdrop-filter: var(--jp-glass);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius-lg);
+  padding: 24px;
+  box-shadow: var(--jp-shadow);
+  transition: border-color 0.25s;
+}
+
+.config-card:hover {
+  border-color: rgba(201, 162, 74, 0.4);
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--jp-border-soft);
+}
+
+.card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.step-num-pill {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(201, 162, 74, 0.15);
+  border: 1px solid var(--jp-gold);
+  color: var(--jp-gold-bright);
+  font-family: var(--jp-font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-heading {
+  font-family: var(--jp-font-heading);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+}
+
+.card-subtext {
+  font-size: 11.5px;
+  color: var(--jp-muted);
+}
+
+/* Form Groups */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--jp-gold-bright);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-select,
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  color: var(--jp-bone);
+  font-family: var(--jp-font-body);
+  font-size: 13px;
+  transition: all 0.25s ease;
+  outline: none;
+}
+
+.form-select:focus,
+.form-input:focus {
+  border-color: var(--jp-gold);
+  box-shadow: 0 0 10px var(--jp-gold-glow);
+}
+
+.input-with-button {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-inline-action {
+  padding: 0 14px;
+  background: rgba(201, 162, 74, 0.12);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius);
+  color: var(--jp-gold-bright);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.btn-inline-action:hover {
+  background: var(--jp-gold);
+  color: #05070a;
+}
+
+/* Destination Presets & Filter Pills */
+.presets-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  scrollbar-width: thin;
+}
+
+.preset-chip {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  background: rgba(17, 23, 33, 0.85);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: 20px;
+  color: var(--jp-bone-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.preset-chip:hover {
+  border-color: var(--jp-gold);
+  color: var(--jp-gold-bright);
+}
+
+.preset-chip.active {
+  background: rgba(201, 162, 74, 0.2);
+  border-color: var(--jp-gold);
+  color: var(--jp-gold-bright);
+  box-shadow: 0 0 8px var(--jp-gold-glow);
+}
+
+/* Search and selection toolbar */
+.selection-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.search-box-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-box-wrapper i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--jp-muted);
+  font-size: 12px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  font-size: 12px;
+  background: rgba(9, 13, 18, 0.85);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  color: var(--jp-bone);
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--jp-gold);
+}
+
+.selection-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-mini-tool {
+  padding: 6px 10px;
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  color: var(--jp-bone-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-mini-tool:hover {
+  border-color: var(--jp-gold);
+  color: var(--jp-gold);
+}
+
+.selected-counter-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--jp-gold);
+}
+
+/* Destination Monuments Selection Grid */
+.monuments-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-bottom: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--jp-gold) rgba(10, 14, 20, 0.6);
+}
+
+.monument-select-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(9, 13, 19, 0.7);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.monument-select-card:hover {
+  border-color: rgba(201, 162, 74, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.monument-select-card.selected {
+  border-color: var(--jp-gold);
+  background: rgba(201, 162, 74, 0.08);
+  box-shadow: 0 0 12px var(--jp-gold-glow);
+}
+
+.monument-card-img-wrap {
+  position: relative;
+  height: 90px;
+  width: 100%;
+  overflow: hidden;
+  background: #020406;
+}
+
+.monument-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.monument-select-card:hover .monument-card-img {
+  transform: scale(1.05);
+}
+
+.card-check-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(5, 7, 10, 0.75);
+  border: 1.5px solid var(--jp-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  font-size: 11px;
+  transition: all 0.2s ease;
+}
+
+.monument-select-card.selected .card-check-indicator {
+  background: var(--jp-gold);
+  border-color: var(--jp-gold);
+  color: #05070a;
+}
+
+.card-region-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(5, 7, 10, 0.85);
+  color: var(--jp-gold);
+  border: 1px solid rgba(201, 162, 74, 0.3);
+}
+
+.monument-card-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.monument-card-title {
+  font-family: var(--jp-font-heading);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.monument-card-subtitle {
+  font-size: 10.5px;
+  color: var(--jp-bone-dim);
+}
+
+.monument-card-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--jp-muted);
+  padding-top: 6px;
+}
+
+/* Primary Execution Button */
+.btn-generate-itinerary {
+  width: 100%;
+  padding: 14px 24px;
+  font-family: var(--jp-font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #05070a;
+  background: linear-gradient(135deg, #dfa753 0%, #c9a24a 50%, #9e792a 100%);
+  border: none;
+  border-radius: var(--jp-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 20px var(--jp-gold-glow);
+  transition: all 0.3s ease;
+}
+
+.btn-generate-itinerary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(201, 162, 74, 0.55);
+  background: linear-gradient(135deg, #f0ba65 0%, #dfa753 50%, #b88f34 100%);
+}
+
+.btn-generate-itinerary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Step 3: Generated Itinerary View ──────────────────────────────── */
+.itinerary-output-container {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.itinerary-output-container.active {
+  display: flex;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.itinerary-summary-hero {
+  background: linear-gradient(135deg, rgba(201, 162, 74, 0.12) 0%, rgba(14, 20, 29, 0.9) 100%);
+  border: 1px solid var(--jp-gold);
+  border-radius: var(--jp-radius-lg);
+  padding: 20px 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.itinerary-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--jp-border);
+}
+
+.summary-stat-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--jp-bone-dim);
+}
+
+.stat-value {
+  font-family: var(--jp-font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--jp-gold-bright);
+}
+
+/* Itinerary Action Toolbar */
+.itinerary-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-action-primary,
+.btn-action-secondary {
+  padding: 9px 16px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: var(--jp-radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s;
+}
+
+.btn-action-primary {
+  background: var(--jp-gold);
+  color: #05070a;
+  border: 1px solid var(--jp-gold);
+}
+
+.btn-action-primary:hover {
+  background: var(--jp-gold-bright);
+  box-shadow: 0 0 14px var(--jp-gold-glow);
+}
+
+.btn-action-secondary {
+  background: rgba(17, 24, 34, 0.8);
+  color: var(--jp-bone);
+  border: 1px solid var(--jp-border-soft);
+}
+
+.btn-action-secondary:hover {
+  border-color: var(--jp-gold);
+  color: var(--jp-gold);
+}
+
+/* Day Tabs Selector */
+.day-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.day-tab-pill {
+  padding: 7px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  background: var(--jp-ink-3);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: 20px;
+  color: var(--jp-bone-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.day-tab-pill.active {
+  background: var(--jp-gold);
+  border-color: var(--jp-gold);
+  color: #05070a;
+}
+
+/* Day Schedule Card */
+.day-timeline-card {
+  background: var(--jp-card-bg);
+  backdrop-filter: var(--jp-glass);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--jp-shadow);
+  margin-bottom: 18px;
+}
+
+.day-card-header {
+  padding: 16px 20px;
+  background: rgba(10, 14, 20, 0.9);
+  border-bottom: 1px solid var(--jp-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.day-badge-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.day-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.day-title-text {
+  font-family: var(--jp-font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.day-region-sub {
+  font-size: 11.5px;
+  color: var(--jp-gold);
+}
+
+/* Stops Sequence */
+.day-stops-list {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Individual Monument Stop Card */
+.stop-card {
+  position: relative;
+  background: rgba(10, 15, 22, 0.7);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  transition: all 0.25s;
+}
+
+.stop-card:hover {
+  border-color: var(--jp-border);
+  background: rgba(15, 22, 32, 0.85);
+}
+
+.stop-thumb-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  background: #000;
+}
+
+.stop-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stop-order-tag {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(5, 7, 10, 0.85);
+  border: 1px solid var(--jp-gold);
+  color: var(--jp-gold);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.stop-info-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stop-time-slot {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--jp-gold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stop-monument-name {
+  font-family: var(--jp-font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stop-hindi-name {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--jp-bone-dim);
+}
+
+.stop-location-desc {
+  font-size: 11.5px;
+  color: var(--jp-muted);
+}
+
+.stop-actions-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-stop-action {
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  background: rgba(20, 28, 38, 0.8);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  color: var(--jp-bone);
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.btn-stop-action:hover {
+  border-color: var(--jp-gold);
+  color: var(--jp-gold-bright);
+}
+
+.btn-stop-action.btn-3d {
+  background: rgba(201, 162, 74, 0.15);
+  border-color: rgba(201, 162, 74, 0.4);
+  color: var(--jp-gold-bright);
+}
+
+.btn-stop-action.btn-voice {
+  background: rgba(224, 35, 28, 0.15);
+  border-color: rgba(224, 35, 28, 0.4);
+  color: #fca5a5;
+}
+
+/* Travel Leg Between Stops */
+.travel-leg-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  margin: 4px 0 4px 40px;
+  background: rgba(14, 20, 28, 0.6);
+  border-left: 2px dashed var(--jp-border);
+  border-radius: 0 var(--jp-radius) var(--jp-radius) 0;
+  font-size: 11px;
+  color: var(--jp-bone-dim);
+}
+
+.travel-leg-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.transit-type-tag {
+  color: var(--jp-gold);
+  font-weight: 600;
+}
+
+.transit-gmaps-link {
+  color: var(--jp-cyan);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.transit-gmaps-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Right Column: Sticky Interactive Leaflet Map ──────────────────── */
+.planner-map-column {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: calc(100vh - 120px);
+  min-height: 520px;
+}
+
+.map-wrapper-card {
+  position: relative;
+  flex: 1;
+  background: var(--jp-card-bg);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--jp-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.map-header-toolbar {
+  padding: 12px 18px;
+  background: rgba(10, 14, 20, 0.95);
+  border-bottom: 1px solid var(--jp-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 500;
+}
+
+.map-title-label {
+  font-family: var(--jp-font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-map-control {
+  padding: 5px 10px;
+  font-size: 11px;
+  background: rgba(17, 24, 34, 0.8);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  color: var(--jp-bone);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.btn-map-control:hover {
+  border-color: var(--jp-gold);
+  color: var(--jp-gold);
+}
+
+#journey-leaflet-map {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background: #070a0e;
+  z-index: 10;
+}
+
+/* Leaflet dark custom marker */
+.custom-gold-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #05070a;
+  border: 2px solid var(--marker-color, #c9a24a);
+  color: #ffffff;
+  font-family: var(--jp-font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 0 12px var(--marker-color, rgba(201, 162, 74, 0.6));
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.custom-gold-marker:hover {
+  transform: scale(1.15);
+}
+
+/* Leaflet Custom Popups */
+.leaflet-popup-content-wrapper {
+  background: rgba(10, 14, 20, 0.95) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--jp-gold) !important;
+  border-radius: 10px !important;
+  color: var(--jp-bone) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(10, 14, 20, 0.95) !important;
+  border: 1px solid var(--jp-gold) !important;
+}
+
+.map-popup-inner {
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 240px;
+}
+
+.popup-img-wrap {
+  width: 100%;
+  height: 90px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+.popup-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.popup-title {
+  font-family: var(--jp-font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.popup-sub {
+  font-size: 11px;
+  color: var(--jp-gold);
+}
+
+.popup-actions-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.btn-popup-action {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-popup-action.primary {
+  background: var(--jp-gold);
+  color: #05070a;
+}
+
+.btn-popup-action.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Map legend */
+.map-legend-bar {
+  padding: 10px 16px;
+  background: rgba(8, 12, 17, 0.95);
+  border-top: 1px solid var(--jp-border-soft);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow-x: auto;
+  font-size: 10.5px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ── Modals & Drawers ──────────────────────────────────────────────── */
+.planner-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 5, 8, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.planner-modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.planner-modal-dialog {
+  background: var(--jp-ink-2);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius-lg);
+  max-width: 640px;
+  width: 90%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.planner-modal-backdrop.active .planner-modal-dialog {
+  transform: translateY(0);
+}
+
+.modal-header-bar {
+  padding: 18px 24px;
+  background: rgba(14, 20, 28, 0.95);
+  border-bottom: 1px solid var(--jp-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-family: var(--jp-font-heading);
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.btn-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--jp-bone-dim);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.btn-modal-close:hover {
+  color: var(--jp-gold);
+}
+
+.modal-content-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Saved journeys list inside modal */
+.saved-journeys-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.saved-journey-item {
+  background: rgba(14, 20, 28, 0.8);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: all 0.2s;
+}
+
+.saved-journey-item:hover {
+  border-color: var(--jp-border);
+  background: rgba(20, 28, 40, 0.9);
+}
+
+.saved-item-meta h4 {
+  font-family: var(--jp-font-heading);
+  font-size: 14.5px;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.saved-item-meta p {
+  font-size: 11.5px;
+  color: var(--jp-bone-dim);
+}
+
+.saved-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Print / PDF Dossier Styles (@media print) ─────────────────────── */
+@media print {
+  body.planner-body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+  .planner-nav,
+  .cosmos-bg,
+  .planner-map-column,
+  .config-card,
+  .itinerary-actions-bar,
+  .btn-stop-action,
+  .transit-gmaps-link,
+  .mobile-view-tabs,
+  .footer-bar {
+    display: none !important;
+  }
+  .planner-main {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .planner-grid-layout {
+    display: block !important;
+  }
+  .itinerary-output-container {
+    display: block !important;
+  }
+  .day-timeline-card {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    margin-bottom: 24px;
+  }
+  .day-card-header {
+    background: #f4f4f4 !important;
+    color: #000000 !important;
+  }
+  .day-title-text {
+    color: #000000 !important;
+  }
+  .stop-card {
+    background: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    color: #111111 !important;
+  }
+  .stop-monument-name {
+    color: #000000 !important;
+  }
+}
+
+/* ── Responsive Media Queries ──────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .planner-grid-layout {
+    grid-template-columns: 1fr;
+  }
+  .planner-map-column {
+    position: relative;
+    top: 0;
+    height: 480px;
+    margin-bottom: 24px;
+  }
+  .mobile-view-tabs {
+    display: grid;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .stop-card {
+    grid-template-columns: 1fr;
+  }
+  .stop-thumb-box {
+    width: 100%;
+    height: 140px;
+  }
+  .travel-leg-banner {
+    margin-left: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
