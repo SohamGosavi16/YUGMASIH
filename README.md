@@ -31,13 +31,17 @@ An intelligent, multi-agent virtual heritage guide featuring real-time generativ
   - 🧭 **Yatra (Expedition Curator)**: Recommends optimal visiting hours, golden-hour photography vantage points, temple sanctum dress codes, and heritage circuits.
   - ✨ **All-Rounder (Civilizational Harmonizer)**: Delivers holistic, multi-perspective synthesis balancing all domains.
 - **Dual-Engine Intelligence (Hybrid Live AI + Curated Offline Engine)**:
-  - **Live AI Mode**: Centralized integration with **Google Gemini 3.8 Flash** pre-configured for all visitors without requiring end-user API keys.
+  - **Live AI Mode**: Powered by **Google Gemini** via a secure **Netlify Serverless Function** (`/.netlify/functions/gemini` / `/api/gemini`). The API key is stored server-side in Netlify environment variables (`GEMINI_API_KEY`) and is never exposed in browser code, client network requests, or repository commits.
   - **Curated Knowledge Engine**: Comprehensive offline multi-agent dossier covering all **22 monuments** with instant fallback on zero latency.
 - **4-State Golden AI Orb Visualizer**:
   - High-performance HTML5 Canvas 2D orb rendering with concentric rotating architectural rings, pulsing auras, and a 28-bar radial audio spectrum.
   - States: `✦ IDLE // READY`, `✦ DELIBERATING ARCHIVE...`, `✦ AGENT SPEAKING...`, and `✦ SPEECH PAUSED`.
   - **Web Speech API Cadence Synchronization**: Word-boundary phonetic energy modulation simulating realistic speech dynamics.
-- **Voice Control Cluster**: Play, Pause, Resume, Stop, Replay, Volume Slider, and real-time Speech Progress Tracking.
+- **Full Narration Playback Suite**:
+  - **Positioned in Right-Side AI Chat Panel & Directly Below Visualizer**: Narration playback controls are prominently integrated both directly beneath the golden orb visualizer and inside the right-side chat panel under the response viewport (without overlapping chat messages or input).
+  - **6 Dedicated Controls**: **Play** (start narration), **Pause** (suspend narration), **Resume** (continue from paused character/word), **Stop** (terminate narration & reset progress to 0%), **Replay** (restart from the very beginning), and **Volume Control** (slider + live percentage).
+  - **6 Synchronized Playback Statuses**: Clear real-time status reporting (`Ready to play.`, `Currently speaking.`, `Paused.`, `Finished.`, `Stopped.`, `Audio unavailable.`).
+  - **Zero Viewport Clutter**: No floating controls at the bottom-left corner of the website; all controls are cleanly self-contained within the AI Companion modal.
 - **Top-Right Visualizer Launcher**: Compact, non-intrusive glowing golden orb launcher with dynamic state animations.
 
 ---
@@ -174,6 +178,13 @@ new sih/
 ├── templegopuram-vr.html            # Temple Gopuram AR/VR
 ├── victoriamemorial-vr.html         # Victoria Memorial AR/VR
 │
+├── netlify/
+│   └── functions/
+│       └── gemini.js                # Secure Netlify serverless proxy for Gemini API
+├── netlify.toml                     # Netlify build configuration & clean API redirects
+├── .env.example                     # Environment variable template (GEMINI_API_KEY)
+├── .gitignore                       # Git security ignore list (protects .env and secrets)
+│
 ├── css/
 │   ├── aiVisualizer.css             # Golden AI Orb visualizer & multi-agent modal
 │   ├── journeyPlanner.css           # Journey planner responsive interface & route drawer
@@ -258,7 +269,7 @@ Visit `http://localhost:8080` in your web browser.
 | **3D Orbital Globe** | Globe.gl v2.46.2 | Scroll-driven orbital Earth and subcontinent focus |
 | **3D Rendering** | Three.js v0.180.0 | GLTF/GLB loader, PBR materials, WebGL pipelines |
 | **AR / VR Portals** | WebXR API / HTML5 Canvas | 360° equirectangular panoramas & immersive viewports |
-| **Generative AI** | Google Gemini 3.8 Flash | Live generative conversational intelligence |
+| **Generative AI** | Google Gemini (Serverless Proxy) | Secure Netlify Function (`GEMINI_API_KEY`) protecting credentials |
 | **Audio Visualizer** | HTML5 Canvas 2D | 60FPS golden orb with concentric rings & radial spectrum |
 | **Voice Narration** | Web Speech API | `SpeechSynthesis` with phonetic cadence synchronization |
 | **Mapping & Routing** | Leaflet.js + CARTO Voyager | Geospatial monument mapping & multi-stop route clustering |

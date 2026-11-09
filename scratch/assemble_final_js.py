@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Assemble production js/aiVisualizer.js without end-user API key prompt or settings modal.
-Uses central YUGMA_AI_CONFIG.GEMINI_API_KEY across all users.
+Assemble production js/aiVisualizer.js without ANY client-side credentials.
+Routes requests securely through Netlify Serverless Function: /.netlify/functions/gemini
+The Gemini API key is stored only on the server in process.env.GEMINI_API_KEY.
 """
 
 import os
@@ -14,7 +15,7 @@ JSON_KNOWLEDGE = json.dumps(ALL_KNOWLEDGE, indent=2)
 
 TEMPLATE = """/**
  * YUGMA AI Heritage Companion & Audio Visualizer (Multi-Agent System)
- * Version: 2.6.0
+ * Version: 2.7.0 (Secure Serverless Architecture)
  * 
  * Features:
  * - 5 Specialized Heritage AI Agents:
@@ -23,8 +24,11 @@ TEMPLATE = """/**
  *   3. Master Architect (Sthapatya: Vastu Shastra, acoustics, interlocking stone)
  *   4. Sacred Lore (Katha: Temple myths, deity iconography, living folklore)
  *   5. Travel Curator (Yatra: Viewpoints, golden hour photography, circuits)
- * - Central Platform Gemini 3.8 Flash AI Integration (Zero end-user key prompts)
- * - Vastly Expanded Local Knowledge Base for all 22 YUGMA Heritage Monuments
+ * - Secure Serverless Architecture:
+ *   Calls Netlify Serverless Function (/.netlify/functions/gemini)
+ *   The Google Gemini API key is stored securely in Netlify environment variables (GEMINI_API_KEY)
+ *   and is NEVER exposed to the browser, network URLs, or GitHub.
+ * - Vastly Expanded Local Knowledge Base for all 22 YUGMA Heritage Monuments (Offline/Fallback)
  * - 4-State Golden AI Orb Visualizer with dynamic audio-reactive waveforms
  * - Web Speech API cadence synchronization & voice controls
  * - High accessibility (reduced motion toggle, keyboard shortcuts, mobile responsive)
@@ -42,10 +46,11 @@ TEMPLATE = """/**
   'use strict';
 
   // ── 0. GLOBAL YUGMA AI CONFIGURATION ──────────────────────────────────────
-  // Central Gemini API key used across all users for live multi-agent intelligence.
-  // Enter your Google Gemini API key below:
+  // The Gemini API key is securely managed on the server (Netlify Environment Variables)
+  // and is never exposed in client-side code, network URLs, or GitHub.
   var YUGMA_AI_CONFIG = {
-    GEMINI_API_KEY: "AQ.Ab8RN6KT0IT_vU3Rb4q1rGKw2eE6255pMX3TXN1Dz0PVULPbag" // <-- Central Gemini API key
+    // Relative endpoint for the Netlify serverless function (works on local netlify dev and production)
+    API_ENDPOINT: "/.netlify/functions/gemini"
   };
 
   if (typeof window !== 'undefined') {
@@ -73,7 +78,6 @@ TEMPLATE = """/**
     // Current State & Active Agent
     currentState: STATES.IDLE,
     selectedAgent: 'orchestrator',
-    geminiApiKey: '',
 
     // Audio & Speech
     audioContext: null,
@@ -87,6 +91,9 @@ TEMPLATE = """/**
     lastSpokenTitle: "",
     charProgress: 0,
     totalChars: 0,
+    isPaused: false,
+    activeOffset: 0,
+    currentPlaybackStatus: "Ready to play.",
 
     // Canvas & Animation loop
     canvas: null,
@@ -102,45 +109,11 @@ TEMPLATE = """/**
 
     // ── Initialization ──────────────────────────────────────────────────────
     init: function () {
-      this.loadGeminiKey();
       this.initDOM();
       this.initParticles();
       this.bindEvents();
       this.setAgent('orchestrator');
-      this.updateSettingsStatusUI();
       this.setInitialText();
-    },
-
-    // ── API Key Storage & Central Resolution ────────────────────────────────
-    loadGeminiKey: function () {
-      // 1. Check window override (e.g. window.YUGMA_GEMINI_API_KEY)
-      if (typeof window !== 'undefined' && window.YUGMA_GEMINI_API_KEY && window.YUGMA_GEMINI_API_KEY.trim()) {
-        this.geminiApiKey = window.YUGMA_GEMINI_API_KEY.trim();
-        return;
-      }
-      // 2. Check central YUGMA_AI_CONFIG object
-      if (YUGMA_AI_CONFIG && YUGMA_AI_CONFIG.GEMINI_API_KEY && YUGMA_AI_CONFIG.GEMINI_API_KEY.trim()) {
-        this.geminiApiKey = YUGMA_AI_CONFIG.GEMINI_API_KEY.trim();
-        return;
-      }
-      // 3. Fallback to localStorage if configured
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          var saved = window.localStorage.getItem('yugma_gemini_api_key');
-          if (saved && saved.trim()) {
-            this.geminiApiKey = saved.trim();
-          }
-        }
-      } catch (e) {
-        console.warn('Could not read localStorage for Gemini key', e);
-      }
-    },
-
-    setApiKey: function (key) {
-      if (!key) key = '';
-      this.geminiApiKey = key.trim();
-      YUGMA_AI_CONFIG.GEMINI_API_KEY = this.geminiApiKey;
-      this.updateSettingsStatusUI();
     },
 
     // ── DOM & Modal Setup ───────────────────────────────────────────────────
@@ -205,37 +178,37 @@ TEMPLATE = """/**
           '        <span class="ai-state-dot"></span>',
           '        <span id="ai-state-label">✦ IDLE // READY</span>',
           '      </div>',
-          '      <!-- Voice Control Panel -->',
+          '      <!-- Voice Control Panel directly below AI voice visualizer -->',
           '      <div class="ai-voice-control-panel">',
           '        <div class="voice-progress-box">',
           '          <div class="voice-progress-bar-wrap">',
           '            <div class="voice-progress-fill" id="ai-voice-progress-fill"></div>',
           '          </div>',
           '          <div class="voice-progress-meta">',
-          '            <span id="ai-voice-status-text">Ready to speak</span>',
+          '            <span id="ai-voice-status-text">Ready to play.</span>',
           '            <span id="ai-voice-progress-text">0%</span>',
           '          </div>',
           '        </div>',
           '        <div class="voice-buttons-cluster">',
-          '          <button type="button" class="btn-voice-ctrl" id="btn-ai-stop" title="Stop speech" disabled>',
+          '          <button type="button" class="btn-voice-ctrl" id="btn-ai-stop" title="Stop narration" aria-label="Stop narration" disabled>',
           '            <i class="fa-solid fa-stop"></i>',
           '          </button>',
-          '          <button type="button" class="btn-voice-ctrl" id="btn-ai-pause" title="Pause speech" disabled>',
+          '          <button type="button" class="btn-voice-ctrl" id="btn-ai-pause" title="Pause narration" aria-label="Pause narration" disabled>',
           '            <i class="fa-solid fa-pause"></i>',
           '          </button>',
-          '          <button type="button" class="btn-voice-ctrl btn-main-play" id="btn-ai-play" title="Play speech">',
+          '          <button type="button" class="btn-voice-ctrl btn-main-play" id="btn-ai-play" title="Play narration" aria-label="Play narration">',
           '            <i class="fa-solid fa-play" id="ai-play-btn-icon"></i>',
           '          </button>',
-          '          <button type="button" class="btn-voice-ctrl" id="btn-ai-resume" title="Resume speech" style="display:none;">',
+          '          <button type="button" class="btn-voice-ctrl btn-main-play" id="btn-ai-resume" title="Resume narration" aria-label="Resume narration" style="display:none;">',
           '            <i class="fa-solid fa-play"></i>',
           '          </button>',
-          '          <button type="button" class="btn-voice-ctrl" id="btn-ai-replay" title="Replay response from beginning">',
+          '          <button type="button" class="btn-voice-ctrl" id="btn-ai-replay" title="Replay narration from beginning" aria-label="Replay narration from beginning">',
           '            <i class="fa-solid fa-rotate-left"></i>',
           '          </button>',
           '        </div>',
           '        <div class="voice-volume-box">',
           '          <i class="fa-solid fa-volume-high"></i>',
-          '          <input type="range" class="voice-volume-slider" id="ai-volume-slider" min="0" max="100" value="90" title="Adjust voice volume">',
+          '          <input type="range" class="voice-volume-slider" id="ai-volume-slider" min="0" max="100" value="90" title="Adjust voice volume" aria-label="Adjust voice volume">',
           '          <span class="voice-volume-label" id="ai-volume-label">90%</span>',
           '        </div>',
           '      </div>',
@@ -273,11 +246,50 @@ TEMPLATE = """/**
           '        <div class="response-header-tag">',
           '          <div style="display:flex; align-items:center; gap:8px;">',
           '            <span id="ai-agent-badge" class="ai-agent-badge"><i class="fa-solid fa-sparkles"></i> YUGMA ALL-ROUNDER</span>',
-          '            <span id="ai-engine-source" class="ai-engine-source">📚 CURATED ARCHIVE</span>',
+          '            <span id="ai-engine-source" class="ai-engine-source gemini-live">⚡ GEMINI LIVE</span>',
           '          </div>',
           '          <span id="ai-response-title" style="color:#c9a24a; font-weight:700;">CIVILIZATIONAL ARCHIVE</span>',
           '        </div>',
           '        <div class="response-text-body" id="ai-response-text"></div>',
+          '      </div>',
+          '      <!-- Dedicated Narration Playback Toolbar inside Right-Side Chat Panel -->',
+          '      <div class="ai-chat-narration-bar" id="ai-chat-narration-bar">',
+          '        <div class="chat-narration-meta-row">',
+          '          <div class="chat-narration-status-wrap">',
+          '            <span class="chat-narration-status-dot"></span>',
+          '            <span class="chat-narration-status-text" id="ai-chat-status-text">Ready to play.</span>',
+          '          </div>',
+          '          <div class="chat-narration-progress-wrap">',
+          '            <div class="chat-narration-progress-bar">',
+          '              <div class="chat-narration-progress-fill" id="ai-chat-progress-fill"></div>',
+          '            </div>',
+          '            <span class="chat-narration-pct" id="ai-chat-progress-text">0%</span>',
+          '          </div>',
+          '        </div>',
+          '        <div class="chat-narration-controls-row">',
+          '          <div class="chat-narration-btn-group">',
+          '            <button type="button" class="btn-narration-ctrl" id="btn-ai-chat-stop" title="Stop narration" aria-label="Stop narration" disabled>',
+          '              <i class="fa-solid fa-stop"></i>',
+          '            </button>',
+          '            <button type="button" class="btn-narration-ctrl" id="btn-ai-chat-pause" title="Pause narration" aria-label="Pause narration" disabled>',
+          '              <i class="fa-solid fa-pause"></i>',
+          '            </button>',
+          '            <button type="button" class="btn-narration-ctrl btn-narration-action" id="btn-ai-chat-play" title="Play narration" aria-label="Play narration">',
+          '              <i class="fa-solid fa-play"></i>',
+          '            </button>',
+          '            <button type="button" class="btn-narration-ctrl btn-narration-action" id="btn-ai-chat-resume" title="Resume narration" aria-label="Resume narration" style="display:none;">',
+          '              <i class="fa-solid fa-play"></i>',
+          '            </button>',
+          '            <button type="button" class="btn-narration-ctrl" id="btn-ai-chat-replay" title="Replay narration from beginning" aria-label="Replay narration from beginning">',
+          '              <i class="fa-solid fa-rotate-left"></i>',
+          '            </button>',
+          '          </div>',
+          '          <div class="chat-narration-volume-group">',
+          '            <i class="fa-solid fa-volume-high" id="ai-chat-vol-icon"></i>',
+          '            <input type="range" class="chat-narration-vol-slider" id="ai-chat-volume-slider" min="0" max="100" value="90" title="Adjust narration volume" aria-label="Adjust narration volume">',
+          '            <span class="chat-narration-vol-label" id="ai-chat-volume-label">90%</span>',
+          '          </div>',
+          '        </div>',
           '      </div>',
           '      <!-- Input Form -->',
           '      <form class="ai-input-form" id="ai-chat-form">',
@@ -376,28 +388,12 @@ TEMPLATE = """/**
       });
     },
 
-    // ── Engine Status Badge ─────────────────────────────────────────────────
-    updateSettingsStatusUI: function () {
-      var engineSource = document.getElementById('ai-engine-source');
-      var hasKey = Boolean(this.geminiApiKey && this.geminiApiKey.length > 5);
-
-      if (engineSource) {
-        if (hasKey) {
-          engineSource.className = 'ai-engine-source gemini-live';
-          engineSource.textContent = '⚡ GEMINI 3.8 FLASH';
-        } else {
-          engineSource.className = 'ai-engine-source';
-          engineSource.textContent = '📚 CURATED ARCHIVE';
-        }
-      }
-    },
-
     // ── Initial State Text ──────────────────────────────────────────────────
     setInitialText: function () {
       var agent = HERITAGE_AGENTS[this.selectedAgent] || HERITAGE_AGENTS.orchestrator;
       var general = HERITAGE_KNOWLEDGE.general || {};
       var intro = general[this.selectedAgent] || general.orchestrator || "Welcome to YUGMA AI Heritage Companion.";
-      this.updateTranscript(general.title || "YUGMA Digital Heritage Archive", intro, this.geminiApiKey ? 'gemini' : 'curated');
+      this.updateTranscript(general.title || "YUGMA Digital Heritage Archive", intro, 'curated');
     },
 
     updateTranscript: function (title, text, source) {
@@ -416,7 +412,7 @@ TEMPLATE = """/**
       if (engineSource) {
         if (source === 'gemini') {
           engineSource.className = 'ai-engine-source gemini-live';
-          engineSource.textContent = '⚡ GEMINI 3.8 FLASH';
+          engineSource.textContent = '⚡ GEMINI LIVE';
         } else {
           engineSource.className = 'ai-engine-source';
           engineSource.textContent = '📚 CURATED ARCHIVE';
@@ -426,8 +422,14 @@ TEMPLATE = """/**
       this.lastSpokenText = text;
       this.lastSpokenTitle = title;
       this.charProgress = 0;
+      this.activeOffset = 0;
+      this.isPaused = false;
       this.totalChars = text.length;
       this.updateProgressUI(0);
+      this.setPlaybackStatus('Ready to play.');
+      if (this.currentState === STATES.IDLE) {
+        this.setState(STATES.IDLE, 'Ready to play.');
+      }
     },
 
     // ── 5. VISUALIZATION CANVAS RENDERING ENGINE ────────────────────────────
@@ -572,8 +574,44 @@ TEMPLATE = """/**
       ctx.shadowBlur = 0;
     },
 
-    // ── 6. STATE MACHINE TRANSITIONS ────────────────────────────────────────
-    setState: function (newState) {
+    // ── 6. STATE MACHINE & PLAYBACK STATUS HELPERS ──────────────────────────
+    setPlaybackStatus: function (statusText) {
+      this.currentPlaybackStatus = statusText;
+      var el1 = document.getElementById('ai-voice-status-text');
+      var el2 = document.getElementById('ai-chat-status-text');
+      if (el1) el1.textContent = statusText;
+      if (el2) el2.textContent = statusText;
+    },
+
+    updateProgressUI: function (percent) {
+      var p = Math.max(0, Math.min(100, Math.round(percent)));
+      var fill1 = document.getElementById('ai-voice-progress-fill');
+      var text1 = document.getElementById('ai-voice-progress-text');
+      var fill2 = document.getElementById('ai-chat-progress-fill');
+      var text2 = document.getElementById('ai-chat-progress-text');
+      if (fill1) fill1.style.width = p + '%';
+      if (text1) text1.textContent = p + '%';
+      if (fill2) fill2.style.width = p + '%';
+      if (text2) text2.textContent = p + '%';
+    },
+
+    setVolume: function (volPercent) {
+      var v = Math.max(0, Math.min(100, parseInt(volPercent, 10) || 0));
+      this.volume = v / 100;
+      var slider1 = document.getElementById('ai-volume-slider');
+      var label1 = document.getElementById('ai-volume-label');
+      var slider2 = document.getElementById('ai-chat-volume-slider');
+      var label2 = document.getElementById('ai-chat-volume-label');
+      if (slider1) slider1.value = v;
+      if (label1) label1.textContent = v + '%';
+      if (slider2) slider2.value = v;
+      if (label2) label2.textContent = v + '%';
+      if (this.activeUtterance) {
+        this.activeUtterance.volume = this.volume;
+      }
+    },
+
+    setState: function (newState, statusOverride) {
       this.currentState = newState;
 
       // Update Top-Right FAB attribute
@@ -584,72 +622,117 @@ TEMPLATE = """/**
 
       var indicator = document.getElementById('ai-state-indicator');
       var label = document.getElementById('ai-state-label');
-      var statusMeta = document.getElementById('ai-voice-status-text');
-      var playBtn = document.getElementById('btn-ai-play');
-      var pauseBtn = document.getElementById('btn-ai-pause');
-      var resumeBtn = document.getElementById('btn-ai-resume');
-      var stopBtn = document.getElementById('btn-ai-stop');
-      var playIcon = document.getElementById('ai-play-btn-icon');
+      if (indicator && label) {
+        indicator.className = 'ai-state-indicator ' + newState;
+      }
 
-      if (!indicator || !label) return;
+      var playBtns = [document.getElementById('btn-ai-play'), document.getElementById('btn-ai-chat-play')];
+      var pauseBtns = [document.getElementById('btn-ai-pause'), document.getElementById('btn-ai-chat-pause')];
+      var resumeBtns = [document.getElementById('btn-ai-resume'), document.getElementById('btn-ai-chat-resume')];
+      var stopBtns = [document.getElementById('btn-ai-stop'), document.getElementById('btn-ai-chat-stop')];
+      var replayBtns = [document.getElementById('btn-ai-replay'), document.getElementById('btn-ai-chat-replay')];
 
-      indicator.className = 'ai-state-indicator ' + newState;
+      var hasText = !!(this.lastSpokenText && this.lastSpokenText.trim());
 
       switch (newState) {
         case STATES.IDLE:
-          label.textContent = "✦ IDLE // READY";
-          if (statusMeta) statusMeta.textContent = "Ready to speak";
-          if (playBtn) { playBtn.disabled = false; playBtn.style.display = 'inline-flex'; }
-          if (pauseBtn) pauseBtn.disabled = true;
-          if (resumeBtn) resumeBtn.style.display = 'none';
-          if (stopBtn) stopBtn.disabled = true;
-          if (playIcon) playIcon.className = 'fa-solid fa-play';
+          if (label) label.textContent = "✦ IDLE // READY";
+          this.setPlaybackStatus(statusOverride || (hasText ? "Ready to play." : "Ready to play."));
+          playBtns.forEach(function (btn) {
+            if (btn) {
+              btn.style.display = 'inline-flex';
+              btn.disabled = !hasText;
+            }
+          });
+          pauseBtns.forEach(function (btn) {
+            if (btn) {
+              btn.style.display = 'inline-flex';
+              btn.disabled = true;
+            }
+          });
+          resumeBtns.forEach(function (btn) {
+            if (btn) {
+              btn.style.display = 'none';
+              btn.disabled = true;
+            }
+          });
+          stopBtns.forEach(function (btn) {
+            if (btn) btn.disabled = true;
+          });
+          replayBtns.forEach(function (btn) {
+            if (btn) btn.disabled = !hasText;
+          });
           this.speechCadenceEnergy = 0.08;
           break;
 
         case STATES.THINKING:
-          label.textContent = "✦ DELIBERATING ARCHIVE...";
-          if (statusMeta) statusMeta.textContent = "Consulting " + (HERITAGE_AGENTS[this.selectedAgent] ? HERITAGE_AGENTS[this.selectedAgent].name : "Agent");
-          if (playBtn) playBtn.disabled = true;
-          if (pauseBtn) pauseBtn.disabled = true;
-          if (resumeBtn) resumeBtn.style.display = 'none';
-          if (stopBtn) stopBtn.disabled = false;
+          if (label) label.textContent = "✦ DELIBERATING ARCHIVE...";
+          var agentName = (HERITAGE_AGENTS[this.selectedAgent] ? HERITAGE_AGENTS[this.selectedAgent].name : "Agent");
+          this.setPlaybackStatus("Consulting " + agentName + "...");
+          playBtns.forEach(function (btn) { if (btn) btn.disabled = true; });
+          pauseBtns.forEach(function (btn) { if (btn) btn.disabled = true; });
+          resumeBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
+          stopBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
+          replayBtns.forEach(function (btn) { if (btn) btn.disabled = true; });
           this.speechCadenceEnergy = 0.25;
           break;
 
         case STATES.SPEAKING:
-          label.textContent = "✦ AGENT SPEAKING...";
-          if (statusMeta) statusMeta.textContent = "Narrating heritage dossier";
-          if (playBtn) playBtn.style.display = 'none';
-          if (resumeBtn) resumeBtn.style.display = 'none';
-          if (pauseBtn) { pauseBtn.disabled = false; pauseBtn.style.display = 'inline-flex'; }
-          if (stopBtn) stopBtn.disabled = false;
+          if (label) label.textContent = "✦ AGENT SPEAKING...";
+          this.setPlaybackStatus("Currently speaking.");
+          playBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
+          resumeBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
+          pauseBtns.forEach(function (btn) {
+            if (btn) {
+              btn.style.display = 'inline-flex';
+              btn.disabled = false;
+            }
+          });
+          stopBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
+          replayBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
           break;
 
         case STATES.PAUSED:
-          label.textContent = "✦ SPEECH PAUSED";
-          if (statusMeta) statusMeta.textContent = "Narration paused";
-          if (pauseBtn) pauseBtn.style.display = 'none';
-          if (resumeBtn) { resumeBtn.style.display = 'inline-flex'; resumeBtn.disabled = false; }
-          if (stopBtn) stopBtn.disabled = false;
+          if (label) label.textContent = "✦ SPEECH PAUSED";
+          this.setPlaybackStatus("Paused.");
+          playBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
+          pauseBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
+          resumeBtns.forEach(function (btn) {
+            if (btn) {
+              btn.style.display = 'inline-flex';
+              btn.disabled = false;
+            }
+          });
+          stopBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
+          replayBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
           this.speechCadenceEnergy = 0.05;
           break;
       }
     },
 
     // ── 7. SPEECH SYNTHESIS & VOICE CONTROL ─────────────────────────────────
-    speakCurrentResponse: function () {
+    speakCurrentResponse: function (startIndex) {
       if (!this.lastSpokenText) return;
       var self = this;
 
       if (!('speechSynthesis' in window)) {
         console.warn('Web Speech API not supported in this browser.');
+        self.setPlaybackStatus('Audio unavailable.');
         return;
       }
 
       window.speechSynthesis.cancel();
 
-      var utterance = new SpeechSynthesisUtterance(this.lastSpokenText);
+      var offset = (typeof startIndex === 'number' && startIndex >= 0) ? startIndex : 0;
+      if (offset >= this.lastSpokenText.length) {
+        offset = 0;
+      }
+      this.activeOffset = offset;
+      this.charProgress = offset;
+      this.totalChars = this.lastSpokenText.length;
+
+      var textSlice = (offset > 0) ? this.lastSpokenText.slice(offset) : this.lastSpokenText;
+      var utterance = new SpeechSynthesisUtterance(textSlice);
       utterance.rate = this.speechRate;
       utterance.volume = this.volume;
       utterance.pitch = 1.0;
@@ -664,16 +747,20 @@ TEMPLATE = """/**
       if (preferredVoice) utterance.voice = preferredVoice;
 
       utterance.onstart = function () {
+        self.isPaused = false;
         self.setState(STATES.SPEAKING);
+        var startPct = Math.min(100, Math.round((self.charProgress / Math.max(1, self.totalChars)) * 100));
+        self.updateProgressUI(startPct);
       };
 
       utterance.onboundary = function (e) {
         if (e.name === 'word') {
-          self.charProgress = e.charIndex;
-          var percent = Math.min(100, Math.round((e.charIndex / Math.max(1, self.totalChars)) * 100));
+          var absoluteIndex = self.activeOffset + e.charIndex;
+          self.charProgress = absoluteIndex;
+          var percent = Math.min(100, Math.round((absoluteIndex / Math.max(1, self.totalChars)) * 100));
           self.updateProgressUI(percent);
 
-          var word = self.lastSpokenText.substr(e.charIndex, e.charLength || 5).toLowerCase();
+          var word = self.lastSpokenText.substr(absoluteIndex, e.charLength || 5).toLowerCase();
           var vowels = (word.match(/[aeiou]/g) || []).length;
           self.speechCadenceEnergy = Math.min(1.0, 0.35 + vowels * 0.18);
           setTimeout(function () {
@@ -683,21 +770,26 @@ TEMPLATE = """/**
       };
 
       utterance.onpause = function () {
+        self.isPaused = true;
         self.setState(STATES.PAUSED);
       };
 
       utterance.onresume = function () {
+        self.isPaused = false;
         self.setState(STATES.SPEAKING);
       };
 
       utterance.onend = function () {
+        self.isPaused = false;
         self.updateProgressUI(100);
-        self.setState(STATES.IDLE);
+        self.setState(STATES.IDLE, 'Finished.');
       };
 
       utterance.onerror = function (err) {
         console.warn('SpeechSynthesis error:', err);
-        self.setState(STATES.IDLE);
+        self.isPaused = false;
+        self.setPlaybackStatus('Audio unavailable.');
+        self.setState(STATES.IDLE, 'Audio unavailable.');
       };
 
       this.activeUtterance = utterance;
@@ -706,17 +798,29 @@ TEMPLATE = """/**
 
     pauseSpeech: function () {
       if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+        this.isPaused = true;
         window.speechSynthesis.pause();
         this.setState(STATES.PAUSED);
       }
     },
 
     resumeSpeech: function () {
+      var self = this;
+      this.isPaused = false;
+
       if ('speechSynthesis' in window && window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
         this.setState(STATES.SPEAKING);
+
+        // Safety fallback for browsers that fail to resume paused utterances
+        setTimeout(function () {
+          if ('speechSynthesis' in window && window.speechSynthesis.paused && self.currentState === STATES.SPEAKING) {
+            window.speechSynthesis.cancel();
+            self.speakCurrentResponse(self.charProgress || 0);
+          }
+        }, 220);
       } else if (this.lastSpokenText) {
-        this.speakCurrentResponse();
+        this.speakCurrentResponse(this.charProgress || 0);
       }
     },
 
@@ -724,23 +828,19 @@ TEMPLATE = """/**
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
+      this.isPaused = false;
+      this.charProgress = 0;
+      this.activeOffset = 0;
       this.updateProgressUI(0);
-      this.setState(STATES.IDLE);
+      this.setState(STATES.IDLE, 'Stopped.');
     },
 
     replaySpeech: function () {
       this.stopSpeech();
-      this.speakCurrentResponse();
+      this.speakCurrentResponse(0);
     },
 
-    updateProgressUI: function (percent) {
-      var fill = document.getElementById('ai-voice-progress-fill');
-      var label = document.getElementById('ai-voice-progress-text');
-      if (fill) fill.style.width = percent + '%';
-      if (label) label.textContent = percent + '%';
-    },
-
-    // ── 8. QUESTION ANSWERING PIPELINE & GEMINI 3.8 FLASH INTEGRATION ────────
+    // ── 8. QUESTION ANSWERING PIPELINE & SECURE SERVERLESS GATEWAY ──────────
     askAI: function (query) {
       var self = this;
       if (!query || !query.trim()) return;
@@ -751,40 +851,22 @@ TEMPLATE = """/**
 
       var activeAgent = HERITAGE_AGENTS[self.selectedAgent] || HERITAGE_AGENTS.orchestrator;
 
-      // ── Path A: Live Google Gemini 3.8 Flash Generation ──
-      if (self.geminiApiKey && self.geminiApiKey.length > 5) {
-        self.callGeminiAPI(q, activeAgent);
-      } else {
-        // ── Path B: Curated Multi-Agent Knowledge Base ──
-        self.callCuratedKnowledge(q, activeAgent);
-      }
+      // Dispatch request to Netlify Serverless Function proxying Gemini securely
+      self.callGeminiAPI(q, activeAgent);
     },
 
     callGeminiAPI: function (userQuery, agent) {
       var self = this;
-      var primaryModel = 'gemini-3.5-flash';
-      var fallbackModel = 'gemini-3.8-flash';
-      var endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + primaryModel + ':generateContent?key=' + encodeURIComponent(self.geminiApiKey);
+      var endpoint = (typeof YUGMA_AI_CONFIG !== 'undefined' && YUGMA_AI_CONFIG.API_ENDPOINT)
+        ? YUGMA_AI_CONFIG.API_ENDPOINT
+        : '/.netlify/functions/gemini';
 
       var payload = {
-        systemInstruction: {
-          parts: [{ text: agent.systemPrompt }]
-        },
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              {
-                text: "User is exploring Indian heritage in the YUGMA platform. Answer the following question from your perspective as " + agent.name + " (" + agent.title + "):\\n\\n" + userQuery
-              }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 550,
-          topP: 0.95
-        }
+        prompt: userQuery,
+        agentId: agent.id,
+        agentName: agent.name,
+        agentTitle: agent.title,
+        systemPrompt: agent.systemPrompt
       };
 
       fetch(endpoint, {
@@ -793,34 +875,20 @@ TEMPLATE = """/**
         body: JSON.stringify(payload)
       })
       .then(function (res) {
-        if (!res.ok) {
-          var altEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + fallbackModel + ':generateContent?key=' + encodeURIComponent(self.geminiApiKey);
-          return fetch(altEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          }).then(function (altRes) {
-            if (!altRes.ok) throw new Error('Gemini API HTTP Error ' + altRes.status);
-            return altRes.json();
-          });
-        }
+        if (!res.ok) throw new Error('AI Serverless Gateway HTTP Error ' + res.status);
         return res.json();
       })
       .then(function (data) {
-        var text = "";
-        try {
-          text = data.candidates[0].content.parts[0].text;
-        } catch (err) {
-          throw new Error('Could not parse Gemini candidate response');
+        if (!data || !data.text) {
+          throw new Error('Empty response from AI gateway');
         }
-
         var title = "✦ " + agent.name.toUpperCase() + ": " + userQuery.substr(0, 38) + "...";
-        self.updateTranscript(title, text, 'gemini');
+        self.updateTranscript(title, data.text, 'gemini');
         self.speakCurrentResponse();
       })
       .catch(function (err) {
-        console.warn('Gemini 3.8 Flash call failed, falling back to curated knowledge:', err);
-        // Fall back gracefully to curated knowledge
+        console.warn('AI Serverless Gateway call failed or server not active, seamlessly falling back to curated knowledge:', err);
+        // Fall back gracefully to the rich 22-monument multi-agent knowledge base
         self.callCuratedKnowledge(userQuery, agent, true);
       });
     },
@@ -906,30 +974,48 @@ TEMPLATE = """/**
         });
       }
 
-      // 6. Voice Control Buttons
-      var playBtn = document.getElementById('btn-ai-play');
-      var pauseBtn = document.getElementById('btn-ai-pause');
-      var resumeBtn = document.getElementById('btn-ai-resume');
-      var stopBtn = document.getElementById('btn-ai-stop');
-      var replayBtn = document.getElementById('btn-ai-replay');
+      // 6. Voice Control Buttons (Visualizer & Right-Side Chat Panel)
+      var playBtns = [document.getElementById('btn-ai-play'), document.getElementById('btn-ai-chat-play')];
+      var pauseBtns = [document.getElementById('btn-ai-pause'), document.getElementById('btn-ai-chat-pause')];
+      var resumeBtns = [document.getElementById('btn-ai-resume'), document.getElementById('btn-ai-chat-resume')];
+      var stopBtns = [document.getElementById('btn-ai-stop'), document.getElementById('btn-ai-chat-stop')];
+      var replayBtns = [document.getElementById('btn-ai-replay'), document.getElementById('btn-ai-chat-replay')];
 
-      if (playBtn) playBtn.addEventListener('click', function () { self.speakCurrentResponse(); });
-      if (pauseBtn) pauseBtn.addEventListener('click', function () { self.pauseSpeech(); });
-      if (resumeBtn) resumeBtn.addEventListener('click', function () { self.resumeSpeech(); });
-      if (stopBtn) stopBtn.addEventListener('click', function () { self.stopSpeech(); });
-      if (replayBtn) replayBtn.addEventListener('click', function () { self.replaySpeech(); });
-
-      // Volume Slider
-      var volSlider = document.getElementById('ai-volume-slider');
-      var volLabel = document.getElementById('ai-volume-label');
-      if (volSlider) {
-        volSlider.addEventListener('input', function (e) {
-          var v = parseInt(e.target.value, 10);
-          self.volume = v / 100;
-          if (volLabel) volLabel.textContent = v + '%';
-          if (self.activeUtterance) self.activeUtterance.volume = self.volume;
+      playBtns.forEach(function (btn) {
+        if (btn) btn.addEventListener('click', function () {
+          if (self.currentState === STATES.PAUSED) {
+            self.resumeSpeech();
+          } else {
+            self.speakCurrentResponse(0);
+          }
         });
-      }
+      });
+
+      pauseBtns.forEach(function (btn) {
+        if (btn) btn.addEventListener('click', function () { self.pauseSpeech(); });
+      });
+
+      resumeBtns.forEach(function (btn) {
+        if (btn) btn.addEventListener('click', function () { self.resumeSpeech(); });
+      });
+
+      stopBtns.forEach(function (btn) {
+        if (btn) btn.addEventListener('click', function () { self.stopSpeech(); });
+      });
+
+      replayBtns.forEach(function (btn) {
+        if (btn) btn.addEventListener('click', function () { self.replaySpeech(); });
+      });
+
+      // Volume Sliders (Synchronized)
+      var volSliders = [document.getElementById('ai-volume-slider'), document.getElementById('ai-chat-volume-slider')];
+      volSliders.forEach(function (slider) {
+        if (slider) {
+          slider.addEventListener('input', function (e) {
+            self.setVolume(e.target.value);
+          });
+        }
+      });
 
       // 7. Multi-Agent Selector Pills
       var agentPills = document.querySelectorAll('.agent-pill');
@@ -1014,4 +1100,4 @@ code = code.replace('__REPLACE_KNOWLEDGE__', JSON_KNOWLEDGE)
 with open('js/aiVisualizer.js', 'w', encoding='utf-8') as f:
     f.write(code)
 
-print("Successfully generated js/aiVisualizer.js without user key prompts! Size:", len(code))
+print("Successfully generated secure js/aiVisualizer.js! Size:", len(code))
