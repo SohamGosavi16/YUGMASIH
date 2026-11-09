@@ -31,7 +31,7 @@ An intelligent, multi-agent virtual heritage guide featuring real-time generativ
   - 🧭 **Yatra (Expedition Curator)**: Recommends optimal visiting hours, golden-hour photography vantage points, temple sanctum dress codes, and heritage circuits.
   - ✨ **All-Rounder (Civilizational Harmonizer)**: Delivers holistic, multi-perspective synthesis balancing all domains.
 - **Dual-Engine Intelligence (Hybrid Live AI + Curated Offline Engine)**:
-  - **Live AI Mode**: Direct integration with **Google Gemini 3.8 Flash** via in-browser Bring-Your-Own-Key (BYOK) settings modal.
+  - **Live AI Mode**: Centralized integration with **Google Gemini 3.8 Flash** pre-configured for all visitors without requiring end-user API keys.
   - **Curated Knowledge Engine**: Comprehensive offline multi-agent dossier covering all **22 monuments** with instant fallback on zero latency.
 - **4-State Golden AI Orb Visualizer**:
   - High-performance HTML5 Canvas 2D orb rendering with concentric rotating architectural rings, pulsing auras, and a 28-bar radial audio spectrum.
@@ -245,7 +245,6 @@ Visit `http://localhost:8080` in your web browser.
 | **Click State / Pinpoint** | Opens state modal with 360° AR/VR portal, 3D Studio, and Heritage Book |
 | **Top-Right Golden Orb** | Launches the **YUGMA AI Heritage Companion & Audio Visualizer** |
 | **Agent Selector Pills** | Switches active AI agent (`All-Rounder`, `Historian`, `Architect`, `Lore`, `Travel`) |
-| **AI Settings Gear** | Configures optional **Google Gemini 3.8 Flash** API key |
 | **Plan Your Journey** | Opens the **Smart Heritage Journey Planner** (`journey-planner.html`) |
 | **Audio Icon** | Toggles procedural ambient Tanpura soundscape |
 | **Language Dropdown** | Switches UI language across 10+ Indian & international languages |

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Assemble the full production js/aiVisualizer.js using token replacement to avoid f-string brace escapes.
+Assemble production js/aiVisualizer.js without end-user API key prompt or settings modal.
+Uses central YUGMA_AI_CONFIG.GEMINI_API_KEY across all users.
 """
 
 import os
@@ -13,7 +14,7 @@ JSON_KNOWLEDGE = json.dumps(ALL_KNOWLEDGE, indent=2)
 
 TEMPLATE = """/**
  * YUGMA AI Heritage Companion & Audio Visualizer (Multi-Agent System)
- * Version: 2.5.0
+ * Version: 2.6.0
  * 
  * Features:
  * - 5 Specialized Heritage AI Agents:
@@ -22,7 +23,7 @@ TEMPLATE = """/**
  *   3. Master Architect (Sthapatya: Vastu Shastra, acoustics, interlocking stone)
  *   4. Sacred Lore (Katha: Temple myths, deity iconography, living folklore)
  *   5. Travel Curator (Yatra: Viewpoints, golden hour photography, circuits)
- * - Live Google Gemini 3.8 Flash Generative AI integration (Bring-Your-Own-Key)
+ * - Central Platform Gemini 3.8 Flash AI Integration (Zero end-user key prompts)
  * - Vastly Expanded Local Knowledge Base for all 22 YUGMA Heritage Monuments
  * - 4-State Golden AI Orb Visualizer with dynamic audio-reactive waveforms
  * - Web Speech API cadence synchronization & voice controls
@@ -39,6 +40,17 @@ TEMPLATE = """/**
   }
 }(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : this), function (root) {
   'use strict';
+
+  // ── 0. GLOBAL YUGMA AI CONFIGURATION ──────────────────────────────────────
+  // Central Gemini API key used across all users for live multi-agent intelligence.
+  // Enter your Google Gemini API key below:
+  var YUGMA_AI_CONFIG = {
+    GEMINI_API_KEY: "AQ.Ab8RN6KT0IT_vU3Rb4q1rGKw2eE6255pMX3TXN1Dz0PVULPbag" // <-- Central Gemini API key
+  };
+
+  if (typeof window !== 'undefined') {
+    window.YUGMA_AI_CONFIG = YUGMA_AI_CONFIG;
+  }
 
   // ── 1. VISUALIZATION STATES ────────────────────────────────────────────────
   var STATES = {
@@ -99,8 +111,19 @@ TEMPLATE = """/**
       this.setInitialText();
     },
 
-    // ── API Key Storage ─────────────────────────────────────────────────────
+    // ── API Key Storage & Central Resolution ────────────────────────────────
     loadGeminiKey: function () {
+      // 1. Check window override (e.g. window.YUGMA_GEMINI_API_KEY)
+      if (typeof window !== 'undefined' && window.YUGMA_GEMINI_API_KEY && window.YUGMA_GEMINI_API_KEY.trim()) {
+        this.geminiApiKey = window.YUGMA_GEMINI_API_KEY.trim();
+        return;
+      }
+      // 2. Check central YUGMA_AI_CONFIG object
+      if (YUGMA_AI_CONFIG && YUGMA_AI_CONFIG.GEMINI_API_KEY && YUGMA_AI_CONFIG.GEMINI_API_KEY.trim()) {
+        this.geminiApiKey = YUGMA_AI_CONFIG.GEMINI_API_KEY.trim();
+        return;
+      }
+      // 3. Fallback to localStorage if configured
       try {
         if (typeof window !== 'undefined' && window.localStorage) {
           var saved = window.localStorage.getItem('yugma_gemini_api_key');
@@ -113,25 +136,11 @@ TEMPLATE = """/**
       }
     },
 
-    saveGeminiKey: function (key) {
+    setApiKey: function (key) {
       if (!key) key = '';
       this.geminiApiKey = key.trim();
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          if (this.geminiApiKey) {
-            window.localStorage.setItem('yugma_gemini_api_key', this.geminiApiKey);
-          } else {
-            window.localStorage.removeItem('yugma_gemini_api_key');
-          }
-        }
-      } catch (e) {
-        console.warn('Could not save to localStorage', e);
-      }
+      YUGMA_AI_CONFIG.GEMINI_API_KEY = this.geminiApiKey;
       this.updateSettingsStatusUI();
-    },
-
-    clearGeminiKey: function () {
-      this.saveGeminiKey('');
     },
 
     // ── DOM & Modal Setup ───────────────────────────────────────────────────
@@ -155,7 +164,7 @@ TEMPLATE = """/**
         document.body.appendChild(fab);
       }
 
-      // 2. Create Modal Container if missing
+      // 2. Create Modal Container if missing (Clean UI: No API key prompts for end-users)
       if (!document.getElementById('ai-companion-modal-backdrop')) {
         var backdrop = document.createElement('div');
         backdrop.className = 'ai-companion-backdrop';
@@ -179,9 +188,6 @@ TEMPLATE = """/**
           '      </div>',
           '    </div>',
           '    <div class="ai-header-controls">',
-          '      <button type="button" class="btn-ai-header-action" id="btn-ai-open-settings" title="Configure Live Gemini 3.8 Flash AI Key">',
-          '        <i class="fa-solid fa-sliders"></i> <span id="ai-header-engine-label">AI: Curated</span>',
-          '      </button>',
           '      <button type="button" class="btn-ai-header-action" id="btn-ai-toggle-motion" title="Toggle animation motion for accessibility">',
           '        <i class="fa-solid fa-wand-magic"></i> <span>Motion: ON</span>',
           '      </button>',
@@ -283,32 +289,6 @@ TEMPLATE = """/**
           '      </form>',
           '    </div>',
           '  </div>',
-          '  <!-- AI Engine Settings Overlay -->',
-          '  <div class="ai-settings-overlay" id="ai-settings-overlay">',
-          '    <div class="ai-settings-card">',
-          '      <div class="ai-settings-header">',
-          '        <h4><i class="fa-solid fa-sliders"></i> YUGMA AI ENGINE CONFIGURATION</h4>',
-          '        <button type="button" class="btn-ai-modal-close" id="btn-close-ai-settings" style="font-size:22px;">&times;</button>',
-          '      </div>',
-          '      <div class="ai-settings-status-box">',
-          '        <span class="ai-settings-status-dot" id="ai-settings-status-dot"></span>',
-          '        <span id="ai-settings-status-text">Engine: Multi-Agent Curated Knowledge Base (Offline / Free)</span>',
-          '      </div>',
-          '      <div class="ai-settings-form-group">',
-          '        <label for="ai-gemini-key-input">Google Gemini API Key (Gemini 3.8 Flash)</label>',
-          '        <input type="password" class="ai-settings-input" id="ai-gemini-key-input" placeholder="AIzaSy..." autocomplete="off">',
-          '        <div class="ai-settings-hint">',
-          '          Power all 5 specialized agents with live conversational intelligence using Google Gemini 3.8 Flash. Your key stays in your local browser only.<br>',
-          '          Get a key for free at <a href="https://aistudio.google.com/" target="_blank" rel="noopener">Google AI Studio</a>.',
-          '        </div>',
-          '      </div>',
-          '      <div class="ai-settings-actions">',
-          '        <button type="button" class="btn-ai-settings-clear" id="btn-clear-gemini-key">Remove Key</button>',
-          '        <button type="button" class="btn-ai-settings-test" id="btn-test-gemini-key"><i class="fa-solid fa-bolt"></i> Test Connection</button>',
-          '        <button type="button" class="btn-ai-settings-save" id="btn-save-gemini-key"><i class="fa-solid fa-check"></i> Save & Activate</button>',
-          '      </div>',
-          '    </div>',
-          '  </div>',
           '</div>'
         ].join('');
         document.body.appendChild(backdrop);
@@ -396,33 +376,16 @@ TEMPLATE = """/**
       });
     },
 
-    // ── Settings Status & Engine Badges ─────────────────────────────────────
+    // ── Engine Status Badge ─────────────────────────────────────────────────
     updateSettingsStatusUI: function () {
-      var dot = document.getElementById('ai-settings-status-dot');
-      var text = document.getElementById('ai-settings-status-text');
-      var headerLabel = document.getElementById('ai-header-engine-label');
       var engineSource = document.getElementById('ai-engine-source');
-      var keyInput = document.getElementById('ai-gemini-key-input');
-
       var hasKey = Boolean(this.geminiApiKey && this.geminiApiKey.length > 5);
 
-      if (keyInput) {
-        keyInput.value = this.geminiApiKey || '';
-      }
-
-      if (hasKey) {
-        if (dot) { dot.className = 'ai-settings-status-dot active'; }
-        if (text) { text.textContent = 'Engine: Google Gemini 3.8 Flash (Live AI Active)'; }
-        if (headerLabel) { headerLabel.textContent = 'AI: Gemini 3.8'; }
-        if (engineSource) {
+      if (engineSource) {
+        if (hasKey) {
           engineSource.className = 'ai-engine-source gemini-live';
           engineSource.textContent = '⚡ GEMINI 3.8 FLASH';
-        }
-      } else {
-        if (dot) { dot.className = 'ai-settings-status-dot'; }
-        if (text) { text.textContent = 'Engine: Multi-Agent Curated Knowledge Base (Offline / Free)'; }
-        if (headerLabel) { headerLabel.textContent = 'AI: Curated'; }
-        if (engineSource) {
+        } else {
           engineSource.className = 'ai-engine-source';
           engineSource.textContent = '📚 CURATED ARCHIVE';
         }
@@ -799,7 +762,9 @@ TEMPLATE = """/**
 
     callGeminiAPI: function (userQuery, agent) {
       var self = this;
-      var endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + encodeURIComponent(self.geminiApiKey);
+      var primaryModel = 'gemini-3.5-flash';
+      var fallbackModel = 'gemini-3.8-flash';
+      var endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + primaryModel + ':generateContent?key=' + encodeURIComponent(self.geminiApiKey);
 
       var payload = {
         systemInstruction: {
@@ -828,7 +793,17 @@ TEMPLATE = """/**
         body: JSON.stringify(payload)
       })
       .then(function (res) {
-        if (!res.ok) throw new Error('Gemini API HTTP Error ' + res.status);
+        if (!res.ok) {
+          var altEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + fallbackModel + ':generateContent?key=' + encodeURIComponent(self.geminiApiKey);
+          return fetch(altEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }).then(function (altRes) {
+            if (!altRes.ok) throw new Error('Gemini API HTTP Error ' + altRes.status);
+            return altRes.json();
+          });
+        }
         return res.json();
       })
       .then(function (data) {
@@ -863,7 +838,8 @@ TEMPLATE = """/**
             if (q.includes(item.keywords[i])) {
               matchedKey = key;
               break;
-            }}
+            }
+          }
         }
         if (matchedKey !== 'general') break;
       }
@@ -978,89 +954,7 @@ TEMPLATE = """/**
         });
       }
 
-      // 9. AI Settings Overlay & Key Management
-      var openSettingsBtn = document.getElementById('btn-ai-open-settings');
-      var settingsOverlay = document.getElementById('ai-settings-overlay');
-      var closeSettingsBtn = document.getElementById('btn-close-ai-settings');
-      var saveKeyBtn = document.getElementById('btn-save-gemini-key');
-      var clearKeyBtn = document.getElementById('btn-clear-gemini-key');
-      var testKeyBtn = document.getElementById('btn-test-gemini-key');
-      var keyInput = document.getElementById('ai-gemini-key-input');
-      var statusText = document.getElementById('ai-settings-status-text');
-
-      if (openSettingsBtn && settingsOverlay) {
-        openSettingsBtn.addEventListener('click', function () {
-          self.updateSettingsStatusUI();
-          settingsOverlay.classList.add('active');
-        });
-      }
-
-      if (closeSettingsBtn && settingsOverlay) {
-        closeSettingsBtn.addEventListener('click', function () {
-          settingsOverlay.classList.remove('active');
-        });
-      }
-
-      if (settingsOverlay) {
-        settingsOverlay.addEventListener('click', function (e) {
-          if (e.target === settingsOverlay) {
-            settingsOverlay.classList.remove('active');
-          }
-        });
-      }
-
-      if (saveKeyBtn && keyInput) {
-        saveKeyBtn.addEventListener('click', function () {
-          var val = keyInput.value.trim();
-          self.saveGeminiKey(val);
-          if (statusText) {
-            statusText.textContent = val ? "Key saved! Gemini 3.8 Flash Active." : "Key cleared! Using Curated Knowledge.";
-          }
-          setTimeout(function () {
-            if (settingsOverlay) settingsOverlay.classList.remove('active');
-          }, 700);
-        });
-      }
-
-      if (clearKeyBtn && keyInput) {
-        clearKeyBtn.addEventListener('click', function () {
-          keyInput.value = '';
-          self.clearGeminiKey();
-          if (statusText) statusText.textContent = "API key removed. Using Curated Knowledge.";
-        });
-      }
-
-      if (testKeyBtn && keyInput) {
-        testKeyBtn.addEventListener('click', function () {
-          var testKey = keyInput.value.trim();
-          if (!testKey) {
-            if (statusText) statusText.textContent = "⚠️ Please enter an API key to test.";
-            return;
-          }
-          if (statusText) statusText.textContent = "Testing connection to Gemini 3.8 Flash...";
-
-          var endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + encodeURIComponent(testKey);
-          fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: "Ping test" }] }]
-            })
-          })
-          .then(function (res) {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.json();
-          })
-          .then(function () {
-            if (statusText) statusText.textContent = "✅ Success: Gemini 3.8 Flash connected!";
-          })
-          .catch(function (err) {
-            if (statusText) statusText.textContent = "❌ Connection failed: " + err.message;
-          });
-        });
-      }
-
-      // Page visibility & escape key handlers
+      // 9. Page visibility & escape key handlers
       document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
           self.stopAnimation();
@@ -1075,11 +969,7 @@ TEMPLATE = """/**
 
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-          if (settingsOverlay && settingsOverlay.classList.contains('active')) {
-            settingsOverlay.classList.remove('active');
-          } else {
-            self.closeModal();
-          }
+          self.closeModal();
         }
       });
     },
@@ -1124,4 +1014,4 @@ code = code.replace('__REPLACE_KNOWLEDGE__', JSON_KNOWLEDGE)
 with open('js/aiVisualizer.js', 'w', encoding='utf-8') as f:
     f.write(code)
 
-print("Successfully written js/aiVisualizer.js! Size:", len(code))
+print("Successfully generated js/aiVisualizer.js without user key prompts! Size:", len(code))
