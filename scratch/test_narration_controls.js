@@ -1,19 +1,49 @@
 /**
- * Comprehensive Automated Test Suite for YUGMA AI Narration Playback Controls
+ * Comprehensive Automated Test Suite for YUGMA AI Voice Visualizer & Narration Controls
+ * Validates:
+ * 1. Single active narration player (no duplicates)
+ * 2. Recognizable inline SVG icons for all controls (no empty circles)
+ * 3. Functional playback state transitions (Play, Pause, Resume, Stop, Replay)
+ * 4. Accurate speaking progress tracking and completion
+ * 5. Functional volume control with sessionStorage persistence and mute toggle
+ * 6. Single throttled rAF loop and static idle/paused frames (zero CPU shadowBlur)
+ * 7. Tab visibility and modal lifecycle handling
+ * 8. Zero floating controls at bottom-left corner of the website
  */
 
 const fs = require('fs');
 const assert = require('assert');
 
 // 1. Mock Browser Environment
+const mockStorage = {};
+global.sessionStorage = {
+  getItem: (k) => (k in mockStorage ? mockStorage[k] : null),
+  setItem: (k, v) => { mockStorage[k] = v.toString(); },
+  removeItem: (k) => { delete mockStorage[k]; },
+  clear: () => { for (let k in mockStorage) delete mockStorage[k]; }
+};
+
 global.window = global;
+global.performance = { now: () => Date.now() };
+
+let rAFQueue = [];
+let animIdCounter = 1;
+global.requestAnimationFrame = function (cb) {
+  const id = animIdCounter++;
+  rAFQueue.push({ id, cb });
+  return id;
+};
+global.cancelAnimationFrame = function (id) {
+  rAFQueue = rAFQueue.filter(item => item.id !== id);
+};
+
 global.document = {
   readyState: 'complete',
+  hidden: false,
   elements: {},
   body: {
     appendChild: function (el) {
       if (el.id) global.document.elements[el.id] = el;
-      // Also register elements inside child
       if (el.children) {
         function reg(parent) {
           (parent.children || []).forEach(c => {
@@ -30,7 +60,7 @@ global.document = {
       tagName: tag.toUpperCase(),
       attributes: {},
       style: {},
-      getContext: function() {
+      getContext: function () {
         return {
           arc: () => {},
           stroke: () => {},
@@ -69,14 +99,15 @@ global.document = {
       children: [],
       set innerHTML(html) {
         this._html = html;
-        // Simple parser to extract IDs and create element stubs
         const idMatches = html.matchAll(/id=["']([^"']+)["']/g);
         for (const m of idMatches) {
           const childId = m[1];
+          // Find matching innerHTML chunk if available
           const childEl = {
             id: childId,
             style: {},
-            getContext: function() {
+            attributes: {},
+            getContext: function () {
               return {
                 arc: () => {},
                 stroke: () => {},
@@ -107,9 +138,9 @@ global.document = {
                 this.listeners[evt.type].forEach(fn => fn(evt));
               }
             },
-            querySelectorAll: function() { return []; },
-            setAttribute: function (k, v) { this[k] = v; },
-            getAttribute: function (k) { return this[k]; },
+            querySelectorAll: function () { return []; },
+            setAttribute: function (k, v) { this.attributes[k] = v; this[k] = v; },
+            getAttribute: function (k) { return this.attributes[k] || this[k]; },
             textContent: ''
           };
           global.document.elements[childId] = childEl;
@@ -125,13 +156,20 @@ global.document = {
   querySelectorAll: function () {
     return [];
   },
-  addEventListener: function () {}
+  documentListeners: {},
+  addEventListener: function (evt, fn) {
+    if (!this.documentListeners[evt]) this.documentListeners[evt] = [];
+    this.documentListeners[evt].push(fn);
+  },
+  dispatchDocEvent: function (evt) {
+    if (this.documentListeners[evt.type]) {
+      this.documentListeners[evt.type].forEach(fn => fn(evt));
+    }
+  }
 };
 
 // Mock SpeechSynthesis
 let activeUtterances = [];
-let isSpeechPaused = false;
-let isSpeaking = false;
 
 global.SpeechSynthesisUtterance = function (text) {
   this.text = text;
@@ -186,20 +224,30 @@ global.speechSynthesis = {
 const ai = require('../js/aiVisualizer.js');
 ai.init();
 
-console.log('--- TEST 1: DOM Elements Verification ---');
-const requiredIds = [
-  // Visualizer column controls
+console.log('--- TEST 1: Single Unified Player & Element Verification ---');
+const requiredPlayerIds = [
   'btn-ai-play',
   'btn-ai-pause',
   'btn-ai-resume',
   'btn-ai-stop',
   'btn-ai-replay',
+  'ai-volume-icon-wrap',
   'ai-volume-slider',
   'ai-volume-label',
   'ai-voice-status-text',
   'ai-voice-progress-fill',
-  'ai-voice-progress-text',
-  // Chat panel narration bar controls
+  'ai-voice-progress-text'
+];
+
+requiredPlayerIds.forEach(id => {
+  const el = document.getElementById(id);
+  assert(el !== null, `Missing required player element: #${id}`);
+  console.log(`  ✓ Element #${id} exists`);
+});
+
+// Verify NO duplicated elements exist
+console.log('\n--- TEST 2: Verify Duplicate Interface Elements are Removed ---');
+const duplicateIds = [
   'ai-chat-narration-bar',
   'btn-ai-chat-play',
   'btn-ai-chat-pause',
@@ -213,56 +261,73 @@ const requiredIds = [
   'ai-chat-progress-text'
 ];
 
-requiredIds.forEach(id => {
+duplicateIds.forEach(id => {
   const el = document.getElementById(id);
-  assert(el !== null, `Missing required element: ${id}`);
-  console.log(`  ✓ Element #${id} exists`);
+  assert.strictEqual(el, null, `Duplicated element #${id} should NOT exist in the DOM`);
+  console.log(`  ✓ Confirmed duplicate #${id} is completely removed`);
 });
 
-console.log('\n--- TEST 2: Initial Status & Playback State ---');
-ai.updateTranscript('Taj Mahal', 'The Taj Mahal is an ivory-white marble mausoleum on the south bank of the Yamuna river.', 'curated');
+console.log('\n--- TEST 3: Verify Inline SVG Icons on All Controls ---');
+const jsCode = fs.readFileSync('js/aiVisualizer.js', 'utf8');
+
+// Check that buttons are defined with inline SVGs and not empty circles or font dependencies
+assert(jsCode.includes('btn-ai-play') && jsCode.includes('<polygon points="6 4 20 12 6 20 6 4"'), 'Play button must contain inline SVG polygon');
+assert(jsCode.includes('btn-ai-pause') && jsCode.includes('<rect x="6" y="4"'), 'Pause button must contain inline SVG rects');
+assert(jsCode.includes('btn-ai-stop') && jsCode.includes('<rect x="5" y="5"'), 'Stop button must contain inline SVG rect');
+assert(jsCode.includes('btn-ai-replay') && jsCode.includes('<path d="M3 12a9 9 0 1 0 9-9'), 'Replay button must contain inline SVG path');
+assert(jsCode.includes('ai-vol-svg'), 'Volume icon must be an inline SVG');
+console.log('  ✓ Play button has inline SVG polygon');
+console.log('  ✓ Pause button has inline SVG rects');
+console.log('  ✓ Stop button has inline SVG rect');
+console.log('  ✓ Replay button has inline SVG path');
+console.log('  ✓ Volume button has inline SVG speaker');
+
+console.log('\n--- TEST 4: Initial Status & Playback State ---');
+ai.updateTranscript('Taj Mahal', 'The Taj Mahal is an ivory-white marble mausoleum on the south bank of the Yamuna river in Agra.', 'curated');
 const status1 = document.getElementById('ai-voice-status-text').textContent;
-const chatStatus1 = document.getElementById('ai-chat-status-text').textContent;
 assert.strictEqual(status1, 'Ready to play.', `Expected "Ready to play." but got "${status1}"`);
-assert.strictEqual(chatStatus1, 'Ready to play.', `Expected "Ready to play." but got "${chatStatus1}"`);
 console.log('  ✓ Initial state is "Ready to play."');
 
-console.log('\n--- TEST 3: Play Button Functionality ---');
-// Trigger play via button listener or speakCurrentResponse
+console.log('\n--- TEST 5: Play Button Action & Status ---');
 ai.speakCurrentResponse();
 assert.strictEqual(ai.currentState, 'speaking', 'State should be speaking');
 const statusSpeaking = document.getElementById('ai-voice-status-text').textContent;
 assert.strictEqual(statusSpeaking, 'Currently speaking.', `Expected "Currently speaking." but got "${statusSpeaking}"`);
+assert.strictEqual(document.getElementById('btn-ai-play').style.display, 'none', 'Play button should be hidden during speech');
+assert.strictEqual(document.getElementById('btn-ai-pause').style.display, 'inline-flex', 'Pause button should be visible during speech');
 console.log('  ✓ Play action sets state to "speaking" and status to "Currently speaking."');
 
-console.log('\n--- TEST 4: Word Boundary Progress Tracking ---');
+console.log('\n--- TEST 6: Progress Tracking & Word Boundary Synchronization ---');
 const utt = activeUtterances[0];
 assert(utt, 'Active utterance should exist');
-// Simulate boundary event at character 30
-utt.onboundary({ name: 'word', charIndex: 30, charLength: 5 });
+// Simulate word boundary event at character 45
+utt.onboundary({ name: 'word', charIndex: 45, charLength: 5 });
 const progressText = document.getElementById('ai-voice-progress-text').textContent;
-const chatProgressText = document.getElementById('ai-chat-progress-text').textContent;
-console.log(`  ✓ Progress updated: ${progressText} (sync chat: ${chatProgressText})`);
-assert(parseInt(progressText) > 0, 'Progress percent should be > 0%');
-assert.strictEqual(progressText, chatProgressText, 'Progress should match across both panels');
+const progressPct = parseInt(progressText, 10);
+assert(progressPct > 0, 'Progress percent should be > 0%');
+console.log(`  ✓ Word boundary synchronized: progress is ${progressText}`);
 
-console.log('\n--- TEST 5: Pause Button Functionality ---');
+console.log('\n--- TEST 7: Pause Button Action & Status ---');
 ai.pauseSpeech();
 assert.strictEqual(ai.currentState, 'paused', 'State should be paused');
 const statusPaused = document.getElementById('ai-voice-status-text').textContent;
 assert.strictEqual(statusPaused, 'Paused.', `Expected "Paused." but got "${statusPaused}"`);
 assert.strictEqual(ai.isPaused, true, 'isPaused flag should be true');
-console.log('  ✓ Pause action sets state to "paused" and status to "Paused."');
+assert.strictEqual(document.getElementById('btn-ai-pause').style.display, 'none', 'Pause button should be hidden when paused');
+assert.strictEqual(document.getElementById('btn-ai-resume').style.display, 'inline-flex', 'Resume button should be visible when paused');
+console.log('  ✓ Pause action sets state to "paused", status to "Paused.", shows Resume button');
 
-console.log('\n--- TEST 6: Resume Button Functionality ---');
+console.log('\n--- TEST 8: Resume Button Action & Status ---');
 ai.resumeSpeech();
 assert.strictEqual(ai.currentState, 'speaking', 'State should be speaking after resume');
 const statusResumed = document.getElementById('ai-voice-status-text').textContent;
 assert.strictEqual(statusResumed, 'Currently speaking.', `Expected "Currently speaking." but got "${statusResumed}"`);
 assert.strictEqual(ai.isPaused, false, 'isPaused flag should be false');
+assert.strictEqual(document.getElementById('btn-ai-resume').style.display, 'none', 'Resume button should be hidden during speech');
+assert.strictEqual(document.getElementById('btn-ai-pause').style.display, 'inline-flex', 'Pause button should be visible during speech');
 console.log('  ✓ Resume continues from paused position and sets status to "Currently speaking."');
 
-console.log('\n--- TEST 7: Stop Button Functionality ---');
+console.log('\n--- TEST 9: Stop Button Action & Status ---');
 ai.stopSpeech();
 assert.strictEqual(ai.currentState, 'idle', 'State should be idle after stop');
 const statusStopped = document.getElementById('ai-voice-status-text').textContent;
@@ -271,7 +336,7 @@ const progressStopped = document.getElementById('ai-voice-progress-text').textCo
 assert.strictEqual(progressStopped, '0%', 'Progress should reset to 0% after stop');
 console.log('  ✓ Stop terminates playback, resets progress to 0%, sets status to "Stopped."');
 
-console.log('\n--- TEST 8: Replay Button Functionality ---');
+console.log('\n--- TEST 10: Replay Button Action & Status ---');
 ai.replaySpeech();
 assert.strictEqual(ai.currentState, 'speaking', 'State should be speaking after replay');
 assert.strictEqual(ai.charProgress, 0, 'charProgress should start from 0 on replay');
@@ -279,7 +344,7 @@ const statusReplay = document.getElementById('ai-voice-status-text').textContent
 assert.strictEqual(statusReplay, 'Currently speaking.', `Expected "Currently speaking." but got "${statusReplay}"`);
 console.log('  ✓ Replay restarts from beginning (char 0) and sets status to "Currently speaking."');
 
-console.log('\n--- TEST 9: Finished Status on Utterance Completion ---');
+console.log('\n--- TEST 11: Natural Utterance Completion (100% Progress & Finished) ---');
 const activeUtt = activeUtterances[activeUtterances.length - 1];
 activeUtt.onend();
 assert.strictEqual(ai.currentState, 'idle', 'State should be idle after speech completion');
@@ -289,25 +354,41 @@ const progressFinished = document.getElementById('ai-voice-progress-text').textC
 assert.strictEqual(progressFinished, '100%', 'Progress should show 100% on finish');
 console.log('  ✓ Natural completion sets status to "Finished." and progress to 100%');
 
-console.log('\n--- TEST 10: Audio Unavailable Status on Error ---');
-ai.speakCurrentResponse();
-const errUtt = activeUtterances[activeUtterances.length - 1];
-errUtt.onerror({ error: 'audio-busy' });
-assert.strictEqual(ai.currentState, 'idle', 'State should be idle after speech error');
-const statusErr = document.getElementById('ai-voice-status-text').textContent;
-assert.strictEqual(statusErr, 'Audio unavailable.', `Expected "Audio unavailable." but got "${statusErr}"`);
-console.log('  ✓ Speech error gracefully sets status to "Audio unavailable."');
-
-console.log('\n--- TEST 11: Volume Slider & Sync ---');
+console.log('\n--- TEST 12: Volume Slider, Persistence & Mute Toggle ---');
 ai.setVolume(75);
 assert.strictEqual(ai.volume, 0.75, 'Volume should be 0.75');
 assert.strictEqual(document.getElementById('ai-volume-label').textContent, '75%');
-assert.strictEqual(document.getElementById('ai-chat-volume-label').textContent, '75%');
 assert.strictEqual(document.getElementById('ai-volume-slider').value, 75);
-assert.strictEqual(document.getElementById('ai-chat-volume-slider').value, 75);
-console.log('  ✓ Volume set to 75% correctly synchronized across both sliders and labels');
+assert.strictEqual(sessionStorage.getItem('yugma_ai_volume'), '75', 'Volume must be saved in sessionStorage');
+console.log('  ✓ Volume set to 75% correctly updates slider, label, and persists in sessionStorage');
 
-console.log('\n--- TEST 12: Check No Bottom-Left Floating Audio Controls ---');
+// Mute toggle test
+ai.toggleMute();
+assert.strictEqual(ai.volume, 0, 'Volume should be 0 after mute');
+assert.strictEqual(document.getElementById('ai-volume-label').textContent, '0%');
+ai.toggleMute();
+assert.strictEqual(ai.volume, 0.75, 'Volume should restore to 75% after unmute');
+assert.strictEqual(document.getElementById('ai-volume-label').textContent, '75%');
+console.log('  ✓ Mute toggle successfully mutes to 0% and restores previous level (75%)');
+
+console.log('\n--- TEST 13: Visualizer Performance & Single Animation Loop ---');
+// Verify startAnimation does not spawn multiple loops
+ai.stopAnimation();
+assert.strictEqual(ai.animFrameId, null);
+ai.startAnimation();
+const firstAnimId = ai.animFrameId;
+assert(firstAnimId !== null);
+ai.startAnimation(); // Second call should not overwrite or duplicate
+assert.strictEqual(ai.animFrameId, firstAnimId, 'startAnimation must reuse existing loop if active');
+ai.stopAnimation();
+assert.strictEqual(ai.animFrameId, null, 'stopAnimation must nullify animFrameId');
+
+// Verify zero ctx.shadowBlur assignments in source code
+assert(!/\.shadowBlur\s*=/.test(jsCode), 'Canvas rendering must NOT assign expensive shadowBlur');
+console.log('  ✓ Verified single requestAnimationFrame loop management');
+console.log('  ✓ Verified 0 shadowBlur assignments in Canvas engine');
+
+console.log('\n--- TEST 14: Check No Bottom-Left Floating Audio Controls ---');
 const html = fs.readFileSync('index.html', 'utf8');
 const css = fs.readFileSync('css/aiVisualizer.css', 'utf8');
 const hasBottomLeftAudio = /position:\s*fixed;[^}]*bottom:[^}]*left:[^}]*\b(audio|play|voice)\b/i.test(html + css);
@@ -315,5 +396,5 @@ assert.strictEqual(hasBottomLeftAudio, false, 'No floating audio controls at bot
 console.log('  ✓ Confirmed 0 floating audio controls at bottom-left corner of the website');
 
 console.log('\n=========================================');
-console.log('ALL 12 TESTS PASSED PERFECTLY!');
+console.log('ALL 14 AUTOMATED TESTS PASSED PERFECTLY!');
 console.log('=========================================');

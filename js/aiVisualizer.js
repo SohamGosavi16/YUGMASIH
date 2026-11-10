@@ -1,6 +1,6 @@
 /**
  * YUGMA AI Heritage Companion & Audio Visualizer (Multi-Agent System)
- * Version: 2.7.0 (Secure Serverless Architecture)
+ * Version: 2.8.0 (Optimized Single Narration Player Architecture)
  * 
  * Features:
  * - 5 Specialized Heritage AI Agents:
@@ -9,14 +9,12 @@
  *   3. Master Architect (Sthapatya: Vastu Shastra, acoustics, interlocking stone)
  *   4. Sacred Lore (Katha: Temple myths, deity iconography, living folklore)
  *   5. Travel Curator (Yatra: Viewpoints, golden hour photography, circuits)
- * - Secure Serverless Architecture:
- *   Calls Netlify Serverless Function (/.netlify/functions/gemini)
- *   The Google Gemini API key is stored securely in Netlify environment variables (GEMINI_API_KEY)
- *   and is NEVER exposed to the browser, network URLs, or GitHub.
- * - Vastly Expanded Local Knowledge Base for all 22 YUGMA Heritage Monuments (Offline/Fallback)
- * - 4-State Golden AI Orb Visualizer with dynamic audio-reactive waveforms
- * - Web Speech API cadence synchronization & voice controls
- * - High accessibility (reduced motion toggle, keyboard shortcuts, mobile responsive)
+ * - Single Unified AI Voice Narration Player directly below AI visualizer
+ * - High-Contrast Inline SVG Controls (Play, Pause, Resume, Stop, Replay, Volume)
+ * - 30 FPS Throttled Canvas Rendering with zero shadowBlur bottlenecks
+ * - Smooth Speaking Progress Tracking with Boundary Sync
+ * - Persistent Volume State across Session
+ * - Secure Serverless Architecture (Gemini API via Netlify Functions)
  */
 
 (function (root, factory) {
@@ -31,10 +29,7 @@
   'use strict';
 
   // ── 0. GLOBAL YUGMA AI CONFIGURATION ──────────────────────────────────────
-  // The Gemini API key is securely managed on the server (Netlify Environment Variables)
-  // and is never exposed in client-side code, network URLs, or GitHub.
   var YUGMA_AI_CONFIG = {
-    // Relative endpoint for the Netlify serverless function (works on local netlify dev and production)
     API_ENDPOINT: "/.netlify/functions/gemini"
   };
 
@@ -677,13 +672,14 @@
     currentState: STATES.IDLE,
     selectedAgent: 'orchestrator',
 
-    // Audio & Speech
+    // Audio & Speech Playback State
     audioContext: null,
     analyserNode: null,
     activeUtterance: null,
     speechCadenceEnergy: 0.1,
     motionEnabled: true,
     volume: 0.9,
+    lastNonZeroVolume: 90,
     speechRate: 0.95,
     lastSpokenText: "",
     lastSpokenTitle: "",
@@ -692,8 +688,12 @@
     isPaused: false,
     activeOffset: 0,
     currentPlaybackStatus: "Ready to play.",
+    playbackStartTime: 0,
+    playbackElapsed: 0,
+    progressTimer: null,
+    isModalOpen: false,
 
-    // Canvas & Animation loop
+    // Canvas & Animation Loop (Optimized ~30 FPS, Zero CPU shadowBlur)
     canvas: null,
     ctx: null,
     animFrameId: null,
@@ -702,16 +702,29 @@
     pulseScale: 1.0,
     concentricAngle1: 0,
     concentricAngle2: 0,
-    concentricAngle3: 0,
     particles: [],
 
     // ── Initialization ──────────────────────────────────────────────────────
     init: function () {
       this.initDOM();
       this.initParticles();
+
+      // Restore volume from sessionStorage if available
+      var savedVol = 90;
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          var stored = sessionStorage.getItem('yugma_ai_volume');
+          if (stored !== null && !isNaN(parseInt(stored, 10))) {
+            savedVol = parseInt(stored, 10);
+          }
+        }
+      } catch (e) {}
+      this.setVolume(savedVol);
+
       this.bindEvents();
       this.setAgent('orchestrator');
       this.setInitialText();
+      this.drawIdleFrame();
     },
 
     // ── DOM & Modal Setup ───────────────────────────────────────────────────
@@ -735,7 +748,7 @@
         document.body.appendChild(fab);
       }
 
-      // 2. Create Modal Container if missing (Clean UI: No API key prompts for end-users)
+      // 2. Create Modal Container if missing (Single unified narration player)
       if (!document.getElementById('ai-companion-modal-backdrop')) {
         var backdrop = document.createElement('div');
         backdrop.className = 'ai-companion-backdrop';
@@ -760,17 +773,18 @@
           '    </div>',
           '    <div class="ai-header-controls">',
           '      <button type="button" class="btn-ai-header-action" id="btn-ai-toggle-motion" title="Toggle animation motion for accessibility">',
-          '        <i class="fa-solid fa-wand-magic"></i> <span>Motion: ON</span>',
+          '        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',
+          '        <span>Motion: ON</span>',
           '      </button>',
           '      <button type="button" class="btn-ai-modal-close" id="btn-ai-modal-close" title="Close AI Companion">&times;</button>',
           '    </div>',
           '  </div>',
           '  <!-- Modal Body -->',
           '  <div class="ai-modal-body">',
-          '    <!-- Left Column: Golden Orb Visualizer & Voice Controls -->',
+          '    <!-- Left Column: Single Unified AI Visualizer & Narration Player -->',
           '    <div class="ai-visualizer-column">',
           '      <div class="ai-orb-stage">',
-          '        <canvas class="ai-orb-canvas" id="ai-orb-canvas" width="560" height="560"></canvas>',
+          '        <canvas class="ai-orb-canvas" id="ai-orb-canvas" width="280" height="280"></canvas>',
           '      </div>',
           '      <div class="ai-state-indicator idle" id="ai-state-indicator">',
           '        <span class="ai-state-dot"></span>',
@@ -789,29 +803,47 @@
           '        </div>',
           '        <div class="voice-buttons-cluster">',
           '          <button type="button" class="btn-voice-ctrl" id="btn-ai-stop" title="Stop narration" aria-label="Stop narration" disabled>',
-          '            <i class="fa-solid fa-stop"></i>',
+          '            <svg class="voice-svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">',
+          '              <rect x="5" y="5" width="14" height="14" rx="2" />',
+          '            </svg>',
           '          </button>',
           '          <button type="button" class="btn-voice-ctrl" id="btn-ai-pause" title="Pause narration" aria-label="Pause narration" disabled>',
-          '            <i class="fa-solid fa-pause"></i>',
+          '            <svg class="voice-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">',
+          '              <rect x="6" y="4" width="4" height="16" rx="1.5" />',
+          '              <rect x="14" y="4" width="4" height="16" rx="1.5" />',
+          '            </svg>',
           '          </button>',
           '          <button type="button" class="btn-voice-ctrl btn-main-play" id="btn-ai-play" title="Play narration" aria-label="Play narration">',
-          '            <i class="fa-solid fa-play" id="ai-play-btn-icon"></i>',
+          '            <svg class="voice-svg-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">',
+          '              <polygon points="6 4 20 12 6 20 6 4" />',
+          '            </svg>',
           '          </button>',
           '          <button type="button" class="btn-voice-ctrl btn-main-play" id="btn-ai-resume" title="Resume narration" aria-label="Resume narration" style="display:none;">',
-          '            <i class="fa-solid fa-play"></i>',
+          '            <svg class="voice-svg-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">',
+          '              <polygon points="6 4 20 12 6 20 6 4" />',
+          '            </svg>',
           '          </button>',
           '          <button type="button" class="btn-voice-ctrl" id="btn-ai-replay" title="Replay narration from beginning" aria-label="Replay narration from beginning">',
-          '            <i class="fa-solid fa-rotate-left"></i>',
+          '            <svg class="voice-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">',
+          '              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />',
+          '              <path d="M3 3v5h5" />',
+          '            </svg>',
           '          </button>',
           '        </div>',
           '        <div class="voice-volume-box">',
-          '          <i class="fa-solid fa-volume-high"></i>',
+          '          <button type="button" class="btn-ai-vol-mute" id="ai-volume-icon-wrap" title="Toggle audio mute" aria-label="Toggle audio mute">',
+          '            <svg class="voice-svg-icon" id="ai-vol-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+          '              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" />',
+          '              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />',
+          '              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />',
+          '            </svg>',
+          '          </button>',
           '          <input type="range" class="voice-volume-slider" id="ai-volume-slider" min="0" max="100" value="90" title="Adjust voice volume" aria-label="Adjust voice volume">',
           '          <span class="voice-volume-label" id="ai-volume-label">90%</span>',
           '        </div>',
           '      </div>',
           '    </div>',
-          '    <!-- Right Column: Multi-Agent Selector, Prompts, Viewport & Input -->',
+          '    <!-- Right Column: Multi-Agent Selector, Prompts, Viewport & Input (NO DUPLICATE CONTROLS) -->',
           '    <div class="ai-dialog-column">',
           '      <!-- Multi-Agent Specialist Selector Bar -->',
           '      <div class="ai-agents-selector-wrap">',
@@ -850,45 +882,6 @@
           '        </div>',
           '        <div class="response-text-body" id="ai-response-text"></div>',
           '      </div>',
-          '      <!-- Dedicated Narration Playback Toolbar inside Right-Side Chat Panel -->',
-          '      <div class="ai-chat-narration-bar" id="ai-chat-narration-bar">',
-          '        <div class="chat-narration-meta-row">',
-          '          <div class="chat-narration-status-wrap">',
-          '            <span class="chat-narration-status-dot"></span>',
-          '            <span class="chat-narration-status-text" id="ai-chat-status-text">Ready to play.</span>',
-          '          </div>',
-          '          <div class="chat-narration-progress-wrap">',
-          '            <div class="chat-narration-progress-bar">',
-          '              <div class="chat-narration-progress-fill" id="ai-chat-progress-fill"></div>',
-          '            </div>',
-          '            <span class="chat-narration-pct" id="ai-chat-progress-text">0%</span>',
-          '          </div>',
-          '        </div>',
-          '        <div class="chat-narration-controls-row">',
-          '          <div class="chat-narration-btn-group">',
-          '            <button type="button" class="btn-narration-ctrl" id="btn-ai-chat-stop" title="Stop narration" aria-label="Stop narration" disabled>',
-          '              <i class="fa-solid fa-stop"></i>',
-          '            </button>',
-          '            <button type="button" class="btn-narration-ctrl" id="btn-ai-chat-pause" title="Pause narration" aria-label="Pause narration" disabled>',
-          '              <i class="fa-solid fa-pause"></i>',
-          '            </button>',
-          '            <button type="button" class="btn-narration-ctrl btn-narration-action" id="btn-ai-chat-play" title="Play narration" aria-label="Play narration">',
-          '              <i class="fa-solid fa-play"></i>',
-          '            </button>',
-          '            <button type="button" class="btn-narration-ctrl btn-narration-action" id="btn-ai-chat-resume" title="Resume narration" aria-label="Resume narration" style="display:none;">',
-          '              <i class="fa-solid fa-play"></i>',
-          '            </button>',
-          '            <button type="button" class="btn-narration-ctrl" id="btn-ai-chat-replay" title="Replay narration from beginning" aria-label="Replay narration from beginning">',
-          '              <i class="fa-solid fa-rotate-left"></i>',
-          '            </button>',
-          '          </div>',
-          '          <div class="chat-narration-volume-group">',
-          '            <i class="fa-solid fa-volume-high" id="ai-chat-vol-icon"></i>',
-          '            <input type="range" class="chat-narration-vol-slider" id="ai-chat-volume-slider" min="0" max="100" value="90" title="Adjust narration volume" aria-label="Adjust narration volume">',
-          '            <span class="chat-narration-vol-label" id="ai-chat-volume-label">90%</span>',
-          '          </div>',
-          '        </div>',
-          '      </div>',
           '      <!-- Input Form -->',
           '      <form class="ai-input-form" id="ai-chat-form">',
           '        <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Ask YUGMA AI about Indian monuments, dynasties, architecture..." autocomplete="off">',
@@ -910,21 +903,18 @@
       }
     },
 
-    // ── Particle System ─────────────────────────────────────────────────────
+    // ── Particle System (Lightweight: 8 subtle particles) ───────────────────
     initParticles: function () {
       this.particles = [];
-      for (var i = 0; i < 40; i++) {
+      for (var i = 0; i < 8; i++) {
         var angle = Math.random() * Math.PI * 2;
-        var dist = 30 + Math.random() * 110;
+        var dist = 32 + Math.random() * 75;
         this.particles.push({
-          x: Math.cos(angle) * dist,
-          y: Math.sin(angle) * dist,
-          baseDist: dist,
           angle: angle,
-          speed: (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
-          size: Math.random() * 2.2 + 0.8,
-          alpha: Math.random() * 0.6 + 0.2,
-          pulseSpeed: Math.random() * 0.03 + 0.015
+          baseDist: dist,
+          speed: (Math.random() * 0.005 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
+          size: Math.random() * 1.8 + 0.8,
+          alpha: Math.random() * 0.45 + 0.25
         });
       }
     },
@@ -935,7 +925,6 @@
       this.selectedAgent = agentId;
       var agent = HERITAGE_AGENTS[agentId];
 
-      // Update active pill button
       var pills = document.querySelectorAll('.agent-pill');
       pills.forEach(function (pill) {
         if (pill.getAttribute('data-agent') === agentId) {
@@ -945,19 +934,14 @@
         }
       });
 
-      // Update agent description label
       var descEl = document.getElementById('ai-active-agent-desc');
-      if (descEl) {
-        descEl.textContent = agent.desc;
-      }
+      if (descEl) descEl.textContent = agent.desc;
 
-      // Update response badge
       var badgeEl = document.getElementById('ai-agent-badge');
       if (badgeEl) {
         badgeEl.innerHTML = '<i class="' + agent.icon + '"></i> ' + agent.name.toUpperCase();
       }
 
-      // Refresh prompt suggestions for this agent
       this.renderPromptSuggestions();
     },
 
@@ -972,7 +956,6 @@
 
       container.innerHTML = html;
 
-      // Rebind click events
       var self = this;
       container.querySelectorAll('.prompt-chip').forEach(function (chip) {
         chip.addEventListener('click', function (e) {
@@ -1022,6 +1005,7 @@
       this.charProgress = 0;
       this.activeOffset = 0;
       this.isPaused = false;
+      this.playbackElapsed = 0;
       this.totalChars = text.length;
       this.updateProgressUI(0);
       this.setPlaybackStatus('Ready to play.');
@@ -1030,13 +1014,17 @@
       }
     },
 
-    // ── 5. VISUALIZATION CANVAS RENDERING ENGINE ────────────────────────────
+    // ── 5. OPTIMIZED CANVAS RENDERING ENGINE (~30 FPS, ZERO CPU BLUR) ───────
     startAnimation: function () {
-      if (this.animFrameId) return;
+      if (this.animFrameId) return; // Guarantee only one active animation loop
       var self = this;
+      this.lastFrameTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
       function renderLoop(timestamp) {
         self.drawFrame(timestamp);
-        self.animFrameId = requestAnimationFrame(renderLoop);
+        if (self.animFrameId) {
+          self.animFrameId = requestAnimationFrame(renderLoop);
+        }
       }
       this.animFrameId = requestAnimationFrame(renderLoop);
     },
@@ -1051,6 +1039,13 @@
     drawFrame: function (timestamp) {
       if (!this.ctx || !this.canvas) return;
 
+      // Throttle rendering to approximately 30 FPS for buttery smooth performance
+      if (timestamp - this.lastFrameTime < 32) return;
+
+      var dt = (timestamp - this.lastFrameTime) * 0.001;
+      this.lastFrameTime = timestamp;
+      if (!dt || dt > 0.1) dt = 0.033;
+
       var ctx = this.ctx;
       var w = this.canvas.width;
       var h = this.canvas.height;
@@ -1059,42 +1054,37 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      var dt = (timestamp - this.lastFrameTime) * 0.001;
-      this.lastFrameTime = timestamp;
-      if (!dt || dt > 0.1) dt = 0.016;
-
       if (!this.motionEnabled) {
-        this.speechCadenceEnergy = (this.currentState === STATES.SPEAKING) ? 0.35 : 0.08;
+        this.speechCadenceEnergy = (this.currentState === STATES.SPEAKING) ? 0.3 : 0.08;
       }
 
       var speedMultiplier = 1.0;
-      if (this.currentState === STATES.THINKING) speedMultiplier = 2.4;
-      else if (this.currentState === STATES.SPEAKING) speedMultiplier = 1.6 + this.speechCadenceEnergy * 2.5;
-      else if (this.currentState === STATES.PAUSED) speedMultiplier = 0.2;
+      if (this.currentState === STATES.THINKING) speedMultiplier = 2.2;
+      else if (this.currentState === STATES.SPEAKING) speedMultiplier = 1.4 + this.speechCadenceEnergy * 2.0;
+      else if (this.currentState === STATES.PAUSED) speedMultiplier = 0.15;
 
       this.concentricAngle1 += 0.35 * dt * speedMultiplier;
-      this.concentricAngle2 -= 0.55 * dt * speedMultiplier;
-      this.concentricAngle3 += 0.22 * dt * speedMultiplier;
-      this.wavePhase += 1.8 * dt * speedMultiplier;
+      this.concentricAngle2 -= 0.45 * dt * speedMultiplier;
+      this.wavePhase += 1.6 * dt * speedMultiplier;
 
-      // Outer Radial Glow Aura
-      var auraRadius = 140 + Math.sin(this.wavePhase * 0.8) * 12 + this.speechCadenceEnergy * 35;
-      var auraGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, auraRadius);
-      auraGrad.addColorStop(0, 'rgba(201, 162, 74, 0.45)');
-      auraGrad.addColorStop(0.4, 'rgba(223, 167, 83, 0.18)');
-      auraGrad.addColorStop(0.7, 'rgba(201, 162, 74, 0.06)');
+      // 1. Soft Outer Radial Glow Aura (Hardware-accelerated gradient, 0 CPU shadowBlur)
+      var auraRadius = 100 + Math.sin(this.wavePhase * 0.8) * 8 + this.speechCadenceEnergy * 24;
+      var auraGrad = ctx.createRadialGradient(cx, cy, 18, cx, cy, auraRadius);
+      auraGrad.addColorStop(0, 'rgba(201, 162, 74, 0.4)');
+      auraGrad.addColorStop(0.4, 'rgba(223, 167, 83, 0.15)');
+      auraGrad.addColorStop(0.7, 'rgba(201, 162, 74, 0.05)');
       auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = auraGrad;
       ctx.beginPath();
       ctx.arc(cx, cy, auraRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Golden Particles
-      if (this.motionEnabled) {
+      // 2. Subtle Golden Particles (8 embers max)
+      if (this.motionEnabled && this.particles.length > 0) {
         for (var i = 0; i < this.particles.length; i++) {
           var p = this.particles[i];
-          p.angle += p.speed * dt * 60 * speedMultiplier;
-          var curDist = p.baseDist + Math.sin(timestamp * 0.002 + i) * 8 + this.speechCadenceEnergy * 20;
+          p.angle += p.speed * dt * 50 * speedMultiplier;
+          var curDist = p.baseDist + Math.sin(timestamp * 0.002 + i) * 6 + this.speechCadenceEnergy * 14;
           var px = cx + Math.cos(p.angle) * curDist;
           var py = cy + Math.sin(p.angle) * curDist;
 
@@ -1105,118 +1095,282 @@
         }
       }
 
-      // Concentric Dashed Architectural Rings
+      // 3. Concentric Dashed Architectural Rings
       ctx.save();
-      ctx.strokeStyle = 'rgba(201, 162, 74, 0.45)';
-      ctx.lineWidth = 1.6;
-      ctx.setLineDash([8, 14]);
+      ctx.strokeStyle = 'rgba(201, 162, 74, 0.4)';
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([6, 12]);
       ctx.beginPath();
-      ctx.arc(cx, cy, 115, this.concentricAngle1, this.concentricAngle1 + Math.PI * 2);
+      ctx.arc(cx, cy, 88, this.concentricAngle1, this.concentricAngle1 + Math.PI * 2);
       ctx.stroke();
 
-      ctx.strokeStyle = 'rgba(223, 167, 83, 0.35)';
-      ctx.lineWidth = 1.2;
-      ctx.setLineDash([4, 18]);
+      ctx.strokeStyle = 'rgba(223, 167, 83, 0.3)';
+      ctx.lineWidth = 1.0;
+      ctx.setLineDash([4, 16]);
       ctx.beginPath();
-      ctx.arc(cx, cy, 95, this.concentricAngle2, this.concentricAngle2 + Math.PI * 2);
-      ctx.stroke();
-
-      ctx.strokeStyle = 'rgba(201, 162, 74, 0.6)';
-      ctx.lineWidth = 1.8;
-      ctx.setLineDash([12, 10]);
-      ctx.beginPath();
-      ctx.arc(cx, cy, 75, this.concentricAngle3, this.concentricAngle3 + Math.PI * 2);
+      ctx.arc(cx, cy, 70, this.concentricAngle2, this.concentricAngle2 + Math.PI * 2);
       ctx.stroke();
       ctx.restore();
 
-      // Radial Audio Waveform (28 Bars)
-      var barCount = 28;
-      var baseR = 52;
+      // 4. Radial Audio Waveform (24 Bars) - Single Batched Path Stroke
+      var barCount = 24;
+      var baseR = 46;
       ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = (this.currentState === STATES.SPEAKING)
+        ? 'rgba(255, 213, 128, 0.75)'
+        : 'rgba(201, 162, 74, 0.45)';
+      ctx.lineWidth = 2.2;
       for (var b = 0; b < barCount; b++) {
         var barAngle = (b / barCount) * Math.PI * 2;
-        var waveMod = Math.sin(this.wavePhase + b * 0.6) * 0.5 + 0.5;
-        var barLen = 6 + waveMod * (this.speechCadenceEnergy * 32 + 8);
-        if (this.currentState === STATES.THINKING) barLen = 8 + Math.sin(timestamp * 0.008 + b) * 6;
-        else if (this.currentState === STATES.IDLE) barLen = 4 + Math.sin(timestamp * 0.002 + b) * 2;
+        var waveMod = Math.sin(this.wavePhase + b * 0.7) * 0.5 + 0.5;
+        var barLen = 5 + waveMod * (this.speechCadenceEnergy * 24 + 6);
+        if (this.currentState === STATES.THINKING) {
+          barLen = 7 + Math.sin(timestamp * 0.008 + b) * 5;
+        } else if (this.currentState === STATES.IDLE) {
+          barLen = 3;
+        }
 
         var x1 = cx + Math.cos(barAngle) * baseR;
         var y1 = cy + Math.sin(barAngle) * baseR;
         var x2 = cx + Math.cos(barAngle) * (baseR + barLen);
         var y2 = cy + Math.sin(barAngle) * (baseR + barLen);
-
-        ctx.strokeStyle = 'rgba(223, 167, 83, ' + (0.35 + waveMod * 0.45) + ')';
-        ctx.lineWidth = 2.4;
-        ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
-        ctx.stroke();
       }
+      ctx.stroke();
       ctx.restore();
 
-      // Central Golden Core
-      var coreRadius = 42 + Math.sin(this.wavePhase * 1.2) * 2.5 + this.speechCadenceEnergy * 10;
-      var coreGrad = ctx.createRadialGradient(cx - 8, cy - 8, 4, cx, cy, coreRadius);
+      // 5. Central Golden Core with Ambient Halo (No software blur)
+      var coreRadius = 36 + Math.sin(this.wavePhase * 1.2) * 2.0 + this.speechCadenceEnergy * 8;
+      
+      // Halo behind core
+      var haloRadius = coreRadius * 1.5;
+      var haloGrad = ctx.createRadialGradient(cx, cy, coreRadius * 0.5, cx, cy, haloRadius);
+      haloGrad.addColorStop(0, (this.currentState === STATES.SPEAKING) ? 'rgba(255, 213, 128, 0.4)' : 'rgba(201, 162, 74, 0.25)');
+      haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, haloRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core sphere
+      var coreGrad = ctx.createRadialGradient(cx - 6, cy - 6, 3, cx, cy, coreRadius);
       coreGrad.addColorStop(0, '#ffffff');
       coreGrad.addColorStop(0.2, '#fff4d6');
       coreGrad.addColorStop(0.55, '#dfa753');
       coreGrad.addColorStop(0.85, '#c9a24a');
       coreGrad.addColorStop(1, '#8b6914');
-
       ctx.fillStyle = coreGrad;
-      ctx.shadowColor = '#dfa753';
-      ctx.shadowBlur = (this.currentState === STATES.SPEAKING) ? 28 : 14;
       ctx.beginPath();
       ctx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
       ctx.fill();
-      ctx.shadowBlur = 0;
+    },
+
+    // Static Serene Idle Frame (Drawn once when idle; eliminates constant background animation)
+    drawIdleFrame: function () {
+      if (!this.ctx || !this.canvas) return;
+      var ctx = this.ctx;
+      var w = this.canvas.width;
+      var h = this.canvas.height;
+      var cx = w / 2;
+      var cy = h / 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Resting gentle aura
+      var auraGrad = ctx.createRadialGradient(cx, cy, 14, cx, cy, 95);
+      auraGrad.addColorStop(0, 'rgba(201, 162, 74, 0.3)');
+      auraGrad.addColorStop(0.5, 'rgba(223, 167, 83, 0.08)');
+      auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = auraGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 95, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Resting architectural rings
+      ctx.save();
+      ctx.strokeStyle = 'rgba(201, 162, 74, 0.35)';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([6, 12]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 88, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(223, 167, 83, 0.25)';
+      ctx.lineWidth = 1.0;
+      ctx.setLineDash([4, 16]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 70, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Resting waveform bars (batched)
+      var barCount = 24;
+      var baseR = 46;
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(201, 162, 74, 0.35)';
+      ctx.lineWidth = 1.8;
+      for (var b = 0; b < barCount; b++) {
+        var barAngle = (b / barCount) * Math.PI * 2;
+        var x1 = cx + Math.cos(barAngle) * baseR;
+        var y1 = cy + Math.sin(barAngle) * baseR;
+        var x2 = cx + Math.cos(barAngle) * (baseR + 4);
+        var y2 = cy + Math.sin(barAngle) * (baseR + 4);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Core sphere
+      var coreRadius = 36;
+      var coreGrad = ctx.createRadialGradient(cx - 6, cy - 6, 3, cx, cy, coreRadius);
+      coreGrad.addColorStop(0, '#ffffff');
+      coreGrad.addColorStop(0.2, '#fff4d6');
+      coreGrad.addColorStop(0.55, '#dfa753');
+      coreGrad.addColorStop(0.85, '#c9a24a');
+      coreGrad.addColorStop(1, '#8b6914');
+      ctx.fillStyle = coreGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
+      ctx.fill();
+    },
+
+    // Static Paused Frame
+    drawPausedFrame: function () {
+      if (!this.ctx || !this.canvas) return;
+      var ctx = this.ctx;
+      var w = this.canvas.width;
+      var h = this.canvas.height;
+      var cx = w / 2;
+      var cy = h / 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Amber paused halo
+      var haloRadius = 60;
+      var haloGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, haloRadius);
+      haloGrad.addColorStop(0, 'rgba(245, 158, 11, 0.35)');
+      haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, haloRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Paused core
+      var coreRadius = 36;
+      var coreGrad = ctx.createRadialGradient(cx - 6, cy - 6, 3, cx, cy, coreRadius);
+      coreGrad.addColorStop(0, '#ffffff');
+      coreGrad.addColorStop(0.3, '#fef3c7');
+      coreGrad.addColorStop(0.7, '#d97706');
+      coreGrad.addColorStop(1, '#78350f');
+      ctx.fillStyle = coreGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
+      ctx.fill();
     },
 
     // ── 6. STATE MACHINE & PLAYBACK STATUS HELPERS ──────────────────────────
     setPlaybackStatus: function (statusText) {
       this.currentPlaybackStatus = statusText;
-      var el1 = document.getElementById('ai-voice-status-text');
-      var el2 = document.getElementById('ai-chat-status-text');
-      if (el1) el1.textContent = statusText;
-      if (el2) el2.textContent = statusText;
+      var statusEl = document.getElementById('ai-voice-status-text');
+      if (statusEl) statusEl.textContent = statusText;
     },
 
     updateProgressUI: function (percent) {
       var p = Math.max(0, Math.min(100, Math.round(percent)));
-      var fill1 = document.getElementById('ai-voice-progress-fill');
-      var text1 = document.getElementById('ai-voice-progress-text');
-      var fill2 = document.getElementById('ai-chat-progress-fill');
-      var text2 = document.getElementById('ai-chat-progress-text');
-      if (fill1) fill1.style.width = p + '%';
-      if (text1) text1.textContent = p + '%';
-      if (fill2) fill2.style.width = p + '%';
-      if (text2) text2.textContent = p + '%';
+      var fill = document.getElementById('ai-voice-progress-fill');
+      var text = document.getElementById('ai-voice-progress-text');
+      if (fill) fill.style.width = p + '%';
+      if (text) text.textContent = p + '%';
+    },
+
+    startProgressTracking: function () {
+      this.stopProgressTracking(false);
+      this.playbackStartTime = Date.now();
+      var self = this;
+      var charsPerSec = 15 * (this.speechRate || 0.95);
+      var totalSec = Math.max(1, this.totalChars / charsPerSec);
+
+      this.progressTimer = setInterval(function () {
+        if (self.currentState !== STATES.SPEAKING || self.isPaused) return;
+        var sessionElapsed = (Date.now() - self.playbackStartTime) / 1000;
+        var currentTotalElapsed = self.playbackElapsed + sessionElapsed;
+        var calculatedPct = Math.min(99, Math.round((currentTotalElapsed / totalSec) * 100));
+
+        // Use boundary progress or elapsed progress whichever is higher
+        var boundaryPct = self.totalChars > 0 ? Math.round((self.charProgress / self.totalChars) * 100) : 0;
+        var finalPct = Math.max(calculatedPct, boundaryPct);
+
+        self.updateProgressUI(finalPct);
+      }, 100);
+    },
+
+    stopProgressTracking: function (isPausing) {
+      if (this.progressTimer) {
+        clearInterval(this.progressTimer);
+        this.progressTimer = null;
+      }
+      if (isPausing && this.playbackStartTime) {
+        this.playbackElapsed += (Date.now() - this.playbackStartTime) / 1000;
+        this.playbackStartTime = 0;
+      }
     },
 
     setVolume: function (volPercent) {
       var v = Math.max(0, Math.min(100, parseInt(volPercent, 10) || 0));
       this.volume = v / 100;
-      var slider1 = document.getElementById('ai-volume-slider');
-      var label1 = document.getElementById('ai-volume-label');
-      var slider2 = document.getElementById('ai-chat-volume-slider');
-      var label2 = document.getElementById('ai-chat-volume-label');
-      if (slider1) slider1.value = v;
-      if (label1) label1.textContent = v + '%';
-      if (slider2) slider2.value = v;
-      if (label2) label2.textContent = v + '%';
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('yugma_ai_volume', v.toString());
+        }
+      } catch (e) {}
+
+      var slider = document.getElementById('ai-volume-slider');
+      var label = document.getElementById('ai-volume-label');
+      var iconWrap = document.getElementById('ai-volume-icon-wrap');
+
+      if (slider) slider.value = v;
+      if (label) label.textContent = v + '%';
+
+      // Dynamic High Contrast Volume SVG Icon (Mute / Low / High)
+      if (iconWrap) {
+        if (v === 0) {
+          iconWrap.innerHTML = '<svg class="voice-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+          iconWrap.setAttribute('title', 'Unmute audio');
+          iconWrap.setAttribute('aria-label', 'Unmute audio');
+        } else if (v < 50) {
+          iconWrap.innerHTML = '<svg class="voice-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+          iconWrap.setAttribute('title', 'Mute audio');
+          iconWrap.setAttribute('aria-label', 'Mute audio');
+        } else {
+          iconWrap.innerHTML = '<svg class="voice-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+          iconWrap.setAttribute('title', 'Mute audio');
+          iconWrap.setAttribute('aria-label', 'Mute audio');
+        }
+      }
+
       if (this.activeUtterance) {
         this.activeUtterance.volume = this.volume;
+      }
+    },
+
+    toggleMute: function () {
+      if (this.volume > 0) {
+        this.lastNonZeroVolume = Math.round(this.volume * 100) || 90;
+        this.setVolume(0);
+      } else {
+        this.setVolume(this.lastNonZeroVolume || 90);
       }
     },
 
     setState: function (newState, statusOverride) {
       this.currentState = newState;
 
-      // Update Top-Right FAB attribute
       var fab = document.getElementById('yugma-ai-fab');
-      if (fab) {
-        fab.setAttribute('data-state', newState);
-      }
+      if (fab) fab.setAttribute('data-state', newState);
 
       var indicator = document.getElementById('ai-state-indicator');
       var label = document.getElementById('ai-state-label');
@@ -1224,86 +1378,63 @@
         indicator.className = 'ai-state-indicator ' + newState;
       }
 
-      var playBtns = [document.getElementById('btn-ai-play'), document.getElementById('btn-ai-chat-play')];
-      var pauseBtns = [document.getElementById('btn-ai-pause'), document.getElementById('btn-ai-chat-pause')];
-      var resumeBtns = [document.getElementById('btn-ai-resume'), document.getElementById('btn-ai-chat-resume')];
-      var stopBtns = [document.getElementById('btn-ai-stop'), document.getElementById('btn-ai-chat-stop')];
-      var replayBtns = [document.getElementById('btn-ai-replay'), document.getElementById('btn-ai-chat-replay')];
+      var playBtn = document.getElementById('btn-ai-play');
+      var pauseBtn = document.getElementById('btn-ai-pause');
+      var resumeBtn = document.getElementById('btn-ai-resume');
+      var stopBtn = document.getElementById('btn-ai-stop');
+      var replayBtn = document.getElementById('btn-ai-replay');
 
       var hasText = !!(this.lastSpokenText && this.lastSpokenText.trim());
 
       switch (newState) {
         case STATES.IDLE:
           if (label) label.textContent = "✦ IDLE // READY";
-          this.setPlaybackStatus(statusOverride || (hasText ? "Ready to play." : "Ready to play."));
-          playBtns.forEach(function (btn) {
-            if (btn) {
-              btn.style.display = 'inline-flex';
-              btn.disabled = !hasText;
-            }
-          });
-          pauseBtns.forEach(function (btn) {
-            if (btn) {
-              btn.style.display = 'inline-flex';
-              btn.disabled = true;
-            }
-          });
-          resumeBtns.forEach(function (btn) {
-            if (btn) {
-              btn.style.display = 'none';
-              btn.disabled = true;
-            }
-          });
-          stopBtns.forEach(function (btn) {
-            if (btn) btn.disabled = true;
-          });
-          replayBtns.forEach(function (btn) {
-            if (btn) btn.disabled = !hasText;
-          });
+          this.setPlaybackStatus(statusOverride || "Ready to play.");
+          if (playBtn) { playBtn.style.display = 'inline-flex'; playBtn.disabled = !hasText; }
+          if (pauseBtn) { pauseBtn.style.display = 'inline-flex'; pauseBtn.disabled = true; }
+          if (resumeBtn) { resumeBtn.style.display = 'none'; resumeBtn.disabled = true; }
+          if (stopBtn) stopBtn.disabled = true;
+          if (replayBtn) replayBtn.disabled = !hasText;
           this.speechCadenceEnergy = 0.08;
+          this.stopAnimation();
+          this.drawIdleFrame();
           break;
 
         case STATES.THINKING:
           if (label) label.textContent = "✦ DELIBERATING ARCHIVE...";
           var agentName = (HERITAGE_AGENTS[this.selectedAgent] ? HERITAGE_AGENTS[this.selectedAgent].name : "Agent");
           this.setPlaybackStatus("Consulting " + agentName + "...");
-          playBtns.forEach(function (btn) { if (btn) btn.disabled = true; });
-          pauseBtns.forEach(function (btn) { if (btn) btn.disabled = true; });
-          resumeBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
-          stopBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
-          replayBtns.forEach(function (btn) { if (btn) btn.disabled = true; });
+          if (playBtn) playBtn.disabled = true;
+          if (pauseBtn) playBtn.disabled = true;
+          if (resumeBtn) resumeBtn.style.display = 'none';
+          if (stopBtn) stopBtn.disabled = false;
+          if (replayBtn) replayBtn.disabled = true;
           this.speechCadenceEnergy = 0.25;
+          this.startAnimation();
           break;
 
         case STATES.SPEAKING:
           if (label) label.textContent = "✦ AGENT SPEAKING...";
           this.setPlaybackStatus("Currently speaking.");
-          playBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
-          resumeBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
-          pauseBtns.forEach(function (btn) {
-            if (btn) {
-              btn.style.display = 'inline-flex';
-              btn.disabled = false;
-            }
-          });
-          stopBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
-          replayBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
+          if (playBtn) playBtn.style.display = 'none';
+          if (resumeBtn) resumeBtn.style.display = 'none';
+          if (pauseBtn) { pauseBtn.style.display = 'inline-flex'; pauseBtn.disabled = false; }
+          if (stopBtn) stopBtn.disabled = false;
+          if (replayBtn) replayBtn.disabled = false;
+          this.startAnimation();
           break;
 
         case STATES.PAUSED:
           if (label) label.textContent = "✦ SPEECH PAUSED";
           this.setPlaybackStatus("Paused.");
-          playBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
-          pauseBtns.forEach(function (btn) { if (btn) btn.style.display = 'none'; });
-          resumeBtns.forEach(function (btn) {
-            if (btn) {
-              btn.style.display = 'inline-flex';
-              btn.disabled = false;
-            }
-          });
-          stopBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
-          replayBtns.forEach(function (btn) { if (btn) btn.disabled = false; });
+          if (playBtn) playBtn.style.display = 'none';
+          if (pauseBtn) pauseBtn.style.display = 'none';
+          if (resumeBtn) { resumeBtn.style.display = 'inline-flex'; resumeBtn.disabled = false; }
+          if (stopBtn) stopBtn.disabled = false;
+          if (replayBtn) replayBtn.disabled = false;
           this.speechCadenceEnergy = 0.05;
+          this.stopAnimation();
+          this.drawPausedFrame();
           break;
       }
     },
@@ -1316,6 +1447,7 @@
       if (!('speechSynthesis' in window)) {
         console.warn('Web Speech API not supported in this browser.');
         self.setPlaybackStatus('Audio unavailable.');
+        self.setState(STATES.IDLE, 'Audio unavailable.');
         return;
       }
 
@@ -1328,6 +1460,9 @@
       this.activeOffset = offset;
       this.charProgress = offset;
       this.totalChars = this.lastSpokenText.length;
+
+      var charsPerSec = 15 * (this.speechRate || 0.95);
+      this.playbackElapsed = offset > 0 ? (offset / charsPerSec) : 0;
 
       var textSlice = (offset > 0) ? this.lastSpokenText.slice(offset) : this.lastSpokenText;
       var utterance = new SpeechSynthesisUtterance(textSlice);
@@ -1347,15 +1482,14 @@
       utterance.onstart = function () {
         self.isPaused = false;
         self.setState(STATES.SPEAKING);
-        var startPct = Math.min(100, Math.round((self.charProgress / Math.max(1, self.totalChars)) * 100));
-        self.updateProgressUI(startPct);
+        self.startProgressTracking();
       };
 
       utterance.onboundary = function (e) {
         if (e.name === 'word') {
           var absoluteIndex = self.activeOffset + e.charIndex;
           self.charProgress = absoluteIndex;
-          var percent = Math.min(100, Math.round((absoluteIndex / Math.max(1, self.totalChars)) * 100));
+          var percent = Math.min(99, Math.round((absoluteIndex / Math.max(1, self.totalChars)) * 100));
           self.updateProgressUI(percent);
 
           var word = self.lastSpokenText.substr(absoluteIndex, e.charLength || 5).toLowerCase();
@@ -1369,16 +1503,21 @@
 
       utterance.onpause = function () {
         self.isPaused = true;
+        self.stopProgressTracking(true);
         self.setState(STATES.PAUSED);
       };
 
       utterance.onresume = function () {
         self.isPaused = false;
         self.setState(STATES.SPEAKING);
+        self.startProgressTracking();
       };
 
       utterance.onend = function () {
         self.isPaused = false;
+        self.stopProgressTracking(false);
+        self.playbackElapsed = 0;
+        self.charProgress = self.totalChars;
         self.updateProgressUI(100);
         self.setState(STATES.IDLE, 'Finished.');
       };
@@ -1386,6 +1525,7 @@
       utterance.onerror = function (err) {
         console.warn('SpeechSynthesis error:', err);
         self.isPaused = false;
+        self.stopProgressTracking(false);
         self.setPlaybackStatus('Audio unavailable.');
         self.setState(STATES.IDLE, 'Audio unavailable.');
       };
@@ -1397,6 +1537,7 @@
     pauseSpeech: function () {
       if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
         this.isPaused = true;
+        this.stopProgressTracking(true);
         window.speechSynthesis.pause();
         this.setState(STATES.PAUSED);
       }
@@ -1409,6 +1550,7 @@
       if ('speechSynthesis' in window && window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
         this.setState(STATES.SPEAKING);
+        this.startProgressTracking();
 
         // Safety fallback for browsers that fail to resume paused utterances
         setTimeout(function () {
@@ -1427,6 +1569,8 @@
         window.speechSynthesis.cancel();
       }
       this.isPaused = false;
+      this.stopProgressTracking(false);
+      this.playbackElapsed = 0;
       this.charProgress = 0;
       this.activeOffset = 0;
       this.updateProgressUI(0);
@@ -1448,8 +1592,6 @@
       self.setState(STATES.THINKING);
 
       var activeAgent = HERITAGE_AGENTS[self.selectedAgent] || HERITAGE_AGENTS.orchestrator;
-
-      // Dispatch request to Netlify Serverless Function proxying Gemini securely
       self.callGeminiAPI(q, activeAgent);
     },
 
@@ -1486,7 +1628,6 @@
       })
       .catch(function (err) {
         console.warn('AI Serverless Gateway call failed or server not active, seamlessly falling back to curated knowledge:', err);
-        // Fall back gracefully to the rich 22-monument multi-agent knowledge base
         self.callCuratedKnowledge(userQuery, agent, true);
       });
     },
@@ -1495,7 +1636,6 @@
       var self = this;
       var q = userQuery.toLowerCase().trim();
 
-      // Scan all 22 monuments and themes for keyword matches
       var matchedKey = 'general';
       for (var key in HERITAGE_KNOWLEDGE) {
         var item = HERITAGE_KNOWLEDGE[key];
@@ -1513,7 +1653,6 @@
       var entry = HERITAGE_KNOWLEDGE[matchedKey] || HERITAGE_KNOWLEDGE.general;
       var responseText = entry[agent.id] || entry.orchestrator || entry.historian || "Here is information from the YUGMA Civilizational Archive.";
 
-      // Realistic 800ms cognitive deliberation
       setTimeout(function () {
         var title = entry.title || "YUGMA Heritage Archive";
         if (hadFallback) {
@@ -1521,7 +1660,7 @@
         }
         self.updateTranscript(title, responseText, 'curated');
         self.speakCurrentResponse();
-      }, 800);
+      }, 750);
     },
 
     // ── 9. EVENT BINDING ───────────────────────────────────────────────────
@@ -1567,53 +1706,57 @@
         motionBtn.addEventListener('click', function () {
           self.motionEnabled = !self.motionEnabled;
           motionBtn.innerHTML = self.motionEnabled
-            ? '<i class="fa-solid fa-wand-magic"></i> <span>Motion: ON</span>'
-            : '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Motion: OFF</span>';
+            ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span>Motion: ON</span>'
+            : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><circle cx="12" cy="12" r="9"/></svg><span>Motion: OFF</span>';
         });
       }
 
-      // 6. Voice Control Buttons (Visualizer & Right-Side Chat Panel)
-      var playBtns = [document.getElementById('btn-ai-play'), document.getElementById('btn-ai-chat-play')];
-      var pauseBtns = [document.getElementById('btn-ai-pause'), document.getElementById('btn-ai-chat-pause')];
-      var resumeBtns = [document.getElementById('btn-ai-resume'), document.getElementById('btn-ai-chat-resume')];
-      var stopBtns = [document.getElementById('btn-ai-stop'), document.getElementById('btn-ai-chat-stop')];
-      var replayBtns = [document.getElementById('btn-ai-replay'), document.getElementById('btn-ai-chat-replay')];
-
-      playBtns.forEach(function (btn) {
-        if (btn) btn.addEventListener('click', function () {
+      // 6. Voice Control Buttons (Single component directly below visualizer)
+      var playBtn = document.getElementById('btn-ai-play');
+      if (playBtn) {
+        playBtn.addEventListener('click', function () {
           if (self.currentState === STATES.PAUSED) {
             self.resumeSpeech();
           } else {
             self.speakCurrentResponse(0);
           }
         });
-      });
+      }
 
-      pauseBtns.forEach(function (btn) {
-        if (btn) btn.addEventListener('click', function () { self.pauseSpeech(); });
-      });
+      var pauseBtn = document.getElementById('btn-ai-pause');
+      if (pauseBtn) {
+        pauseBtn.addEventListener('click', function () { self.pauseSpeech(); });
+      }
 
-      resumeBtns.forEach(function (btn) {
-        if (btn) btn.addEventListener('click', function () { self.resumeSpeech(); });
-      });
+      var resumeBtn = document.getElementById('btn-ai-resume');
+      if (resumeBtn) {
+        resumeBtn.addEventListener('click', function () { self.resumeSpeech(); });
+      }
 
-      stopBtns.forEach(function (btn) {
-        if (btn) btn.addEventListener('click', function () { self.stopSpeech(); });
-      });
+      var stopBtn = document.getElementById('btn-ai-stop');
+      if (stopBtn) {
+        stopBtn.addEventListener('click', function () { self.stopSpeech(); });
+      }
 
-      replayBtns.forEach(function (btn) {
-        if (btn) btn.addEventListener('click', function () { self.replaySpeech(); });
-      });
+      var replayBtn = document.getElementById('btn-ai-replay');
+      if (replayBtn) {
+        replayBtn.addEventListener('click', function () { self.replaySpeech(); });
+      }
 
-      // Volume Sliders (Synchronized)
-      var volSliders = [document.getElementById('ai-volume-slider'), document.getElementById('ai-chat-volume-slider')];
-      volSliders.forEach(function (slider) {
-        if (slider) {
-          slider.addEventListener('input', function (e) {
-            self.setVolume(e.target.value);
-          });
-        }
-      });
+      // Volume Slider & Mute Toggle
+      var volSlider = document.getElementById('ai-volume-slider');
+      if (volSlider) {
+        volSlider.addEventListener('input', function (e) {
+          self.setVolume(e.target.value);
+        });
+      }
+
+      var muteWrap = document.getElementById('ai-volume-icon-wrap');
+      if (muteWrap) {
+        muteWrap.addEventListener('click', function () {
+          self.toggleMute();
+        });
+      }
 
       // 7. Multi-Agent Selector Pills
       var agentPills = document.querySelectorAll('.agent-pill');
@@ -1638,7 +1781,7 @@
         });
       }
 
-      // 9. Page visibility & escape key handlers
+      // 9. Page visibility & escape key handlers (Pause audio & stop animation on tab switch)
       document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
           self.stopAnimation();
@@ -1646,7 +1789,11 @@
         } else {
           var modal = document.getElementById('ai-companion-modal-backdrop');
           if (modal && modal.classList.contains('active')) {
-            self.startAnimation();
+            if (self.currentState === STATES.SPEAKING || self.currentState === STATES.THINKING) {
+              self.startAnimation();
+            } else {
+              self.drawIdleFrame();
+            }
           }
         }
       });
@@ -1662,7 +1809,12 @@
       var backdrop = document.getElementById('ai-companion-modal-backdrop');
       if (backdrop) {
         backdrop.classList.add('active');
-        this.startAnimation();
+        this.isModalOpen = true;
+        if (this.currentState === STATES.SPEAKING || this.currentState === STATES.THINKING) {
+          this.startAnimation();
+        } else {
+          this.drawIdleFrame();
+        }
       }
     },
 
@@ -1670,6 +1822,7 @@
       var backdrop = document.getElementById('ai-companion-modal-backdrop');
       if (backdrop) {
         backdrop.classList.remove('active');
+        this.isModalOpen = false;
         this.stopSpeech();
         this.stopAnimation();
       }
