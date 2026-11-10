@@ -96,6 +96,9 @@
       <button type="button" class="mobile-tab-btn" data-view="schedule">
         <i class="fa-solid fa-calendar-days"></i> Schedule
       </button>
+      <button type="button" class="mobile-tab-btn" data-view="budget">
+        <i class="fa-solid fa-calculator"></i> Budget (₹)
+      </button>
       <button type="button" class="mobile-tab-btn" data-view="map">
         <i class="fa-solid fa-map-location-dot"></i> Map
       </button>
@@ -276,6 +279,9 @@
                 <button type="button" class="btn-action-secondary" id="btn-print-itinerary">
                   <i class="fa-solid fa-print"></i> Print / PDF
                 </button>
+                <button type="button" class="btn-action-secondary" id="btn-jump-budget" title="Jump to Journey Budget & Expenses Calculator">
+                  <i class="fa-solid fa-calculator"></i> Budget (₹)
+                </button>
                 <button type="button" class="btn-action-secondary" id="btn-export-json">
                   <i class="fa-solid fa-file-arrow-down"></i> Export JSON
                 </button>
@@ -312,6 +318,423 @@
           <div id="itinerary-days-container">
             <!-- Dynamically populated by journeyPlanner.js -->
           </div>
+
+          <!-- STEP 4: Journey Budget & Expenses Section -->
+          <section class="journey-budget-card" id="journey-budget-card" aria-label="Journey Budget and Expenses Calculator">
+            <!-- Header Bar -->
+            <div class="budget-card-header">
+              <div class="card-title-group">
+                <span class="step-num-pill budget-pill">
+                  <i class="fa-solid fa-coins"></i>
+                </span>
+                <div>
+                  <h2 class="card-heading">JOURNEY BUDGET &amp; EXPENSES</h2>
+                  <span class="card-subtext">Live real-time expenditure calculator synchronized with your itinerary &amp; transit distance</span>
+                </div>
+              </div>
+              <div class="budget-header-actions">
+                <button type="button" class="btn-mini-tool" id="btn-sync-budget-route" title="Sync distance and duration with current itinerary">
+                  <i class="fa-solid fa-arrows-rotate"></i> Sync Route
+                </button>
+                <button type="button" class="btn-mini-tool" id="btn-reset-budget-defaults" title="Reset all expenses to standard defaults">
+                  <i class="fa-solid fa-rotate-left"></i> Reset Defaults
+                </button>
+              </div>
+            </div>
+
+            <!-- Global Trip Budget Param Controls Bar -->
+            <div class="budget-global-bar">
+              <div class="budget-param-box">
+                <label for="budget-travellers"><i class="fa-solid fa-users"></i> Travellers</label>
+                <div class="budget-stepper">
+                  <button type="button" class="btn-stepper" id="btn-travellers-minus" title="Decrease travellers" aria-label="Decrease travellers">−</button>
+                  <input type="number" id="budget-travellers" min="1" max="50" value="2" class="stepper-input" aria-label="Number of travellers">
+                  <button type="button" class="btn-stepper" id="btn-travellers-plus" title="Increase travellers" aria-label="Increase travellers">+</button>
+                </div>
+              </div>
+
+              <div class="budget-param-box">
+                <label for="budget-trip-days"><i class="fa-regular fa-calendar-days"></i> Trip Days</label>
+                <div class="budget-stepper">
+                  <button type="button" class="btn-stepper" id="btn-days-minus" title="Decrease days" aria-label="Decrease days">−</button>
+                  <input type="number" id="budget-trip-days" min="1" max="30" value="3" class="stepper-input" aria-label="Trip days">
+                  <button type="button" class="btn-stepper" id="btn-days-plus" title="Increase days" aria-label="Increase days">+</button>
+                </div>
+              </div>
+
+              <div class="budget-param-box">
+                <label for="budget-hotel-nights"><i class="fa-solid fa-bed"></i> Hotel Nights</label>
+                <div class="budget-stepper">
+                  <button type="button" class="btn-stepper" id="btn-nights-minus" title="Decrease nights" aria-label="Decrease nights">−</button>
+                  <input type="number" id="budget-hotel-nights" min="0" max="30" value="2" class="stepper-input" aria-label="Hotel nights">
+                  <button type="button" class="btn-stepper" id="btn-nights-plus" title="Increase nights" aria-label="Increase nights">+</button>
+                </div>
+              </div>
+
+              <div class="budget-param-box visitor-tier-box">
+                <label for="budget-visitor-tier"><i class="fa-solid fa-passport"></i> Visitor Category</label>
+                <select id="budget-visitor-tier" class="form-select budget-tier-select" aria-label="Visitor category">
+                  <option value="domestic" selected>🇮🇳 Indian Resident (ASI Standard)</option>
+                  <option value="foreign">🌐 International Explorer (Foreign)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Master Summary Banner -->
+            <div class="budget-overview-dashboard">
+              <div class="budget-metric-card highlight">
+                <span class="metric-label">TOTAL ESTIMATED BUDGET</span>
+                <span class="metric-value-gold" id="budget-display-grand-total">₹ 0</span>
+                <span class="metric-sub" id="budget-display-route-stat">0 km route • 0 destinations</span>
+              </div>
+              <div class="budget-metric-card">
+                <span class="metric-label">COST PER TRAVELLER</span>
+                <span class="metric-value-cyan" id="budget-display-per-person">₹ 0</span>
+                <span class="metric-sub" id="budget-display-per-person-sub">Based on 2 travellers</span>
+              </div>
+              <div class="budget-metric-card">
+                <span class="metric-label">TRANSIT &amp; FUEL</span>
+                <span class="metric-value-white" id="budget-display-fuel-stat">₹ 0</span>
+                <span class="metric-sub" id="budget-display-fuel-litres">0 Litres Fuel Est.</span>
+              </div>
+            </div>
+
+            <!-- Visual Category Breakdown Meter -->
+            <div class="budget-breakdown-wrapper">
+              <div class="breakdown-header-row">
+                <span class="breakdown-title"><i class="fa-solid fa-chart-pie"></i> EXPENSE ALLOCATION</span>
+                <span class="breakdown-total-tag" id="breakdown-total-tag">100% Calculated</span>
+              </div>
+              <div class="budget-progress-bar" id="budget-progress-bar">
+                <div class="bar-segment bar-transport" id="bar-transport" style="width: 20%;" title="Transportation"></div>
+                <div class="bar-segment bar-stay" id="bar-stay" style="width: 30%;" title="Accommodation"></div>
+                <div class="bar-segment bar-food" id="bar-food" style="width: 25%;" title="Food &amp; Dining"></div>
+                <div class="bar-segment bar-tickets" id="bar-tickets" style="width: 10%;" title="Monuments &amp; Passes"></div>
+                <div class="bar-segment bar-misc" id="bar-misc" style="width: 15%;" title="Miscellaneous &amp; Contingency"></div>
+              </div>
+              <!-- Category Chips Legend -->
+              <div class="budget-legend-grid">
+                <div class="legend-chip transport">
+                  <span class="dot"></span>
+                  <span class="cat-name">Transit &amp; Fuel:</span>
+                  <strong id="legend-transport-val">₹ 0</strong>
+                  <span class="pct" id="legend-transport-pct">(0%)</span>
+                </div>
+                <div class="legend-chip stay">
+                  <span class="dot"></span>
+                  <span class="cat-name">Accommodation:</span>
+                  <strong id="legend-stay-val">₹ 0</strong>
+                  <span class="pct" id="legend-stay-pct">(0%)</span>
+                </div>
+                <div class="legend-chip food">
+                  <span class="dot"></span>
+                  <span class="cat-name">Food &amp; Dining:</span>
+                  <strong id="legend-food-val">₹ 0</strong>
+                  <span class="pct" id="legend-food-pct">(0%)</span>
+                </div>
+                <div class="legend-chip tickets">
+                  <span class="dot"></span>
+                  <span class="cat-name">Monuments &amp; Passes:</span>
+                  <strong id="legend-tickets-val">₹ 0</strong>
+                  <span class="pct" id="legend-tickets-pct">(0%)</span>
+                </div>
+                <div class="legend-chip misc">
+                  <span class="dot"></span>
+                  <span class="cat-name">Misc &amp; Contingency:</span>
+                  <strong id="legend-misc-val">₹ 0</strong>
+                  <span class="pct" id="legend-misc-pct">(0%)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Five Category Modules -->
+            <div class="budget-sections-container">
+
+              <!-- CATEGORY A: TRANSPORTATION -->
+              <div class="budget-category-card" id="cat-transportation">
+                <div class="cat-card-header">
+                  <div class="cat-title-cluster">
+                    <span class="cat-badge transport"><i class="fa-solid fa-car-side"></i></span>
+                    <div>
+                      <h3 class="cat-heading">A. TRANSPORTATION &amp; TRANSIT</h3>
+                      <p class="cat-desc">Route distance, vehicle specifications, fuel formula, tolls &amp; local transfers</p>
+                    </div>
+                  </div>
+                  <div class="cat-subtotal-badge" id="budget-transport-subtotal">₹ 0</div>
+                </div>
+
+                <div class="cat-card-body">
+                  <div class="form-grid-3">
+                    <div class="form-group">
+                      <label class="form-label" for="budget-vehicle-type"><i class="fa-solid fa-truck-pickup"></i> Vehicle Type</label>
+                      <select id="budget-vehicle-type" class="form-select">
+                        <option value="sedan" selected>Petrol Sedan / Compact (15 km/L)</option>
+                        <option value="suv">Diesel SUV / MUV (13 km/L)</option>
+                        <option value="ev">Electric Vehicle (EV) (~₹2.50/km eq.)</option>
+                        <option value="hatchback">Economy Hatchback (18 km/L)</option>
+                        <option value="tempo">Tempo Traveller (9 km/L)</option>
+                        <option value="bus">Tour Bus / Coach (5 km/L)</option>
+                        <option value="custom">Custom Configuration</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-dist-km">
+                        <span><i class="fa-solid fa-route"></i> Total Distance (km)</span>
+                      </label>
+                      <div class="input-with-button">
+                        <input type="number" id="budget-dist-km" min="0" step="1" value="0" class="form-input">
+                        <button type="button" class="btn-inline-action" id="btn-sync-distance-itinerary" title="Reset distance to exact itinerary route">
+                          <i class="fa-solid fa-arrows-rotate"></i> Sync Route
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-num-vehicles"><i class="fa-solid fa-car"></i> Number of Vehicles</label>
+                      <input type="number" id="budget-num-vehicles" min="1" max="10" value="1" class="form-input">
+                    </div>
+                  </div>
+
+                  <div class="form-grid-3" style="margin-top:12px;">
+                    <div class="form-group">
+                      <label class="form-label" for="budget-mileage"><i class="fa-solid fa-gauge"></i> Fuel Mileage (km/L)</label>
+                      <input type="number" id="budget-mileage" min="1" step="0.5" value="15" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-fuel-price"><i class="fa-solid fa-gas-pump"></i> Fuel Price (₹/L)</label>
+                      <input type="number" id="budget-fuel-price" min="1" step="0.5" value="96.50" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label"><i class="fa-solid fa-fire-flame-simple"></i> Calculated Fuel Outlay</label>
+                      <div class="calc-readonly-box" id="budget-calc-fuel-cost">₹ 0 (0 L)</div>
+                    </div>
+                  </div>
+
+                  <!-- Formula Alert Box -->
+                  <div class="budget-formula-note">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span><strong>Fuel Cost Formula:</strong> (Total Distance / Mileage) × Fuel Price × Number of Vehicles</span>
+                  </div>
+
+                  <!-- Tolls, Parking, Local Transit -->
+                  <div class="form-grid-3" style="margin-top:12px;">
+                    <div class="form-group">
+                      <label class="form-label" for="budget-tolls"><i class="fa-solid fa-road"></i> Toll Expenses (₹)</label>
+                      <input type="number" id="budget-tolls" min="0" step="50" value="750" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-parking"><i class="fa-solid fa-square-parking"></i> Monument Parking (₹)</label>
+                      <input type="number" id="budget-parking" min="0" step="50" value="250" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-local-transit"><i class="fa-solid fa-taxi"></i> Local Transit / Auto / Cabs (₹)</label>
+                      <input type="number" id="budget-local-transit" min="0" step="50" value="500" class="form-input">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CATEGORY B: ACCOMMODATION -->
+              <div class="budget-category-card" id="cat-accommodation">
+                <div class="cat-card-header">
+                  <div class="cat-title-cluster">
+                    <span class="cat-badge stay"><i class="fa-solid fa-hotel"></i></span>
+                    <div>
+                      <h3 class="cat-heading">B. ACCOMMODATION &amp; STAYS</h3>
+                      <p class="cat-desc">Room tier presets, room count, and total night stays</p>
+                    </div>
+                  </div>
+                  <div class="cat-subtotal-badge" id="budget-stay-subtotal">₹ 0</div>
+                </div>
+
+                <div class="cat-card-body">
+                  <div class="form-grid-4">
+                    <div class="form-group">
+                      <label class="form-label" for="budget-hotel-preset"><i class="fa-solid fa-bell-concierge"></i> Room Category</label>
+                      <select id="budget-hotel-preset" class="form-select">
+                        <option value="budget">Budget Homestay / Dharamshala (₹1,500/night)</option>
+                        <option value="comfort" selected>Comfort Heritage Hotel / 3-Star (₹3,500/night)</option>
+                        <option value="luxury">Luxury Heritage Haveli / 4-Star (₹7,500/night)</option>
+                        <option value="palace">Royal Palace Heritage Resort / 5-Star (₹16,000/night)</option>
+                        <option value="custom">Custom Nightly Rate</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-room-rate"><i class="fa-solid fa-indian-rupee-sign"></i> Rate per Room / Night (₹)</label>
+                      <input type="number" id="budget-room-rate" min="0" step="100" value="3500" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-num-rooms"><i class="fa-solid fa-door-open"></i> Number of Rooms</label>
+                      <input type="number" id="budget-num-rooms" min="1" max="25" value="1" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-num-nights"><i class="fa-solid fa-moon"></i> Number of Nights</label>
+                      <input type="number" id="budget-num-nights" min="0" max="30" value="2" class="form-input">
+                    </div>
+                  </div>
+
+                  <!-- Formula Alert Box -->
+                  <div class="budget-formula-note">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span><strong>Accommodation Formula:</strong> Room Rate × Rooms × Nights</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CATEGORY C: FOOD & DINING -->
+              <div class="budget-category-card" id="cat-food">
+                <div class="cat-card-header">
+                  <div class="cat-title-cluster">
+                    <span class="cat-badge food"><i class="fa-solid fa-utensils"></i></span>
+                    <div>
+                      <h3 class="cat-heading">C. FOOD &amp; REGIONAL DINING</h3>
+                      <p class="cat-desc">Daily meals, authentic heritage cuisine, street snacks, and beverages</p>
+                    </div>
+                  </div>
+                  <div class="cat-subtotal-badge" id="budget-food-subtotal">₹ 0</div>
+                </div>
+
+                <div class="cat-card-body">
+                  <div class="form-grid-4">
+                    <div class="form-group">
+                      <label class="form-label" for="budget-food-preset"><i class="fa-solid fa-bowl-rice"></i> Dining Style</label>
+                      <select id="budget-food-preset" class="form-select">
+                        <option value="street">Street Food, Dhabas &amp; Cafes (₹400 / person / day)</option>
+                        <option value="standard" selected>Standard Regional Dining (₹850 / person / day)</option>
+                        <option value="royal">Royal Heritage Thali &amp; Specialty (₹1,800 / person / day)</option>
+                        <option value="fine">Fine Dining &amp; Palace Cuisine (₹3,500 / person / day)</option>
+                        <option value="custom">Custom Daily Allowance</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-daily-food"><i class="fa-solid fa-indian-rupee-sign"></i> Daily Food / Person (₹)</label>
+                      <input type="number" id="budget-daily-food" min="0" step="50" value="850" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label"><i class="fa-solid fa-users"></i> Travellers</label>
+                      <div class="calc-readonly-box" id="budget-display-food-travellers">2 Travellers</div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label"><i class="fa-regular fa-calendar-days"></i> Trip Days</label>
+                      <div class="calc-readonly-box" id="budget-display-food-days">3 Days</div>
+                    </div>
+                  </div>
+
+                  <!-- Formula Alert Box -->
+                  <div class="budget-formula-note">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span><strong>Food Formula:</strong> Daily Food Budget × Travellers × Trip Days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CATEGORY D: ENTRY TICKETS & MONUMENT CHARGES -->
+              <div class="budget-category-card" id="cat-tickets">
+                <div class="cat-card-header">
+                  <div class="cat-title-cluster">
+                    <span class="cat-badge tickets"><i class="fa-solid fa-ticket"></i></span>
+                    <div>
+                      <h3 class="cat-heading">D. MONUMENT ENTRY TICKETS &amp; PASSES</h3>
+                      <p class="cat-desc">Official ASI / trust admission fees &amp; optional passes for destinations in your itinerary</p>
+                    </div>
+                  </div>
+                  <div class="cat-subtotal-badge" id="budget-tickets-subtotal">₹ 0</div>
+                </div>
+
+                <div class="cat-card-body">
+                  <div class="tickets-table-wrapper">
+                    <table class="tickets-budget-table" id="tickets-budget-table">
+                      <thead>
+                        <tr>
+                          <th>Destination Sanctuary</th>
+                          <th>Official Base Fee (₹)</th>
+                          <th>Optional Add-ons (₹)</th>
+                          <th>Visitors</th>
+                          <th style="text-align:right;">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody id="budget-monuments-ticket-list">
+                        <!-- Populated dynamically by journeyPlanner.js -->
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="budget-formula-note" style="margin-top:12px;">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Admission rates reflect verified ASI / state archaeology norms. Modify any field to customize for student/senior exemptions or camera permits.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CATEGORY E: MISCELLANEOUS & CONTINGENCIES -->
+              <div class="budget-category-card" id="cat-misc">
+                <div class="cat-card-header">
+                  <div class="cat-title-cluster">
+                    <span class="cat-badge misc"><i class="fa-solid fa-basket-shopping"></i></span>
+                    <div>
+                      <h3 class="cat-heading">E. MISCELLANEOUS &amp; CONTINGENCIES</h3>
+                      <p class="cat-desc">Licensed tour guides, shopping budget, emergency contingency, and custom expenses</p>
+                    </div>
+                  </div>
+                  <div class="cat-subtotal-badge" id="budget-misc-subtotal">₹ 0</div>
+                </div>
+
+                <div class="cat-card-body">
+                  <div class="form-grid-3">
+                    <div class="form-group">
+                      <label class="form-label" for="budget-guide-expenses"><i class="fa-solid fa-user-tie"></i> Licensed Tour Guide (₹)</label>
+                      <input type="number" id="budget-guide-expenses" min="0" step="100" value="1500" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-shopping-budget"><i class="fa-solid fa-bag-shopping"></i> Souvenirs &amp; Shopping (₹)</label>
+                      <input type="number" id="budget-shopping-budget" min="0" step="100" value="3000" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="budget-emergency-allowance"><i class="fa-solid fa-shield-heart"></i> Emergency Contingency (₹)</label>
+                      <input type="number" id="budget-emergency-allowance" min="0" step="100" value="2500" class="form-input">
+                    </div>
+                  </div>
+
+                  <!-- Custom Expense Items Section -->
+                  <div class="custom-expenses-wrapper" style="margin-top:18px;">
+                    <div class="custom-expenses-header">
+                      <span class="custom-expenses-title"><i class="fa-solid fa-plus-circle"></i> Custom Expense Categories</span>
+                      <button type="button" class="btn-action-secondary btn-sm" id="btn-add-custom-expense">
+                        <i class="fa-solid fa-plus"></i> Add Custom Expense
+                      </button>
+                    </div>
+                    <div id="budget-custom-expenses-list" class="custom-expenses-list">
+                      <!-- Dynamic custom expense rows -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Print Dossier CTA Banner at Bottom of Budget -->
+            <div class="budget-print-cta-banner">
+              <div>
+                <h4 style="font-family:var(--jp-font-heading); color:#ffffff; font-size:16px;">Ready for your Expedition?</h4>
+                <p style="font-size:12.5px; color:var(--jp-bone-dim);">Generate a publication-grade A4 travel dossier and financial statement.</p>
+              </div>
+              <button type="button" class="btn-action-primary" id="btn-print-budget-dossier" onclick="document.getElementById('btn-print-itinerary').click()">
+                <i class="fa-solid fa-print"></i> Print / Save as PDF
+              </button>
+            </div>
+          </section>
         </section>
 
       </div>
@@ -354,6 +777,9 @@
       </aside>
 
     </div>
+
+    <!-- Hidden Dedicated Print Dossier for Publication-Grade A4 Printing & Save-as-PDF -->
+    <div id="yugma-print-dossier" class="yugma-print-dossier" aria-hidden="true"></div>
   </main>
 
   <!-- MODALS -->

@@ -547,6 +547,58 @@
     }
   };
 
+  // ── 3B. MONUMENT TICKETING, VEHICLE & BUDGET CONFIG REGISTRY ───────────────
+  const YUGMA_MONUMENT_TICKETS = {
+    taj_mahal: { domestic: 50, foreign: 1100, optional: 200, optionalDesc: "Main Mausoleum Entry" },
+    amber_fort: { domestic: 100, foreign: 500, optional: 50, optionalDesc: "Sheesh Mahal & Audio Guide" },
+    ajanta_caves: { domestic: 40, foreign: 600, optional: 50, optionalDesc: "Eco-bus shuttle & amenities" },
+    rani_ki_vav: { domestic: 40, foreign: 600, optional: 25, optionalDesc: "Camera permit" },
+    brihadisvara: { domestic: 0, foreign: 0, optional: 50, optionalDesc: "Special Darshan / Guide" },
+    victoria_memorial: { domestic: 50, foreign: 500, optional: 50, optionalDesc: "Royal Gallery Pass" },
+    hampi_chariot: { domestic: 40, foreign: 600, optional: 40, optionalDesc: "Vittala Complex & Museum" },
+    konark_sun: { domestic: 40, foreign: 600, optional: 25, optionalDesc: "Interpretation Center" },
+    padmanabhapuram: { domestic: 50, foreign: 300, optional: 50, optionalDesc: "Palace camera permit" },
+    rang_ghar: { domestic: 25, foreign: 300, optional: 25, optionalDesc: "Site pass & guide" },
+    mahabodhi: { domestic: 0, foreign: 0, optional: 100, optionalDesc: "Camera / Meditation pass" },
+    lakshmana_temple: { domestic: 25, foreign: 300, optional: 25, optionalDesc: "Archaeological Museum" },
+    bom_jesus: { domestic: 0, foreign: 0, optional: 50, optionalDesc: "Basilica Art Gallery" },
+    lepakshi_temple: { domestic: 0, foreign: 0, optional: 50, optionalDesc: "Heritage archive token" },
+    statue_of_unity: { domestic: 150, foreign: 150, optional: 230, optionalDesc: "Viewing Gallery Express" },
+    jageshwar_dham: { domestic: 0, foreign: 0, optional: 50, optionalDesc: "Archaeological Museum" },
+    neermahal_palace: { domestic: 50, foreign: 150, optional: 30, optionalDesc: "Rudrasagar boat transfer" },
+    golden_temple: { domestic: 0, foreign: 0, optional: 0, optionalDesc: "Free for all pilgrims" },
+    sanchi_stupa: { domestic: 40, foreign: 600, optional: 30, optionalDesc: "Archaeological Museum" },
+    gateway_of_india: { domestic: 0, foreign: 0, optional: 120, optionalDesc: "Harbour ferry pass" },
+    rajgad_fort: { domestic: 0, foreign: 0, optional: 50, optionalDesc: "Forest conservation token" },
+    humayun_tomb: { domestic: 40, foreign: 600, optional: 50, optionalDesc: "Isa Khan complex & Museum" }
+  };
+
+  const VEHICLE_PRESETS = {
+    sedan: { label: "Petrol Sedan / Compact (15 km/L)", mileage: 15, fuelPrice: 96.50 },
+    suv: { label: "Diesel SUV / MUV (13 km/L)", mileage: 13, fuelPrice: 89.20 },
+    ev: { label: "Electric Vehicle (EV) (~₹2.50/km eq.)", mileage: 38.6, fuelPrice: 96.50 },
+    hatchback: { label: "Economy Hatchback (18 km/L)", mileage: 18, fuelPrice: 96.50 },
+    tempo: { label: "Tempo Traveller (9 km/L)", mileage: 9, fuelPrice: 89.20 },
+    bus: { label: "Tour Bus / Coach (5 km/L)", mileage: 5, fuelPrice: 89.20 },
+    custom: { label: "Custom Configuration", mileage: 15, fuelPrice: 96.50 }
+  };
+
+  const HOTEL_PRESETS = {
+    budget: { label: "Budget Homestay / Dharamshala (₹1,500/night)", rate: 1500 },
+    comfort: { label: "Comfort Heritage Hotel / 3-Star (₹3,500/night)", rate: 3500 },
+    luxury: { label: "Luxury Heritage Haveli / 4-Star (₹7,500/night)", rate: 7500 },
+    palace: { label: "Royal Palace Heritage Resort / 5-Star (₹16,000/night)", rate: 16000 },
+    custom: { label: "Custom Nightly Rate", rate: 3500 }
+  };
+
+  const FOOD_PRESETS = {
+    street: { label: "Street Food, Dhabas & Cafes (₹400 / person / day)", rate: 400 },
+    standard: { label: "Standard Regional Dining (₹850 / person / day)", rate: 850 },
+    royal: { label: "Royal Heritage Thali & Specialty (₹1,800 / person / day)", rate: 1800 },
+    fine: { label: "Fine Dining & Palace Cuisine (₹3,500 / person / day)", rate: 3500 },
+    custom: { label: "Custom Daily Allowance", rate: 850 }
+  };
+
   // ── 4. STATE STORE ────────────────────────────────────────────────────────
   const state = {
     currentUser: null,
@@ -566,7 +618,35 @@
     mapPolylines: [],
     activeDayFilter: "all",
     currentTileLayer: null,
-    activeBasemapStyle: "voyager"
+    activeBasemapStyle: "voyager",
+
+    // Journey Budget & Expenses Configuration
+    budgetConfig: {
+      travellers: 2,
+      tripDays: 3,
+      hotelNights: 2,
+      visitorTier: 'domestic', // 'domestic' | 'foreign'
+      distanceKm: 0,
+      manualDistance: false,
+      vehicleType: 'sedan',
+      numVehicles: 1,
+      mileage: 15,
+      fuelPrice: 96.50,
+      tolls: 750,
+      parking: 250,
+      localTransit: 500,
+      hotelPreset: 'comfort',
+      roomRate: 3500,
+      numRooms: 1,
+      foodPreset: 'standard',
+      dailyFood: 850,
+      guideExpenses: 1500,
+      shoppingBudget: 3000,
+      emergencyAllowance: 2500,
+      customExpenses: [],
+      monumentOverrides: {},
+      calculated: null
+    }
   };
 
   // ── 5. HAVERSINE DISTANCE FORMULA (KM) ────────────────────────────────────
@@ -1121,6 +1201,9 @@
 
     // Update map with full itinerary
     renderMapItinerary(itinerary, state.activeDayFilter);
+
+    // Sync & Render Journey Budget & Expenses Calculator
+    syncBudgetWithItinerary(itinerary);
   }
 
   function filterTimelineByDay(dayNumber) {
@@ -1649,12 +1732,1021 @@
     badge.style.display = count > 0 ? 'inline-block' : 'none';
   }
 
-  // ── 14. EXPORT & PRINT HANDLERS ──────────────────────────────────────────
+  // ── 14. EXPORT & PUBLICATION-GRADE PRINT HANDLERS ─────────────────────────
+  function formatINR(amount) {
+    const num = Math.round(Number(amount) || 0);
+    return num.toLocaleString('en-IN');
+  }
+
+  function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function getItineraryMonumentsList() {
+    if (!state.currentItinerary || !Array.isArray(state.currentItinerary.days)) {
+      return YUGMA_22_MONUMENTS.filter(m => state.selectedMonumentIds.has(m.id));
+    }
+    const seen = new Set();
+    const result = [];
+    state.currentItinerary.days.forEach(day => {
+      (day.stops || []).forEach(stop => {
+        if (!seen.has(stop.id)) {
+          seen.add(stop.id);
+          result.push(stop);
+        }
+      });
+    });
+    return result.length > 0 ? result : YUGMA_22_MONUMENTS.filter(m => state.selectedMonumentIds.has(m.id));
+  }
+
+  // ── 14B. JOURNEY BUDGET & EXPENSES CALCULATION ENGINE ──────────────────────
+  function calculateBudget() {
+    const b = state.budgetConfig;
+    const travellers = Math.max(1, parseInt(b.travellers, 10) || 1);
+    const tripDays = Math.max(1, parseInt(b.tripDays, 10) || 1);
+    const hotelNights = Math.max(0, parseInt(b.hotelNights, 10) || 0);
+    const numRooms = Math.max(1, parseInt(b.numRooms, 10) || 1);
+    const roomRate = Math.max(0, parseFloat(b.roomRate) || 0);
+    const dailyFood = Math.max(0, parseFloat(b.dailyFood) || 0);
+    const distanceKm = Math.max(0, parseFloat(b.distanceKm) || 0);
+    const mileage = Math.max(0.1, parseFloat(b.mileage) || 15);
+    const fuelPrice = Math.max(0, parseFloat(b.fuelPrice) || 0);
+    const numVehicles = Math.max(1, parseInt(b.numVehicles, 10) || 1);
+    const tolls = Math.max(0, parseFloat(b.tolls) || 0);
+    const parking = Math.max(0, parseFloat(b.parking) || 0);
+    const localTransit = Math.max(0, parseFloat(b.localTransit) || 0);
+    const guideExpenses = Math.max(0, parseFloat(b.guideExpenses) || 0);
+    const shoppingBudget = Math.max(0, parseFloat(b.shoppingBudget) || 0);
+    const emergencyAllowance = Math.max(0, parseFloat(b.emergencyAllowance) || 0);
+
+    // 1. Transportation
+    // Formula: Fuel Cost = (Total Distance / Mileage) × Fuel Price × Number of Vehicles
+    const fuelLitres = (mileage > 0) ? Math.round((distanceKm / mileage) * numVehicles) : 0;
+    const fuelCost = (mileage > 0) ? Math.round((distanceKm / mileage) * fuelPrice * numVehicles) : 0;
+    const transportSubtotal = fuelCost + Math.round(tolls) + Math.round(parking) + Math.round(localTransit);
+
+    // 2. Accommodation
+    // Formula: Accommodation Cost = Room Rate × Rooms × Nights
+    const accommodationSubtotal = Math.round(roomRate * numRooms * hotelNights);
+
+    // 3. Food
+    // Formula: Food Cost = Daily Food Budget × Travellers × Days
+    const foodSubtotal = Math.round(dailyFood * travellers * tripDays);
+
+    // 4. Entry Tickets
+    let ticketsSubtotal = 0;
+    const monumentRows = [];
+    const itineraryMonuments = getItineraryMonumentsList();
+
+    itineraryMonuments.forEach(m => {
+      const defaultTicket = YUGMA_MONUMENT_TICKETS[m.id] || { domestic: 40, foreign: 600, optional: 0, optionalDesc: "Site pass" };
+      const defaultBase = (b.visitorTier === 'foreign') ? defaultTicket.foreign : defaultTicket.domestic;
+      const defaultOptional = defaultTicket.optional || 0;
+
+      const override = b.monumentOverrides[m.id] || {};
+      const baseFee = (typeof override.base === 'number') ? override.base : defaultBase;
+      const optionalFee = (typeof override.optional === 'number') ? override.optional : defaultOptional;
+      const rowTotal = Math.round((baseFee + optionalFee) * travellers);
+
+      ticketsSubtotal += rowTotal;
+      monumentRows.push({
+        id: m.id,
+        name: m.name,
+        nameHindi: m.nameHindi,
+        city: m.city,
+        state: m.state,
+        baseFee: baseFee,
+        optionalFee: optionalFee,
+        optionalDesc: defaultTicket.optionalDesc || "Passes",
+        travellers: travellers,
+        rowTotal: rowTotal
+      });
+    });
+
+    // 5. Miscellaneous
+    let customExpensesTotal = 0;
+    (b.customExpenses || []).forEach(item => {
+      customExpensesTotal += Math.max(0, parseFloat(item.amount) || 0);
+    });
+    const miscSubtotal = Math.round(guideExpenses) + Math.round(shoppingBudget) + Math.round(emergencyAllowance) + Math.round(customExpensesTotal);
+
+    // Grand Total & Cost Per Person
+    const grandTotal = transportSubtotal + accommodationSubtotal + foodSubtotal + ticketsSubtotal + miscSubtotal;
+    const perPerson = (travellers > 0) ? Math.round(grandTotal / travellers) : grandTotal;
+
+    // Allocation Percentages
+    const calcPct = (sub) => grandTotal > 0 ? Math.round((sub / grandTotal) * 100) : 0;
+    const pctTransport = calcPct(transportSubtotal);
+    const pctAccommodation = calcPct(accommodationSubtotal);
+    const pctFood = calcPct(foodSubtotal);
+    const pctTickets = calcPct(ticketsSubtotal);
+    let pctMisc = 100 - (pctTransport + pctAccommodation + pctFood + pctTickets);
+    if (pctMisc < 0) pctMisc = calcPct(miscSubtotal);
+
+    const calculationResult = {
+      travellers,
+      tripDays,
+      hotelNights,
+      numRooms,
+      roomRate,
+      dailyFood,
+      distanceKm,
+      mileage,
+      fuelPrice,
+      numVehicles,
+      fuelLitres,
+      fuelCost,
+      tolls,
+      parking,
+      localTransit,
+      transportSubtotal,
+      accommodationSubtotal,
+      foodSubtotal,
+      ticketsSubtotal,
+      guideExpenses,
+      shoppingBudget,
+      emergencyAllowance,
+      customExpensesTotal,
+      miscSubtotal,
+      grandTotal,
+      perPerson,
+      pctTransport,
+      pctAccommodation,
+      pctFood,
+      pctTickets,
+      pctMisc,
+      totalDestinations: itineraryMonuments.length,
+      monumentRows,
+      vehicleTypeLabel: (VEHICLE_PRESETS[b.vehicleType] || {}).label || b.vehicleType,
+      hotelPresetLabel: (HOTEL_PRESETS[b.hotelPreset] || {}).label || b.hotelPreset,
+      foodPresetLabel: (FOOD_PRESETS[b.foodPreset] || {}).label || b.foodPreset,
+      visitorTier: b.visitorTier
+    };
+
+    state.budgetConfig.calculated = calculationResult;
+    return calculationResult;
+  }
+
+  function updateBudgetDisplayElements(res) {
+    if (!res) return;
+
+    // Master highlight cards
+    const elGrandTotal = document.getElementById('budget-display-grand-total');
+    if (elGrandTotal) elGrandTotal.textContent = `₹ ${formatINR(res.grandTotal)}`;
+
+    const elPerPerson = document.getElementById('budget-display-per-person');
+    if (elPerPerson) elPerPerson.textContent = `₹ ${formatINR(res.perPerson)}`;
+
+    const elPerPersonSub = document.getElementById('budget-display-per-person-sub');
+    if (elPerPersonSub) elPerPersonSub.textContent = `Based on ${res.travellers} explorer${res.travellers > 1 ? 's' : ''}`;
+
+    const elRouteStat = document.getElementById('budget-display-route-stat');
+    if (elRouteStat) elRouteStat.textContent = `${res.distanceKm} km route • ${res.totalDestinations} destination${res.totalDestinations !== 1 ? 's' : ''}`;
+
+    const elFuelStat = document.getElementById('budget-display-fuel-stat');
+    if (elFuelStat) elFuelStat.textContent = `₹ ${formatINR(res.fuelCost)}`;
+
+    const elFuelLitres = document.getElementById('budget-display-fuel-litres');
+    if (elFuelLitres) elFuelLitres.textContent = `${res.fuelLitres} Litres Fuel Est.`;
+
+    const elCalcFuelCost = document.getElementById('budget-calc-fuel-cost');
+    if (elCalcFuelCost) elCalcFuelCost.textContent = `₹ ${formatINR(res.fuelCost)} (${res.fuelLitres} L)`;
+
+    // Category Subtotal Badges
+    const elTransSub = document.getElementById('budget-transport-subtotal');
+    if (elTransSub) elTransSub.textContent = `₹ ${formatINR(res.transportSubtotal)}`;
+
+    const elStaySub = document.getElementById('budget-stay-subtotal');
+    if (elStaySub) elStaySub.textContent = `₹ ${formatINR(res.accommodationSubtotal)}`;
+
+    const elFoodSub = document.getElementById('budget-food-subtotal');
+    if (elFoodSub) elFoodSub.textContent = `₹ ${formatINR(res.foodSubtotal)}`;
+
+    const elTicketsSub = document.getElementById('budget-tickets-subtotal');
+    if (elTicketsSub) elTicketsSub.textContent = `₹ ${formatINR(res.ticketsSubtotal)}`;
+
+    const elMiscSub = document.getElementById('budget-misc-subtotal');
+    if (elMiscSub) elMiscSub.textContent = `₹ ${formatINR(res.miscSubtotal)}`;
+
+    // Readonly synced boxes
+    const elFoodTravellers = document.getElementById('budget-display-food-travellers');
+    if (elFoodTravellers) elFoodTravellers.textContent = `${res.travellers} Explorer${res.travellers > 1 ? 's' : ''}`;
+
+    const elFoodDays = document.getElementById('budget-display-food-days');
+    if (elFoodDays) elFoodDays.textContent = `${res.tripDays} Day${res.tripDays > 1 ? 's' : ''}`;
+
+    // Visual Meter Segments
+    const barTransport = document.getElementById('bar-transport');
+    if (barTransport) barTransport.style.width = `${res.pctTransport}%`;
+
+    const barStay = document.getElementById('bar-stay');
+    if (barStay) barStay.style.width = `${res.pctAccommodation}%`;
+
+    const barFood = document.getElementById('bar-food');
+    if (barFood) barFood.style.width = `${res.pctFood}%`;
+
+    const barTickets = document.getElementById('bar-tickets');
+    if (barTickets) barTickets.style.width = `${res.pctTickets}%`;
+
+    const barMisc = document.getElementById('bar-misc');
+    if (barMisc) barMisc.style.width = `${res.pctMisc}%`;
+
+    // Legend Chips
+    const updateChip = (cat, val, pct) => {
+      const elVal = document.getElementById(`legend-${cat}-val`);
+      const elPct = document.getElementById(`legend-${cat}-pct`);
+      if (elVal) elVal.textContent = `₹ ${formatINR(val)}`;
+      if (elPct) elPct.textContent = `(${pct}%)`;
+    };
+
+    updateChip('transport', res.transportSubtotal, res.pctTransport);
+    updateChip('stay', res.accommodationSubtotal, res.pctAccommodation);
+    updateChip('food', res.foodSubtotal, res.pctFood);
+    updateChip('tickets', res.ticketsSubtotal, res.pctTickets);
+    updateChip('misc', res.miscSubtotal, res.pctMisc);
+
+    // Update row subtotals in ticket table
+    res.monumentRows.forEach(mrow => {
+      const cell = document.querySelector(`.ticket-row-subtotal[data-id="${mrow.id}"]`);
+      if (cell) cell.textContent = `₹ ${formatINR(mrow.rowTotal)}`;
+    });
+  }
+
+  function updateBudgetLiveCalculations() {
+    const res = calculateBudget();
+    updateBudgetDisplayElements(res);
+  }
+
+  function renderBudgetCalculator() {
+    const b = state.budgetConfig;
+    const res = calculateBudget();
+
+    const setValIfNotFocused = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && document.activeElement !== el) {
+        el.value = val;
+      }
+    };
+
+    // Global parameters
+    setValIfNotFocused('budget-travellers', b.travellers);
+    setValIfNotFocused('budget-trip-days', b.tripDays);
+    setValIfNotFocused('budget-hotel-nights', b.hotelNights);
+    setValIfNotFocused('budget-visitor-tier', b.visitorTier);
+
+    // Transportation inputs
+    setValIfNotFocused('budget-vehicle-type', b.vehicleType);
+    setValIfNotFocused('budget-dist-km', b.distanceKm);
+    setValIfNotFocused('budget-num-vehicles', b.numVehicles);
+    setValIfNotFocused('budget-mileage', b.mileage);
+    setValIfNotFocused('budget-fuel-price', b.fuelPrice);
+    setValIfNotFocused('budget-tolls', b.tolls);
+    setValIfNotFocused('budget-parking', b.parking);
+    setValIfNotFocused('budget-local-transit', b.localTransit);
+
+    // Accommodation inputs
+    setValIfNotFocused('budget-hotel-preset', b.hotelPreset);
+    setValIfNotFocused('budget-room-rate', b.roomRate);
+    setValIfNotFocused('budget-num-rooms', b.numRooms);
+
+    // Food inputs
+    setValIfNotFocused('budget-food-preset', b.foodPreset);
+    setValIfNotFocused('budget-daily-food', b.dailyFood);
+
+    // Miscellaneous inputs
+    setValIfNotFocused('budget-guide-expenses', b.guideExpenses);
+    setValIfNotFocused('budget-shopping-budget', b.shoppingBudget);
+    setValIfNotFocused('budget-emergency-allowance', b.emergencyAllowance);
+
+    // Render Dynamic Sub-tables
+    renderMonumentTicketsTable(res.monumentRows);
+    renderCustomExpensesList();
+
+    // Render Displays & Badges
+    updateBudgetDisplayElements(res);
+  }
+
+  function renderMonumentTicketsTable(monumentRows) {
+    const tbody = document.getElementById('budget-monuments-ticket-list');
+    if (!tbody) return;
+
+    // Do not rebuild DOM if an input inside table has active focus
+    if (tbody.contains(document.activeElement)) {
+      monumentRows.forEach(mrow => {
+        const cell = tbody.querySelector(`.ticket-row-subtotal[data-id="${mrow.id}"]`);
+        if (cell) cell.textContent = `₹ ${formatINR(mrow.rowTotal)}`;
+      });
+      return;
+    }
+
+    if (!monumentRows || monumentRows.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align:center; padding:18px; color:var(--jp-muted); font-style:italic;">
+            No destinations selected in your itinerary yet. Select monuments above to generate budget passes.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = '';
+    monumentRows.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div style="font-weight:700; color:#ffffff;">${escapeHtml(row.name)}</div>
+          <div style="font-size:10.5px; color:var(--jp-bone-dim);">${escapeHtml(row.city)}, ${escapeHtml(row.state)}</div>
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="color:var(--jp-gold); font-weight:700;">₹</span>
+            <input type="number" class="ticket-input ticket-base-input" data-id="${row.id}" min="0" step="10" value="${row.baseFee}" aria-label="${escapeHtml(row.name)} base admission fee">
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="color:var(--jp-gold); font-weight:700;">₹</span>
+            <input type="number" class="ticket-input ticket-opt-input" data-id="${row.id}" min="0" step="10" value="${row.optionalFee}" aria-label="${escapeHtml(row.name)} optional charges">
+          </div>
+          <span style="font-size:9.5px; color:var(--jp-muted); display:block; margin-top:2px;">${escapeHtml(row.optionalDesc)}</span>
+        </td>
+        <td style="color:var(--jp-bone); font-weight:600;">
+          ${row.travellers}
+        </td>
+        <td class="ticket-row-subtotal" data-id="${row.id}" style="text-align:right; font-weight:700; color:var(--jp-gold); font-family:var(--jp-font-heading);">
+          ₹ ${formatINR(row.rowTotal)}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('.ticket-base-input').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const id = e.target.dataset.id;
+        if (!state.budgetConfig.monumentOverrides[id]) {
+          state.budgetConfig.monumentOverrides[id] = {};
+        }
+        state.budgetConfig.monumentOverrides[id].base = Math.max(0, parseFloat(e.target.value) || 0);
+        updateBudgetLiveCalculations();
+      });
+    });
+
+    tbody.querySelectorAll('.ticket-opt-input').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const id = e.target.dataset.id;
+        if (!state.budgetConfig.monumentOverrides[id]) {
+          state.budgetConfig.monumentOverrides[id] = {};
+        }
+        state.budgetConfig.monumentOverrides[id].optional = Math.max(0, parseFloat(e.target.value) || 0);
+        updateBudgetLiveCalculations();
+      });
+    });
+  }
+
+  function renderCustomExpensesList() {
+    const listEl = document.getElementById('budget-custom-expenses-list');
+    if (!listEl) return;
+
+    if (listEl.contains(document.activeElement)) return;
+
+    const items = state.budgetConfig.customExpenses || [];
+    if (items.length === 0) {
+      listEl.innerHTML = `
+        <div style="font-size:11.5px; color:var(--jp-muted); font-style:italic; padding:6px 0;">
+          No custom expense categories added yet. Click "+ Add Custom Expense" above to add boat rides, camel safaris, or special regional activities.
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = '';
+    items.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = 'custom-expense-row';
+      row.innerHTML = `
+        <input type="text" class="form-input custom-name-input" data-idx="${idx}" value="${escapeHtml(item.name)}" placeholder="Expense description (e.g. Ganga Boat Ride)">
+        <div>
+          <input type="number" class="form-input custom-amount-input" data-idx="${idx}" min="0" step="50" value="${item.amount}" placeholder="Amount (₹)">
+        </div>
+        <button type="button" class="btn-remove-custom-expense" data-idx="${idx}" title="Remove expense">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      `;
+      listEl.appendChild(row);
+    });
+
+    listEl.querySelectorAll('.custom-name-input').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const i = parseInt(e.target.dataset.idx, 10);
+        if (state.budgetConfig.customExpenses[i]) {
+          state.budgetConfig.customExpenses[i].name = e.target.value;
+        }
+      });
+    });
+
+    listEl.querySelectorAll('.custom-amount-input').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const i = parseInt(e.target.dataset.idx, 10);
+        if (state.budgetConfig.customExpenses[i]) {
+          state.budgetConfig.customExpenses[i].amount = Math.max(0, parseFloat(e.target.value) || 0);
+          updateBudgetLiveCalculations();
+        }
+      });
+    });
+
+    listEl.querySelectorAll('.btn-remove-custom-expense').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const i = parseInt(e.currentTarget.dataset.idx, 10);
+        state.budgetConfig.customExpenses.splice(i, 1);
+        renderBudgetCalculator();
+      });
+    });
+  }
+
+  function addCustomExpense(name, amount) {
+    if (!state.budgetConfig.customExpenses) state.budgetConfig.customExpenses = [];
+    state.budgetConfig.customExpenses.push({
+      id: 'ce_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      name: name || "Custom Expense",
+      amount: amount || 500
+    });
+    renderBudgetCalculator();
+  }
+
+  function syncBudgetWithItinerary(itinerary, forceResetDistance) {
+    if (!itinerary) return;
+    const b = state.budgetConfig;
+
+    b.tripDays = Math.max(1, itinerary.durationDays || 3);
+    b.hotelNights = Math.max(0, b.tripDays - 1);
+
+    if (!b.manualDistance || forceResetDistance) {
+      b.distanceKm = itinerary.totalTravelKm || 0;
+      b.manualDistance = false;
+    }
+
+    renderBudgetCalculator();
+  }
+
+  function setupBudgetEventListeners() {
+    // Travellers Stepper
+    const btnTravellersMinus = document.getElementById('btn-travellers-minus');
+    const btnTravellersPlus = document.getElementById('btn-travellers-plus');
+    const inpTravellers = document.getElementById('budget-travellers');
+
+    if (btnTravellersMinus && inpTravellers) {
+      btnTravellersMinus.addEventListener('click', () => {
+        let val = Math.max(1, (parseInt(inpTravellers.value, 10) || 1) - 1);
+        inpTravellers.value = val;
+        state.budgetConfig.travellers = val;
+        state.budgetConfig.numRooms = Math.max(1, Math.ceil(val / 2));
+        renderBudgetCalculator();
+      });
+    }
+
+    if (btnTravellersPlus && inpTravellers) {
+      btnTravellersPlus.addEventListener('click', () => {
+        let val = Math.min(50, (parseInt(inpTravellers.value, 10) || 1) + 1);
+        inpTravellers.value = val;
+        state.budgetConfig.travellers = val;
+        state.budgetConfig.numRooms = Math.max(1, Math.ceil(val / 2));
+        renderBudgetCalculator();
+      });
+    }
+
+    if (inpTravellers) {
+      inpTravellers.addEventListener('input', (e) => {
+        const val = Math.max(1, parseInt(e.target.value, 10) || 1);
+        state.budgetConfig.travellers = val;
+        state.budgetConfig.numRooms = Math.max(1, Math.ceil(val / 2));
+        updateBudgetLiveCalculations();
+      });
+    }
+
+    // Days Stepper
+    const btnDaysMinus = document.getElementById('btn-days-minus');
+    const btnDaysPlus = document.getElementById('btn-days-plus');
+    const inpTripDays = document.getElementById('budget-trip-days');
+
+    if (btnDaysMinus && inpTripDays) {
+      btnDaysMinus.addEventListener('click', () => {
+        let val = Math.max(1, (parseInt(inpTripDays.value, 10) || 1) - 1);
+        inpTripDays.value = val;
+        state.budgetConfig.tripDays = val;
+        state.budgetConfig.hotelNights = Math.max(0, val - 1);
+        renderBudgetCalculator();
+      });
+    }
+
+    if (btnDaysPlus && inpTripDays) {
+      btnDaysPlus.addEventListener('click', () => {
+        let val = Math.min(30, (parseInt(inpTripDays.value, 10) || 1) + 1);
+        inpTripDays.value = val;
+        state.budgetConfig.tripDays = val;
+        state.budgetConfig.hotelNights = Math.max(0, val - 1);
+        renderBudgetCalculator();
+      });
+    }
+
+    if (inpTripDays) {
+      inpTripDays.addEventListener('input', (e) => {
+        const val = Math.max(1, parseInt(e.target.value, 10) || 1);
+        state.budgetConfig.tripDays = val;
+        state.budgetConfig.hotelNights = Math.max(0, val - 1);
+        updateBudgetLiveCalculations();
+      });
+    }
+
+    // Hotel Nights Stepper
+    const btnNightsMinus = document.getElementById('btn-nights-minus');
+    const btnNightsPlus = document.getElementById('btn-nights-plus');
+    const inpHotelNights = document.getElementById('budget-hotel-nights');
+
+    if (btnNightsMinus && inpHotelNights) {
+      btnNightsMinus.addEventListener('click', () => {
+        let val = Math.max(0, (parseInt(inpHotelNights.value, 10) || 0) - 1);
+        inpHotelNights.value = val;
+        state.budgetConfig.hotelNights = val;
+        renderBudgetCalculator();
+      });
+    }
+
+    if (btnNightsPlus && inpHotelNights) {
+      btnNightsPlus.addEventListener('click', () => {
+        let val = Math.min(30, (parseInt(inpHotelNights.value, 10) || 0) + 1);
+        inpHotelNights.value = val;
+        state.budgetConfig.hotelNights = val;
+        renderBudgetCalculator();
+      });
+    }
+
+    if (inpHotelNights) {
+      inpHotelNights.addEventListener('input', (e) => {
+        const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+        state.budgetConfig.hotelNights = val;
+        updateBudgetLiveCalculations();
+      });
+    }
+
+    // Visitor Tier (Domestic / Foreign)
+    const selTier = document.getElementById('budget-visitor-tier');
+    if (selTier) {
+      selTier.addEventListener('change', (e) => {
+        state.budgetConfig.visitorTier = e.target.value;
+        state.budgetConfig.monumentOverrides = {}; // Reset overrides to load new tier defaults
+        renderBudgetCalculator();
+      });
+    }
+
+    // Vehicle Type Selector
+    const selVehicle = document.getElementById('budget-vehicle-type');
+    if (selVehicle) {
+      selVehicle.addEventListener('change', (e) => {
+        const v = e.target.value;
+        state.budgetConfig.vehicleType = v;
+        if (VEHICLE_PRESETS[v] && v !== 'custom') {
+          state.budgetConfig.mileage = VEHICLE_PRESETS[v].mileage;
+          state.budgetConfig.fuelPrice = VEHICLE_PRESETS[v].fuelPrice;
+        }
+        renderBudgetCalculator();
+      });
+    }
+
+    // Hotel Category Preset Selector
+    const selHotel = document.getElementById('budget-hotel-preset');
+    if (selHotel) {
+      selHotel.addEventListener('change', (e) => {
+        const h = e.target.value;
+        state.budgetConfig.hotelPreset = h;
+        if (HOTEL_PRESETS[h] && h !== 'custom') {
+          state.budgetConfig.roomRate = HOTEL_PRESETS[h].rate;
+        }
+        renderBudgetCalculator();
+      });
+    }
+
+    // Food Preset Selector
+    const selFood = document.getElementById('budget-food-preset');
+    if (selFood) {
+      selFood.addEventListener('change', (e) => {
+        const f = e.target.value;
+        state.budgetConfig.foodPreset = f;
+        if (FOOD_PRESETS[f] && f !== 'custom') {
+          state.budgetConfig.dailyFood = FOOD_PRESETS[f].rate;
+        }
+        renderBudgetCalculator();
+      });
+    }
+
+    // Distance input
+    const inpDist = document.getElementById('budget-dist-km');
+    if (inpDist) {
+      inpDist.addEventListener('input', (e) => {
+        state.budgetConfig.distanceKm = Math.max(0, parseFloat(e.target.value) || 0);
+        state.budgetConfig.manualDistance = true;
+        updateBudgetLiveCalculations();
+      });
+    }
+
+    // Sync Route Distance Buttons
+    const btnSyncDist = document.getElementById('btn-sync-distance-itinerary');
+    const btnSyncRoute = document.getElementById('btn-sync-budget-route');
+    const handleSync = () => {
+      if (state.currentItinerary) {
+        syncBudgetWithItinerary(state.currentItinerary, true);
+      }
+    };
+    if (btnSyncDist) btnSyncDist.addEventListener('click', handleSync);
+    if (btnSyncRoute) btnSyncRoute.addEventListener('click', handleSync);
+
+    // Reset Defaults
+    const btnResetDefaults = document.getElementById('btn-reset-budget-defaults');
+    if (btnResetDefaults) {
+      btnResetDefaults.addEventListener('click', () => {
+        const routeKm = state.currentItinerary ? state.currentItinerary.totalTravelKm : 450;
+        const days = state.currentItinerary ? state.currentItinerary.durationDays : 3;
+        state.budgetConfig = {
+          travellers: 2,
+          tripDays: days,
+          hotelNights: Math.max(0, days - 1),
+          visitorTier: 'domestic',
+          distanceKm: routeKm,
+          manualDistance: false,
+          vehicleType: 'sedan',
+          numVehicles: 1,
+          mileage: 15,
+          fuelPrice: 96.50,
+          tolls: 750,
+          parking: 250,
+          localTransit: 500,
+          hotelPreset: 'comfort',
+          roomRate: 3500,
+          numRooms: 1,
+          foodPreset: 'standard',
+          dailyFood: 850,
+          guideExpenses: 1500,
+          shoppingBudget: 3000,
+          emergencyAllowance: 2500,
+          customExpenses: [],
+          monumentOverrides: {},
+          calculated: null
+        };
+        renderBudgetCalculator();
+      });
+    }
+
+    // Bind numeric inputs
+    const bindNumericInput = (id, propKey, isInt) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', (e) => {
+          const val = isInt ? (parseInt(e.target.value, 10) || 0) : (parseFloat(e.target.value) || 0);
+          state.budgetConfig[propKey] = Math.max(0, val);
+          updateBudgetLiveCalculations();
+        });
+      }
+    };
+
+    bindNumericInput('budget-num-vehicles', 'numVehicles', true);
+    bindNumericInput('budget-mileage', 'mileage', false);
+    bindNumericInput('budget-fuel-price', 'fuelPrice', false);
+    bindNumericInput('budget-tolls', 'tolls', false);
+    bindNumericInput('budget-parking', 'parking', false);
+    bindNumericInput('budget-local-transit', 'localTransit', false);
+    bindNumericInput('budget-room-rate', 'roomRate', false);
+    bindNumericInput('budget-num-rooms', 'numRooms', true);
+    bindNumericInput('budget-daily-food', 'dailyFood', false);
+    bindNumericInput('budget-guide-expenses', 'guideExpenses', false);
+    bindNumericInput('budget-shopping-budget', 'shoppingBudget', false);
+    bindNumericInput('budget-emergency-allowance', 'emergencyAllowance', false);
+
+    // Add Custom Expense Button
+    const btnAddCustom = document.getElementById('btn-add-custom-expense');
+    if (btnAddCustom) {
+      btnAddCustom.addEventListener('click', () => {
+        addCustomExpense("Custom Activity / Fee", 500);
+      });
+    }
+
+    // Jump to budget button
+    const btnJumpBudget = document.getElementById('btn-jump-budget');
+    if (btnJumpBudget) {
+      btnJumpBudget.addEventListener('click', () => {
+        const card = document.getElementById('journey-budget-card');
+        if (card) card.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  }
+
+  // ── 14C. PUBLICATION-GRADE PRINT & PDF DOSSIER GENERATOR ───────────────────
+  function preparePrintDossier() {
+    const dossierEl = document.getElementById('yugma-print-dossier');
+    if (!dossierEl) return;
+
+    const itin = state.currentItinerary;
+    if (!itin) return;
+
+    const res = calculateBudget();
+    const dateFormatted = new Date().toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    const docCode = 'YUGMA-EXP-' + (itin.id ? itin.id.replace('yg-journey-', '') : Date.now().toString().slice(-6));
+
+    // 1. Header Banner
+    let html = `
+      <div class="print-header-banner">
+        <div class="print-brand-left">
+          <svg class="print-crest-svg" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <circle cx="22" cy="22" r="19" stroke="#8a6d2b" stroke-width="1.8" />
+            <circle cx="22" cy="22" r="14" stroke="#8a6d2b" stroke-width="0.8" stroke-dasharray="2 2" />
+            <path d="M22 3v38M3 22h38M8 8l28 28M8 36L36 8" stroke="#8a6d2b" stroke-width="0.7" stroke-opacity="0.6" />
+            <circle cx="22" cy="22" r="6" fill="#8a6d2b" />
+          </svg>
+          <div>
+            <h1 class="print-title-main">YUGMA CIVILIZATIONAL EXPEDITION DOSSIER</h1>
+            <div class="print-title-sub">✦ OFFICIAL HERITAGE ITINERARY &amp; FINANCIAL EXPENDITURE STATEMENT ✦</div>
+          </div>
+        </div>
+        <div class="print-doc-meta">
+          <div><strong>Dossier Ref:</strong> ${docCode}</div>
+          <div><strong>Date Generated:</strong> ${dateFormatted}</div>
+          <div><strong>Authority:</strong> YUGMA Digital Heritage Archive</div>
+        </div>
+      </div>
+
+      <!-- Executive Expedition Summary Grid -->
+      <div class="print-summary-grid">
+        <div class="print-stat-item">
+          <span class="print-stat-label">Destinations</span>
+          <span class="print-stat-val">${res.totalDestinations}</span>
+          <span class="print-stat-sub">Verified Sanctuaries</span>
+        </div>
+        <div class="print-stat-item">
+          <span class="print-stat-label">Total Transit</span>
+          <span class="print-stat-val">${res.distanceKm} km</span>
+          <span class="print-stat-sub">Estimated Distance</span>
+        </div>
+        <div class="print-stat-item">
+          <span class="print-stat-label">Duration</span>
+          <span class="print-stat-val">${itin.durationDays} Days</span>
+          <span class="print-stat-sub">${res.hotelNights} Night Stays</span>
+        </div>
+        <div class="print-stat-item">
+          <span class="print-stat-label">Total Outlay</span>
+          <span class="print-stat-val" style="color:#775c20;">₹ ${formatINR(res.grandTotal)}</span>
+          <span class="print-stat-sub">Complete Journey</span>
+        </div>
+        <div class="print-stat-item">
+          <span class="print-stat-label">Per Traveller</span>
+          <span class="print-stat-val" style="color:#111111;">₹ ${formatINR(res.perPerson)}</span>
+          <span class="print-stat-sub">${res.travellers} Explorer${res.travellers > 1 ? 's' : ''}</span>
+        </div>
+      </div>
+    `;
+
+    // 2. Day-by-Day Heritage Schedule
+    html += `
+      <div class="print-section-title">
+        <span>Section 1: Day-by-Day Heritage Schedule</span>
+        <span class="print-section-sub">Origin: ${escapeHtml(itin.origin ? itin.origin.name : 'Origin')} • Pace: ${escapeHtml(itin.pace || 'balanced').toUpperCase()}</span>
+      </div>
+    `;
+
+    (itin.days || []).forEach(day => {
+      let stopsRows = '';
+      (day.stops || []).forEach((stop, sIdx) => {
+        const sched = stop.schedule || {};
+        stopsRows += `
+          <tr>
+            <td style="width:4%; text-align:center; font-weight:700;">#${sIdx + 1}</td>
+            <td style="width:18%; font-weight:600;">${escapeHtml(sched.timeSlot || '09:00 AM')}</td>
+            <td style="width:28%;">
+              <strong style="font-size:8.5pt;">${escapeHtml(stop.name)}</strong>
+              ${stop.nameHindi ? `<span style="color:#666666; font-size:7.5pt; display:block;">${escapeHtml(stop.nameHindi)}</span>` : ''}
+              <div style="font-size:7.5pt; color:#555555;">${escapeHtml(stop.city)}, ${escapeHtml(stop.state)}</div>
+            </td>
+            <td style="width:20%; font-size:7.5pt;">
+              <div>${escapeHtml(stop.style || 'Heritage')}</div>
+              <div style="color:#666666;">${escapeHtml(stop.era || '')}</div>
+            </td>
+            <td style="width:10%; text-align:center;">${stop.visitHours} hrs</td>
+            <td style="width:20%; font-size:7.5pt;">
+              ${sched.legDistanceKm > 0 ? `<strong>${sched.legDistanceKm} km</strong> transit<br>` : ''}
+              ${escapeHtml(sched.transitAdvice || 'Local arrival')}
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `
+        <div class="print-day-block">
+          <div class="print-day-header">
+            <span>Day ${day.dayNumber}: ${escapeHtml(day.regionFocus || 'Heritage Region')}</span>
+            <span>${day.stops.length} Stops • ${day.totalTravelKm} km travel • ${day.totalEstHours} hrs exploration</span>
+          </div>
+          <table class="print-stops-table">
+            <thead>
+              <tr>
+                <th style="width:4%; text-align:center;">#</th>
+                <th style="width:18%;">Time Slot</th>
+                <th style="width:28%;">Monument &amp; Location</th>
+                <th style="width:20%;">Architecture &amp; Era</th>
+                <th style="width:10%; text-align:center;">Visit</th>
+                <th style="width:20%;">Transit &amp; Route Advice</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${stopsRows}
+            </tbody>
+          </table>
+        </div>
+      `;
+    });
+
+    // 3. Financial Statement & Journey Budget Table
+    html += `
+      <div class="print-section-title print-page-break">
+        <span>Section 2: Journey Budget &amp; Financial Breakdown</span>
+        <span class="print-section-sub">Itemized Statement in Indian National Rupees (INR ₹)</span>
+      </div>
+
+      <table class="print-budget-table">
+        <thead>
+          <tr>
+            <th style="width:38%;">Category &amp; Item Specification</th>
+            <th style="width:34%;">Calculation Parameters &amp; Formula Details</th>
+            <th style="width:28%; text-align:right;">Estimated Outlay (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- A. Transportation -->
+          <tr class="category-row">
+            <td colspan="3"><strong>A. TRANSPORTATION &amp; TRANSIT</strong></td>
+          </tr>
+          <tr>
+            <td>Fuel Consumption (${res.vehicleTypeLabel})</td>
+            <td>(${res.distanceKm} km ÷ ${res.mileage} km/L) × ₹${res.fuelPrice}/L × ${res.numVehicles} vehicle(s) [${res.fuelLitres} L]</td>
+            <td style="text-align:right;">₹ ${formatINR(res.fuelCost)}</td>
+          </tr>
+          <tr>
+            <td>National &amp; State Highway Tolls</td>
+            <td>Estimated corridor tolls across ${res.distanceKm} km route</td>
+            <td style="text-align:right;">₹ ${formatINR(res.tolls)}</td>
+          </tr>
+          <tr>
+            <td>Monument Parking &amp; Entry Gates</td>
+            <td>Designated ASI &amp; municipality parking across ${res.totalDestinations} sites</td>
+            <td style="text-align:right;">₹ ${formatINR(res.parking)}</td>
+          </tr>
+          <tr>
+            <td>Local Transit &amp; Intra-city Transfers</td>
+            <td>Auto-rickshaws, metro tokens &amp; app taxis</td>
+            <td style="text-align:right;">₹ ${formatINR(res.localTransit)}</td>
+          </tr>
+          <tr class="subtotal-row">
+            <td colspan="2"><strong>Transportation Subtotal</strong></td>
+            <td style="text-align:right; font-weight:700;">₹ ${formatINR(res.transportSubtotal)}</td>
+          </tr>
+
+          <!-- B. Accommodation -->
+          <tr class="category-row">
+            <td colspan="3"><strong>B. ACCOMMODATION &amp; STAYS</strong></td>
+          </tr>
+          <tr>
+            <td>${res.hotelPresetLabel}</td>
+            <td>₹${formatINR(res.roomRate)} / room / night × ${res.numRooms} room(s) × ${res.hotelNights} night(s)</td>
+            <td style="text-align:right;">₹ ${formatINR(res.accommodationSubtotal)}</td>
+          </tr>
+          <tr class="subtotal-row">
+            <td colspan="2"><strong>Accommodation Subtotal</strong></td>
+            <td style="text-align:right; font-weight:700;">₹ ${formatINR(res.accommodationSubtotal)}</td>
+          </tr>
+
+          <!-- C. Food & Dining -->
+          <tr class="category-row">
+            <td colspan="3"><strong>C. FOOD &amp; REGIONAL DINING</strong></td>
+          </tr>
+          <tr>
+            <td>${res.foodPresetLabel}</td>
+            <td>₹${formatINR(res.dailyFood)} / person / day × ${res.travellers} traveller(s) × ${res.tripDays} day(s)</td>
+            <td style="text-align:right;">₹ ${formatINR(res.foodSubtotal)}</td>
+          </tr>
+          <tr class="subtotal-row">
+            <td colspan="2"><strong>Food &amp; Dining Subtotal</strong></td>
+            <td style="text-align:right; font-weight:700;">₹ ${formatINR(res.foodSubtotal)}</td>
+          </tr>
+
+          <!-- D. Monument Entry Tickets -->
+          <tr class="category-row">
+            <td colspan="3"><strong>D. MONUMENT ENTRY TICKETS &amp; HERITAGE PASSES</strong> (${res.visitorTier === 'foreign' ? 'International / NRI Explorer' : 'Indian Resident - ASI Standard'})</td>
+          </tr>
+    `;
+
+    res.monumentRows.forEach(mrow => {
+      html += `
+        <tr>
+          <td>${escapeHtml(mrow.name)} (${escapeHtml(mrow.city)})</td>
+          <td>Base: ₹${mrow.baseFee} ${mrow.optionalFee > 0 ? `+ ${escapeHtml(mrow.optionalDesc)}: ₹${mrow.optionalFee}` : ''} × ${mrow.travellers} visitor(s)</td>
+          <td style="text-align:right;">₹ ${formatINR(mrow.rowTotal)}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          <tr class="subtotal-row">
+            <td colspan="2"><strong>Monument Entry Passes Subtotal</strong></td>
+            <td style="text-align:right; font-weight:700;">₹ ${formatINR(res.ticketsSubtotal)}</td>
+          </tr>
+
+          <!-- E. Miscellaneous -->
+          <tr class="category-row">
+            <td colspan="3"><strong>E. MISCELLANEOUS &amp; CONTINGENCIES</strong></td>
+          </tr>
+          <tr>
+            <td>Licensed Tour Guide Services</td>
+            <td>Approved ASI certified cultural guides for major sanctuary zones</td>
+            <td style="text-align:right;">₹ ${formatINR(res.guideExpenses)}</td>
+          </tr>
+          <tr>
+            <td>Souvenirs, Handicrafts &amp; Cultural Shopping</td>
+            <td>Traditional textile, stonecraft, and local memorabilia budget</td>
+            <td style="text-align:right;">₹ ${formatINR(res.shoppingBudget)}</td>
+          </tr>
+          <tr>
+            <td>Emergency &amp; Medical Contingency Fund</td>
+            <td>Unforeseen road assistance, first aid &amp; buffer allowance</td>
+            <td style="text-align:right;">₹ ${formatINR(res.emergencyAllowance)}</td>
+          </tr>
+    `;
+
+    (state.budgetConfig.customExpenses || []).forEach(cItem => {
+      html += `
+        <tr>
+          <td>Custom: ${escapeHtml(cItem.name)}</td>
+          <td>User defined expedition add-on</td>
+          <td style="text-align:right;">₹ ${formatINR(cItem.amount)}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          <tr class="subtotal-row">
+            <td colspan="2"><strong>Miscellaneous Subtotal</strong></td>
+            <td style="text-align:right; font-weight:700;">₹ ${formatINR(res.miscSubtotal)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Grand Total Highlight Box -->
+      <div class="print-grand-total-banner">
+        <div class="print-total-left">
+          <span class="print-total-title">TOTAL ESTIMATED EXPEDITION OUTLAY</span>
+          <span class="print-total-sub">Includes Transportation, Accommodation, Meals, Verified Passes &amp; Contingency</span>
+        </div>
+        <div>
+          <div class="print-total-amount">₹ ${formatINR(res.grandTotal)}</div>
+          <div class="print-per-person">₹ ${formatINR(res.perPerson)} per traveller (${res.travellers} Persons)</div>
+        </div>
+      </div>
+
+      <!-- Advisory Box -->
+      <div class="print-advisory-box">
+        <div style="font-weight:700; color:#775c20; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.04em;">
+          ✦ Civilizational Sanctuary Guidelines &amp; ASI Advisory ✦
+        </div>
+        <ul style="margin:0 0 0 16px; padding:0;">
+          <li><strong>Sanctuary Dress Protocol:</strong> Modest attire covering shoulders and knees is mandatory across spiritual sites (Harmandir Sahib, Brihadisvara, Bodh Gaya). Remove footwear where designated.</li>
+          <li><strong>Photography &amp; Permits:</strong> Handheld photography is permitted at all ASI monuments. Tripods and commercial drones require prior ASI / DGCA clearance.</li>
+          <li><strong>Preservation Ethics:</strong> Never touch ancient frescoes, lime plaster or marble reliefs. Help YUGMA preserve civilizational memory for future generations.</li>
+          <li><strong>Official Identification:</strong> Carry government-issued photo ID (Aadhaar / Voter ID / Passport) matching online ticket bookings for entry verification.</li>
+        </ul>
+      </div>
+
+      <!-- Formal Footer -->
+      <div class="print-footer-bar">
+        <span>YUGMA Digital Heritage Archive • Preserving 5,000+ Years of Civilizational Memory</span>
+        <span>Generated via yugma-heritage.in • Open Access Cultural Knowledge</span>
+      </div>
+    `;
+
+    dossierEl.innerHTML = html;
+  }
+
   function printItinerary() {
     if (!state.currentItinerary) {
       alert("Please generate an itinerary before printing.");
       return;
     }
+    preparePrintDossier();
     window.print();
   }
 
@@ -1882,6 +2974,12 @@
           if (configCard) configCard.style.display = 'none';
           if (itinCard) itinCard.style.display = 'flex';
           if (mapColumn) mapColumn.style.display = 'none';
+        } else if (view === 'budget') {
+          if (configCard) configCard.style.display = 'none';
+          if (itinCard) itinCard.style.display = 'flex';
+          if (mapColumn) mapColumn.style.display = 'none';
+          const budgetCard = document.getElementById('journey-budget-card');
+          if (budgetCard) budgetCard.scrollIntoView({ behavior: 'smooth' });
         } else if (view === 'map') {
           if (configCard) configCard.style.display = 'none';
           if (itinCard) itinCard.style.display = 'none';
@@ -1892,11 +2990,18 @@
         }
       });
     });
+
+    // Initialize Budget & Expense Calculator Event Listeners
+    setupBudgetEventListeners();
   }
 
   // ── 17. PUBLIC API EXPOSURE ──────────────────────────────────────────────
   window.YugmaPlanner = {
     monuments: YUGMA_22_MONUMENTS,
+    tickets: YUGMA_MONUMENT_TICKETS,
+    vehiclePresets: VEHICLE_PRESETS,
+    hotelPresets: HOTEL_PRESETS,
+    foodPresets: FOOD_PRESETS,
     state: state,
     generateItinerary: generateSmartItinerary,
     moveStop: moveStop,
@@ -1907,6 +3012,13 @@
     loadSavedJourney: loadSavedJourney,
     deleteSavedJourney: deleteSavedJourney,
     setBasemapStyle: setBasemapStyle,
+    calculateBudget: calculateBudget,
+    renderBudgetCalculator: renderBudgetCalculator,
+    syncBudgetWithItinerary: syncBudgetWithItinerary,
+    addCustomExpense: addCustomExpense,
+    preparePrintDossier: preparePrintDossier,
+    printItinerary: printItinerary,
+    formatINR: formatINR,
     cartoConfig: { apiKey: CARTO_API_KEY, basemaps: CARTO_BASEMAPS }
   };
 

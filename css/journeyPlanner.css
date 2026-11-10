@@ -372,6 +372,20 @@ body.planner-body {
   margin-bottom: 18px;
 }
 
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.form-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -1366,54 +1380,848 @@ body.planner-body {
   gap: 8px;
 }
 
-/* ── Print / PDF Dossier Styles (@media print) ─────────────────────── */
+/* ── Journey Budget & Expenses Section ─────────────────────────────────── */
+.journey-budget-card {
+  background: var(--jp-card-bg);
+  backdrop-filter: var(--jp-glass);
+  -webkit-backdrop-filter: var(--jp-glass);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius-lg);
+  padding: 26px 28px;
+  margin-top: 32px;
+  box-shadow: var(--jp-shadow);
+  transition: border-color 0.3s ease;
+}
+
+.journey-budget-card:hover {
+  border-color: rgba(201, 162, 74, 0.45);
+}
+
+.budget-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--jp-border);
+}
+
+.budget-pill {
+  background: linear-gradient(135deg, #c9a24a, #e0231c) !important;
+  color: #ffffff !important;
+}
+
+.budget-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.budget-global-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  background: rgba(8, 12, 18, 0.85);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius);
+  padding: 14px 18px;
+  margin-bottom: 22px;
+}
+
+.budget-param-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.budget-param-box label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--jp-gold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.budget-stepper {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 22, 33, 0.95);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  overflow: hidden;
+  height: 38px;
+}
+
+.btn-stepper {
+  width: 38px;
+  height: 38px;
+  background: rgba(201, 162, 74, 0.12);
+  border: none;
+  color: var(--jp-gold);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.btn-stepper:hover {
+  background: var(--jp-gold);
+  color: #000000;
+}
+
+.stepper-input {
+  flex: 1;
+  text-align: center;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.budget-tier-select {
+  height: 38px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* Master Summary Banner */
+.budget-overview-dashboard {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.budget-metric-card {
+  background: linear-gradient(135deg, rgba(17, 24, 36, 0.95) 0%, rgba(10, 14, 22, 0.95) 100%);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.budget-metric-card.highlight {
+  background: linear-gradient(135deg, rgba(32, 25, 14, 0.95) 0%, rgba(15, 18, 25, 0.95) 100%);
+  border-color: var(--jp-gold);
+  box-shadow: 0 0 20px rgba(201, 162, 74, 0.15);
+}
+
+.budget-metric-card .metric-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--jp-bone-dim);
+  text-transform: uppercase;
+}
+
+.metric-value-gold {
+  font-family: var(--jp-font-heading);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--jp-gold);
+  text-shadow: 0 0 12px rgba(201, 162, 74, 0.4);
+  line-height: 1.1;
+}
+
+.metric-value-cyan {
+  font-family: var(--jp-font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--jp-cyan);
+  line-height: 1.1;
+}
+
+.metric-value-white {
+  font-family: var(--jp-font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.budget-metric-card .metric-sub {
+  font-size: 11px;
+  color: var(--jp-muted);
+  margin-top: 2px;
+}
+
+/* Visual Breakdown Bar */
+.budget-breakdown-wrapper {
+  background: rgba(10, 14, 22, 0.7);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.breakdown-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.breakdown-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--jp-gold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.breakdown-total-tag {
+  font-size: 10.5px;
+  color: var(--jp-bone-dim);
+}
+
+.budget-progress-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin-bottom: 14px;
+}
+
+.bar-segment {
+  height: 100%;
+  transition: width 0.35s ease;
+}
+
+.bar-transport { background: #c9a24a; }
+.bar-stay { background: #38bdf8; }
+.bar-food { background: #10b981; }
+.bar-tickets { background: #e0231c; }
+.bar-misc { background: #a855f7; }
+
+.budget-legend-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.legend-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--jp-bone);
+}
+
+.legend-chip .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-chip.transport .dot { background: #c9a24a; box-shadow: 0 0 6px #c9a24a; }
+.legend-chip.stay .dot { background: #38bdf8; box-shadow: 0 0 6px #38bdf8; }
+.legend-chip.food .dot { background: #10b981; box-shadow: 0 0 6px #10b981; }
+.legend-chip.tickets .dot { background: #e0231c; box-shadow: 0 0 6px #e0231c; }
+.legend-chip.misc .dot { background: #a855f7; box-shadow: 0 0 6px #a855f7; }
+.legend-chip .cat-name { color: var(--jp-bone-dim); }
+.legend-chip strong { color: #ffffff; }
+.legend-chip .pct { color: var(--jp-muted); font-size: 10.5px; }
+
+/* Five Category Cards */
+.budget-sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.budget-category-card {
+  background: rgba(12, 17, 26, 0.85);
+  border: 1px solid var(--jp-border);
+  border-radius: var(--jp-radius);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.budget-category-card:hover {
+  border-color: rgba(201, 162, 74, 0.4);
+}
+
+.cat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: rgba(18, 25, 38, 0.85);
+  border-bottom: 1px solid var(--jp-border-soft);
+}
+
+.cat-title-cluster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cat-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.cat-badge.transport { background: rgba(201, 162, 74, 0.15); color: #c9a24a; }
+.cat-badge.stay { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.cat-badge.food { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.cat-badge.tickets { background: rgba(224, 35, 28, 0.15); color: #e0231c; }
+.cat-badge.misc { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+
+.cat-heading {
+  font-family: var(--jp-font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+}
+
+.cat-desc {
+  font-size: 11px;
+  color: var(--jp-bone-dim);
+  margin-top: 1px;
+}
+
+.cat-subtotal-badge {
+  font-family: var(--jp-font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--jp-gold);
+  background: rgba(201, 162, 74, 0.1);
+  border: 1px solid rgba(201, 162, 74, 0.25);
+  padding: 4px 12px;
+  border-radius: var(--jp-radius);
+}
+
+.cat-card-body {
+  padding: 18px;
+}
+
+.calc-readonly-box {
+  background: rgba(18, 24, 34, 0.95);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  padding: 10px 14px;
+  color: var(--jp-gold);
+  font-weight: 700;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  height: 42px;
+}
+
+.budget-formula-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(201, 162, 74, 0.06);
+  border: 1px dashed rgba(201, 162, 74, 0.25);
+  border-radius: var(--jp-radius);
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: var(--jp-bone-dim);
+  margin-top: 12px;
+}
+
+.budget-formula-note i {
+  color: var(--jp-gold);
+}
+
+.tickets-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+}
+
+.tickets-budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  text-align: left;
+}
+
+.tickets-budget-table th {
+  background: rgba(18, 26, 38, 0.95);
+  color: var(--jp-gold);
+  padding: 10px 14px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--jp-border);
+  letter-spacing: 0.06em;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.tickets-budget-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(223, 231, 224, 0.06);
+  color: var(--jp-bone);
+  vertical-align: middle;
+}
+
+.tickets-budget-table tr:last-child td {
+  border-bottom: none;
+}
+
+.tickets-budget-table .ticket-input {
+  width: 90px;
+  padding: 6px 10px;
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tickets-budget-table .ticket-input:focus {
+  border-color: var(--jp-gold);
+  outline: none;
+}
+
+.custom-expenses-wrapper {
+  background: rgba(10, 15, 23, 0.6);
+  border: 1px solid var(--jp-border-soft);
+  border-radius: var(--jp-radius);
+  padding: 14px 16px;
+}
+
+.custom-expenses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.custom-expenses-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--jp-gold);
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.custom-expenses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.custom-expense-row {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-remove-custom-expense {
+  width: 36px;
+  height: 36px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 4px;
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-custom-expense:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.budget-print-cta-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(20, 28, 42, 0.95) 0%, rgba(14, 18, 28, 0.95) 100%);
+  border: 1px solid var(--jp-gold);
+  border-radius: var(--jp-radius);
+  padding: 18px 24px;
+  margin-top: 26px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ── Screen hidden state for print dossier ────────────────────────────── */
+#yugma-print-dossier,
+.yugma-print-dossier {
+  display: none;
+}
+
+/* ── Publication-Grade Print / PDF Dossier Styles (@media print) ─────── */
 @media print {
-  body.planner-body {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 12mm 14mm;
+  }
+
+  html, body.planner-body {
     background: #ffffff !important;
     color: #111111 !important;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+    font-size: 10pt !important;
+    line-height: 1.38 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
+
+  /* Hide all interactive screen chrome, navbar, map, modals, FABs, and chatbox */
   .planner-nav,
   .cosmos-bg,
+  .planner-hero-banner,
+  .mobile-view-tabs,
+  .planner-grid-layout,
+  .planner-panel-column,
   .planner-map-column,
   .config-card,
+  .itinerary-output-container,
   .itinerary-actions-bar,
   .btn-stop-action,
   .transit-gmaps-link,
-  .mobile-view-tabs,
-  .footer-bar {
+  .footer-bar,
+  .planner-modal-backdrop,
+  .ai-companion-drawer,
+  .btn-ai-fab,
+  #yugma-ai-companion,
+  .ai-chat-panel,
+  .ai-orb-container,
+  .btn-mini-tool,
+  #btn-save-journey,
+  #btn-print-itinerary,
+  #btn-export-json,
+  #btn-jump-budget {
     display: none !important;
   }
-  .planner-main {
-    max-width: 100% !important;
+
+  /* Display Dedicated Publication-Grade Print Dossier */
+  #yugma-print-dossier,
+  .yugma-print-dossier {
+    display: block !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #111111 !important;
     padding: 0 !important;
   }
-  .planner-grid-layout {
-    display: block !important;
+
+  .print-page-break {
+    page-break-before: always;
+    break-before: page;
   }
-  .itinerary-output-container {
-    display: block !important;
-  }
-  .day-timeline-card {
-    background: #ffffff !important;
-    border: 1px solid #cccccc !important;
-    box-shadow: none !important;
+
+  .print-avoid-break {
     page-break-inside: avoid;
-    margin-bottom: 24px;
+    break-inside: avoid;
   }
-  .day-card-header {
-    background: #f4f4f4 !important;
-    color: #000000 !important;
+
+  /* Header Branding */
+  .print-header-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #8a6d2b;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
   }
-  .day-title-text {
-    color: #000000 !important;
+
+  .print-brand-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
-  .stop-card {
-    background: #ffffff !important;
-    border: 1px solid #e0e0e0 !important;
-    color: #111111 !important;
+
+  .print-crest-svg {
+    width: 44px;
+    height: 44px;
   }
-  .stop-monument-name {
-    color: #000000 !important;
+
+  .print-title-main {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 16pt;
+    font-weight: 800;
+    color: #111111;
+    letter-spacing: 0.05em;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .print-title-sub {
+    font-size: 8pt;
+    font-weight: 700;
+    color: #8a6d2b;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .print-doc-meta {
+    text-align: right;
+    font-size: 8pt;
+    color: #444444;
+    line-height: 1.35;
+  }
+
+  /* Meta & Summary Box */
+  .print-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    background: #faf7f2;
+    border: 1px solid #d4c39e;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .print-stat-label {
+    font-size: 7pt;
+    font-weight: 700;
+    color: #776233;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .print-stat-val {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 12pt;
+    font-weight: 800;
+    color: #111111;
+  }
+
+  .print-stat-sub {
+    font-size: 6.8pt;
+    color: #666666;
+  }
+
+  /* Section Headings */
+  .print-section-title {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 11pt;
+    font-weight: 700;
+    color: #111111;
+    border-bottom: 1.5px solid #8a6d2b;
+    padding-bottom: 3px;
+    margin: 14px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    page-break-after: avoid;
+  }
+
+  .print-section-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: 7.5pt;
+    font-weight: normal;
+    color: #666666;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  /* Day-by-Day Cards for Print */
+  .print-day-block {
+    border: 1px solid #dcd7cc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    overflow: hidden;
+  }
+
+  .print-day-header {
+    background: #f4eee2;
+    border-bottom: 1px solid #dcd7cc;
+    padding: 5px 8px;
+    font-weight: 700;
+    font-size: 9pt;
+    display: flex;
+    justify-content: space-between;
+    color: #222222;
+  }
+
+  .print-stops-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+  }
+
+  .print-stops-table th {
+    background: #fbf9f5;
+    padding: 4px 6px;
+    border-bottom: 1px solid #dcd7cc;
+    text-align: left;
+    font-weight: 700;
+    color: #555555;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+  }
+
+  .print-stops-table td {
+    padding: 5px 6px;
+    border-bottom: 1px solid #eeeeee;
+    vertical-align: top;
+    color: #222222;
+  }
+
+  .print-stops-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Budget Breakdown Tables for Print */
+  .print-budget-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    margin-bottom: 10px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-budget-table th {
+    background: #f4eee2;
+    color: #222222;
+    padding: 5px 6px;
+    font-weight: 700;
+    border-top: 1px solid #8a6d2b;
+    border-bottom: 1.5px solid #8a6d2b;
+    text-align: left;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+  }
+
+  .print-budget-table td {
+    padding: 4.5px 6px;
+    border-bottom: 1px solid #e5e0d8;
+    color: #222222;
+  }
+
+  .print-budget-table tr.category-row td {
+    background: #faf8f5;
+    font-weight: 700;
+    color: #8a6d2b;
+    padding-top: 6px;
+  }
+
+  .print-budget-table tr.subtotal-row td {
+    background: #f7f3eb;
+    font-weight: 700;
+    border-bottom: 1px solid #ccbfad;
+  }
+
+  .print-grand-total-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f2ece0;
+    border: 1.5px solid #8a6d2b;
+    border-radius: 4px;
+    padding: 8px 14px;
+    margin: 12px 0 14px 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-total-left {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .print-total-title {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 11pt;
+    font-weight: 800;
+    color: #111111;
+  }
+
+  .print-total-sub {
+    font-size: 7.5pt;
+    color: #555555;
+  }
+
+  .print-total-amount {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 16pt;
+    font-weight: 800;
+    color: #775c20;
+    text-align: right;
+  }
+
+  .print-per-person {
+    font-size: 8pt;
+    color: #333333;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* Advisory Box */
+  .print-advisory-box {
+    border: 1px solid #d4c39e;
+    background: #fcfbfa;
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-top: 8px;
+    font-size: 7pt;
+    color: #444444;
+    line-height: 1.35;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-footer-bar {
+    border-top: 1px solid #d4c39e;
+    padding-top: 6px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 6.8pt;
+    color: #777777;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
 
@@ -1430,11 +2238,27 @@ body.planner-body {
   }
   .mobile-view-tabs {
     display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .budget-global-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .budget-overview-dashboard {
+    grid-template-columns: 1fr;
+  }
+  .form-grid-3, .form-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .form-grid-2 {
+  .journey-budget-card {
+    padding: 18px 14px;
+  }
+  .budget-global-bar {
+    grid-template-columns: 1fr;
+  }
+  .form-grid-2, .form-grid-3, .form-grid-4 {
     grid-template-columns: 1fr;
   }
   .stop-card {
@@ -1449,6 +2273,18 @@ body.planner-body {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+  }
+  .custom-expense-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .budget-legend-grid {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .budget-print-cta-banner {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
