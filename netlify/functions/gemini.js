@@ -147,20 +147,37 @@ exports.handler = async function (event, context) {
     };
   }
 
+  const history = Array.isArray(body.history) ? body.history : [];
+  const contents = [];
+
+  // Include up to last 6 dialogue turns for true multi-turn context
+  const recentHistory = history.slice(-6);
+  recentHistory.forEach(msg => {
+    if (msg.role && msg.content && typeof msg.content === 'string') {
+      contents.push({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content.trim() }]
+      });
+    }
+  });
+
+  // Append current user turn
+  contents.push({
+    role: 'user',
+    parts: [
+      {
+        text: contents.length === 0
+          ? `User is exploring Indian heritage on the YUGMA platform. Answer the following question from your perspective as ${agentName} (${agentTitle}):\n\n${prompt}`
+          : prompt
+      }
+    ]
+  });
+
   const geminiPayload = {
     systemInstruction: {
       parts: [{ text: systemPrompt }]
     },
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          {
-            text: `User is exploring Indian heritage on the YUGMA platform. Answer the following question from your perspective as ${agentName} (${agentTitle}):\n\n${prompt}`
-          }
-        ]
-      }
-    ],
+    contents: contents,
     generationConfig: {
       temperature: 0.7,
       maxOutputTokens: 600,
@@ -168,8 +185,8 @@ exports.handler = async function (event, context) {
     }
   };
 
-  // 6. Call Gemini API with Primary (gemini-3.5-flash) and Fallback (gemini-3.8-flash)
-  const models = ['gemini-3.5-flash', 'gemini-3.8-flash'];
+  // 6. Call Gemini API with Fast Production Models & Fallbacks
+  const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-3.5-flash', 'gemini-3.8-flash'];
   let lastError = null;
 
   for (const model of models) {

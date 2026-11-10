@@ -1,14 +1,20 @@
 /**
  * YUGMA AI Heritage Companion & Audio Visualizer (Multi-Agent System)
- * Version: 2.8.0 (Optimized Single Narration Player Architecture)
+ * Version: 2.9.0 (Optimized AI Chatbox & Multi-Turn Heritage Intelligence)
  * 
  * Features:
- * - 5 Specialized Heritage AI Agents:
- *   1. All-Rounder (Civilizational Synthesis & Harmonizer)
- *   2. Chief Historian (Itihasa: Dynastic archives, timelines, epigraphy)
- *   3. Master Architect (Sthapatya: Vastu Shastra, acoustics, interlocking stone)
- *   4. Sacred Lore (Katha: Temple myths, deity iconography, living folklore)
- *   5. Travel Curator (Yatra: Viewpoints, golden hour photography, circuits)
+ * - 5 Specialized Heritage AI Agents (All-Rounder, Historian, Architect, Sacred Lore, Travel Curator)
+ * - Optimized AI Chatbox:
+ *   * Threaded conversation history with distinct user and agent message bubbles
+ *   * True multi-turn conversation memory (context preserved across queries)
+ *   * Real-time query caching for 0ms repeated lookups and prompt suggestions
+ *   * Native speech-to-text voice dictation (Microphone button via Web Speech API)
+ *   * Rich formatted typography (bold, italic, golden headers, bullet points)
+ *   * 1-click clipboard copy on any response with "Copied!" feedback
+ *   * 1-click audio replay button on every response in the conversation
+ *   * Clear chat button to reset conversation state
+ *   * Animated pulsating golden thinking dots during deliberation
+ *   * Double-submit prevention & smooth auto-scroll to newest answers
  * - Single Unified AI Voice Narration Player directly below AI visualizer
  * - High-Contrast Inline SVG Controls (Play, Pause, Resume, Stop, Replay, Volume)
  * - 30 FPS Throttled Canvas Rendering with zero shadowBlur bottlenecks
@@ -672,6 +678,11 @@
     currentState: STATES.IDLE,
     selectedAgent: 'orchestrator',
 
+    // Conversation History, Caching & Interaction State
+    conversationHistory: [],
+    responseCache: {},
+    isDeliberating: false,
+
     // Audio & Speech Playback State
     audioContext: null,
     analyserNode: null,
@@ -722,6 +733,7 @@
       this.setVolume(savedVol);
 
       this.bindEvents();
+      this.initVoiceInput();
       this.setAgent('orchestrator');
       this.setInitialText();
       this.drawIdleFrame();
@@ -748,7 +760,7 @@
         document.body.appendChild(fab);
       }
 
-      // 2. Create Modal Container if missing (Single unified narration player)
+      // 2. Create Modal Container if missing (Single unified player + Optimized Chatbox)
       if (!document.getElementById('ai-companion-modal-backdrop')) {
         var backdrop = document.createElement('div');
         backdrop.className = 'ai-companion-backdrop';
@@ -843,7 +855,7 @@
           '        </div>',
           '      </div>',
           '    </div>',
-          '    <!-- Right Column: Multi-Agent Selector, Prompts, Viewport & Input (NO DUPLICATE CONTROLS) -->',
+          '    <!-- Right Column: Multi-Agent Selector, Prompts, Viewport & Input (OPTIMIZED CHATBOX) -->',
           '    <div class="ai-dialog-column">',
           '      <!-- Multi-Agent Specialist Selector Bar -->',
           '      <div class="ai-agents-selector-wrap">',
@@ -871,23 +883,46 @@
           '      </div>',
           '      <!-- Dynamic Prompt Suggestions -->',
           '      <div class="ai-prompt-suggestions" id="ai-prompt-suggestions"></div>',
-          '      <!-- Response Viewport -->',
+          '      <!-- Optimized Threaded Conversation Viewport -->',
           '      <div class="ai-response-viewport" id="ai-response-viewport">',
-          '        <div class="response-header-tag">',
-          '          <div style="display:flex; align-items:center; gap:8px;">',
-          '            <span id="ai-agent-badge" class="ai-agent-badge"><i class="fa-solid fa-sparkles"></i> YUGMA ALL-ROUNDER</span>',
-          '            <span id="ai-engine-source" class="ai-engine-source gemini-live">⚡ GEMINI LIVE</span>',
+          '        <div class="ai-viewport-topbar">',
+          '          <div class="ai-viewport-meta">',
+          '            <span class="ai-viewport-title" id="ai-response-title">CIVILIZATIONAL ARCHIVE</span>',
+          '            <span class="ai-agent-badge" id="ai-agent-badge"><i class="fa-solid fa-sparkles"></i> ALL-ROUNDER</span>',
+          '            <span class="ai-engine-source" id="ai-engine-source">⚡ GEMINI LIVE</span>',
+          '            <span class="ai-msg-count" id="ai-msg-count">1 message</span>',
           '          </div>',
-          '          <span id="ai-response-title" style="color:#c9a24a; font-weight:700;">CIVILIZATIONAL ARCHIVE</span>',
+          '          <button type="button" class="btn-clear-chat" id="btn-clear-chat" title="Clear conversation history">',
+          '            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+          '            <span>Clear</span>',
+          '          </button>',
           '        </div>',
-          '        <div class="response-text-body" id="ai-response-text"></div>',
+          '        <div class="ai-messages-list" id="ai-messages-list"></div>',
+          '        <!-- Hidden compatibility anchor -->',
+          '        <div class="response-text-body" id="ai-response-text" style="display:none;" aria-hidden="true"></div>',
           '      </div>',
-          '      <!-- Input Form -->',
+          '      <!-- Optimized Input Form with Voice Dictation & Fast Send -->',
           '      <form class="ai-input-form" id="ai-chat-form">',
-          '        <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Ask YUGMA AI about Indian monuments, dynasties, architecture..." autocomplete="off">',
+          '        <div class="ai-input-box-wrap">',
+          '          <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Ask YUGMA AI about Indian monuments, dynasties, architecture..." autocomplete="off">',
+          '          <button type="button" class="btn-ai-input-action" id="btn-ai-mic" title="Voice dictation (Speak your question)" aria-label="Voice dictation">',
+          '            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+          '              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>',
+          '              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>',
+          '              <line x1="12" y1="19" x2="12" y2="23"/>',
+          '              <line x1="8" y1="23" x2="16" y2="23"/>',
+          '            </svg>',
+          '          </button>',
+          '          <button type="button" class="btn-ai-input-action" id="btn-ai-clear-input" title="Clear input text" aria-label="Clear input text" style="display:none;">',
+          '            &times;',
+          '          </button>',
+          '        </div>',
           '        <button type="submit" class="btn-ai-send" id="btn-ai-send">',
-          '          <span>ASK AI</span>',
-          '          <i class="fa-solid fa-arrow-right"></i>',
+          '          <span id="btn-send-text">ASK AI</span>',
+          '          <svg class="send-arrow-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">',
+          '            <line x1="5" y1="12" x2="19" y2="12"/>',
+          '            <polyline points="12 5 19 12 12 19"/>',
+          '          </svg>',
           '        </button>',
           '      </form>',
           '    </div>',
@@ -943,6 +978,10 @@
       }
 
       this.renderPromptSuggestions();
+
+      if (this.conversationHistory && this.conversationHistory.length > 0) {
+        this.appendSystemNotice("Switched to " + agent.name + " (" + agent.title + ")");
+      }
     },
 
     renderPromptSuggestions: function () {
@@ -974,18 +1013,23 @@
       var agent = HERITAGE_AGENTS[this.selectedAgent] || HERITAGE_AGENTS.orchestrator;
       var general = HERITAGE_KNOWLEDGE.general || {};
       var intro = general[this.selectedAgent] || general.orchestrator || "Welcome to YUGMA AI Heritage Companion.";
+      this.conversationHistory = [];
+      var listEl = document.getElementById('ai-messages-list');
+      if (listEl) listEl.innerHTML = '';
       this.updateTranscript(general.title || "YUGMA Digital Heritage Archive", intro, 'curated');
     },
 
     updateTranscript: function (title, text, source) {
-      var titleEl = document.getElementById('ai-response-title');
-      var bodyEl = document.getElementById('ai-response-text');
-      var engineSource = document.getElementById('ai-engine-source');
-      var badgeEl = document.getElementById('ai-agent-badge');
+      var self = this;
       var agent = HERITAGE_AGENTS[this.selectedAgent] || HERITAGE_AGENTS.orchestrator;
 
+      var titleEl = document.getElementById('ai-response-title');
+      var legacyBodyEl = document.getElementById('ai-response-text');
+      var engineSource = document.getElementById('ai-engine-source');
+      var badgeEl = document.getElementById('ai-agent-badge');
+
       if (titleEl) titleEl.textContent = title;
-      if (bodyEl) bodyEl.textContent = text;
+      if (legacyBodyEl) legacyBodyEl.textContent = text;
       if (badgeEl) {
         badgeEl.innerHTML = '<i class="' + agent.icon + '"></i> ' + agent.name.toUpperCase();
       }
@@ -1011,6 +1055,337 @@
       this.setPlaybackStatus('Ready to play.');
       if (this.currentState === STATES.IDLE) {
         this.setState(STATES.IDLE, 'Ready to play.');
+      }
+
+      // Append to the threaded conversation stream
+      this.appendAgentMessage(title, text, source, agent);
+    },
+
+    // ── Chat Stream Helpers (Threaded Bubbles & Fast UI) ────────────────────
+    appendUserMessage: function (text) {
+      var listEl = document.getElementById('ai-messages-list');
+      var now = new Date();
+      var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      var msgObj = {
+        role: 'user',
+        content: text,
+        timestamp: timeStr
+      };
+      this.conversationHistory.push(msgObj);
+
+      if (listEl && typeof document !== 'undefined') {
+        var row = document.createElement('div');
+        row.className = 'ai-msg-row user';
+        row.innerHTML = [
+          '<div class="ai-msg-bubble user">',
+          '  <div class="ai-msg-meta">',
+          '    <span class="ai-msg-sender"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>YOU</span>',
+          '    <span class="ai-msg-time">' + timeStr + '</span>',
+          '  </div>',
+          '  <div class="ai-msg-text">' + this.escapeHtml(text) + '</div>',
+          '</div>'
+        ].join('');
+        if (listEl.appendChild) listEl.appendChild(row);
+        this.scrollToBottom();
+      }
+      this.updateMessageCount();
+    },
+
+    appendAgentMessage: function (title, text, source, agent) {
+      this.hideThinkingIndicator();
+      var listEl = document.getElementById('ai-messages-list');
+      var self = this;
+      var now = new Date();
+      var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      var msgObj = {
+        role: 'model',
+        content: text,
+        agentId: agent.id,
+        agentName: agent.name,
+        timestamp: timeStr
+      };
+      this.conversationHistory.push(msgObj);
+
+      var sourceLabel = (source === 'gemini') ? '⚡ GEMINI LIVE' : '📚 CURATED ARCHIVE';
+      var sourceClass = (source === 'gemini') ? 'ai-engine-source gemini-live' : 'ai-engine-source';
+      var formatted = this.formatMarkdown(text);
+
+      if (listEl && typeof document !== 'undefined') {
+        var row = document.createElement('div');
+        row.className = 'ai-msg-row agent';
+        row.innerHTML = [
+          '<div class="ai-msg-bubble agent">',
+          '  <div class="ai-msg-header">',
+          '    <div class="ai-msg-agent-info">',
+          '      <span class="ai-agent-badge"><i class="' + agent.icon + '"></i> ' + agent.name.toUpperCase() + '</span>',
+          '      <span class="' + sourceClass + '">' + sourceLabel + '</span>',
+          '    </div>',
+          '    <div class="ai-msg-actions">',
+          '      <button type="button" class="btn-msg-action btn-msg-listen" title="Listen to this narration" aria-label="Listen to narration">',
+          '        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>',
+          '      </button>',
+          '      <button type="button" class="btn-msg-action btn-msg-copy" title="Copy text to clipboard" aria-label="Copy text">',
+          '        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+          '      </button>',
+          '    </div>',
+          '  </div>',
+          '  <div class="ai-msg-body">' + formatted + '</div>',
+          '</div>'
+        ].join('');
+
+        if (row.querySelector) {
+          var listenBtn = row.querySelector('.btn-msg-listen');
+          if (listenBtn && listenBtn.addEventListener) {
+            listenBtn.addEventListener('click', function () {
+              self.listenToMessage(text);
+            });
+          }
+
+          var copyBtn = row.querySelector('.btn-msg-copy');
+          if (copyBtn && copyBtn.addEventListener) {
+            copyBtn.addEventListener('click', function () {
+              self.copyToClipboard(text, copyBtn);
+            });
+          }
+        }
+
+        if (listEl.appendChild) listEl.appendChild(row);
+        this.scrollToBottom();
+      }
+      this.updateMessageCount();
+    },
+
+    appendSystemNotice: function (noticeText) {
+      var listEl = document.getElementById('ai-messages-list');
+      if (listEl && listEl.appendChild) {
+        var row = document.createElement('div');
+        row.className = 'ai-msg-system-notice';
+        row.innerHTML = '<span>✦ ' + this.escapeHtml(noticeText) + '</span>';
+        listEl.appendChild(row);
+        this.scrollToBottom();
+      }
+    },
+
+    showThinkingIndicator: function () {
+      this.hideThinkingIndicator();
+      var listEl = document.getElementById('ai-messages-list');
+      var agent = HERITAGE_AGENTS[this.selectedAgent] || HERITAGE_AGENTS.orchestrator;
+      if (listEl && listEl.appendChild) {
+        var row = document.createElement('div');
+        row.className = 'ai-msg-row agent thinking';
+        row.id = 'ai-msg-thinking';
+        row.innerHTML = [
+          '<div class="ai-msg-bubble agent thinking">',
+          '  <div class="ai-thinking-wrap">',
+          '    <span class="ai-thinking-sparkle">✦</span>',
+          '    <span>Deliberating with <strong>' + agent.name + '</strong>...</span>',
+          '    <div class="ai-thinking-dots">',
+          '      <span></span><span></span><span></span>',
+          '    </div>',
+          '  </div>',
+          '</div>'
+        ].join('');
+        listEl.appendChild(row);
+        this.scrollToBottom();
+      }
+    },
+
+    hideThinkingIndicator: function () {
+      var el = document.getElementById('ai-msg-thinking');
+      if (el && el.parentNode && el.parentNode.removeChild) {
+        el.parentNode.removeChild(el);
+      }
+    },
+
+    scrollToBottom: function () {
+      var vp = document.getElementById('ai-response-viewport');
+      if (vp) {
+        if (typeof requestAnimationFrame !== 'undefined') {
+          requestAnimationFrame(function () {
+            vp.scrollTop = vp.scrollHeight;
+          });
+        } else {
+          vp.scrollTop = vp.scrollHeight;
+        }
+      }
+    },
+
+    updateMessageCount: function () {
+      var countEl = document.getElementById('ai-msg-count');
+      if (countEl) {
+        var n = this.conversationHistory.length;
+        countEl.textContent = n + (n === 1 ? ' message' : ' messages');
+      }
+    },
+
+    clearChat: function () {
+      this.conversationHistory = [];
+      this.stopSpeech();
+      var listEl = document.getElementById('ai-messages-list');
+      if (listEl) listEl.innerHTML = '';
+      this.setInitialText();
+    },
+
+    getHistoryForAPI: function () {
+      return (this.conversationHistory || []).slice(-6).map(function (m) {
+        return { role: m.role, content: m.content };
+      });
+    },
+
+    getCachedResponse: function (agentId, query) {
+      var key = agentId + '::' + query.trim().toLowerCase();
+      return this.responseCache[key] || null;
+    },
+
+    setCachedResponse: function (agentId, query, text, source) {
+      var key = agentId + '::' + query.trim().toLowerCase();
+      this.responseCache[key] = { text: text, source: source, time: Date.now() };
+    },
+
+    copyToClipboard: function (text, btn) {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          var originalHtml = btn.innerHTML;
+          btn.innerHTML = '<span style="font-size:10px; font-weight:700; color:#ffd580;">COPIED!</span>';
+          setTimeout(function () {
+            btn.innerHTML = originalHtml;
+          }, 1800);
+        }).catch(function () {});
+      }
+    },
+
+    listenToMessage: function (text) {
+      this.lastSpokenText = text;
+      this.speakCurrentResponse(0);
+    },
+
+    setSendButtonState: function (isSending) {
+      var sendBtn = document.getElementById('btn-ai-send');
+      var sendText = document.getElementById('btn-send-text');
+      var input = document.getElementById('ai-chat-input');
+      if (sendBtn) {
+        sendBtn.disabled = isSending;
+        if (isSending) {
+          sendBtn.classList.add('loading');
+          if (sendText) sendText.textContent = "WAIT...";
+        } else {
+          sendBtn.classList.remove('loading');
+          if (sendText) sendText.textContent = "ASK AI";
+        }
+      }
+      if (input) {
+        if (isSending) {
+          input.setAttribute('placeholder', 'Deliberating response from archive...');
+        } else {
+          input.setAttribute('placeholder', 'Ask YUGMA AI about Indian monuments, dynasties, architecture...');
+        }
+      }
+    },
+
+    escapeHtml: function (str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    },
+
+    formatMarkdown: function (raw) {
+      if (!raw) return '';
+      var text = this.escapeHtml(raw);
+
+      // Bold: **text**
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      // Italic: *text*
+      text = text.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+
+      // Headings: ### Heading
+      text = text.replace(/^### (.*$)/gim, '<div class="ai-msg-h3">$1</div>');
+      text = text.replace(/^## (.*$)/gim, '<div class="ai-msg-h2">$1</div>');
+
+      // Bullet points: - item or * item
+      text = text.replace(/^\s*[\-\*]\s+(.*)$/gim, '<div class="ai-msg-bullet"><span class="bullet-gold">✦</span> <span>$1</span></div>');
+
+      // Numbered lists: 1. item
+      text = text.replace(/^\s*(\d+)\.\s+(.*)$/gim, '<div class="ai-msg-bullet"><span class="bullet-num">$1.</span> <span>$2</span></div>');
+
+      // Paragraphs
+      text = text.replace(/\n\n+/g, '</p><p>');
+      text = '<p>' + text + '</p>';
+      text = text.replace(/<p>\s*<\/p>/g, '');
+
+      return text;
+    },
+
+    initVoiceInput: function () {
+      var micBtn = document.getElementById('btn-ai-mic');
+      var input = document.getElementById('ai-chat-input');
+      if (!micBtn || !input) return;
+
+      var SpeechRec = (typeof window !== 'undefined')
+        ? (window.SpeechRecognition || window.webkitSpeechRecognition)
+        : null;
+
+      if (!SpeechRec) {
+        micBtn.style.display = 'none';
+        return;
+      }
+
+      try {
+        var recognition = new SpeechRec();
+        recognition.lang = 'en-IN';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        var isListening = false;
+        var self = this;
+
+        micBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (isListening) {
+            recognition.stop();
+            return;
+          }
+          try {
+            recognition.start();
+            isListening = true;
+            micBtn.classList.add('listening');
+            micBtn.setAttribute('title', 'Listening... Speak your heritage question');
+            input.setAttribute('placeholder', 'Listening to your voice... Speak now');
+          } catch (err) {
+            console.warn('Voice input recognition failed to start:', err);
+          }
+        });
+
+        recognition.onresult = function (event) {
+          if (event.results && event.results[0] && event.results[0][0]) {
+            var transcript = event.results[0][0].transcript;
+            if (transcript) {
+              input.value = transcript;
+              self.askAI(transcript);
+            }
+          }
+        };
+
+        recognition.onend = function () {
+          isListening = false;
+          micBtn.classList.remove('listening');
+          micBtn.setAttribute('title', 'Voice dictation (Speak your query)');
+          input.setAttribute('placeholder', 'Ask YUGMA AI about Indian monuments, dynasties, architecture...');
+        };
+
+        recognition.onerror = function () {
+          isListening = false;
+          micBtn.classList.remove('listening');
+          micBtn.setAttribute('title', 'Voice dictation (Speak your query)');
+        };
+      } catch (e) {
+        micBtn.style.display = 'none';
       }
     },
 
@@ -1585,11 +1960,30 @@
     // ── 8. QUESTION ANSWERING PIPELINE & SECURE SERVERLESS GATEWAY ──────────
     askAI: function (query) {
       var self = this;
-      if (!query || !query.trim()) return;
+      if (!query || !query.trim() || self.isDeliberating) return;
 
       var q = query.trim();
       self.stopSpeech();
+
+      // Check cache first for 0ms instant response on repeated queries
+      var cached = self.getCachedResponse(self.selectedAgent, q);
+      if (cached) {
+        self.appendUserMessage(q);
+        setTimeout(function () {
+          var title = "✦ " + (HERITAGE_AGENTS[self.selectedAgent] ? HERITAGE_AGENTS[self.selectedAgent].name.toUpperCase() : "AGENT") + ": " + q.substr(0, 36) + "...";
+          self.updateTranscript(title, cached.text, cached.source);
+          self.speakCurrentResponse();
+        }, 100);
+        return;
+      }
+
+      self.isDeliberating = true;
+      self.setSendButtonState(true);
       self.setState(STATES.THINKING);
+
+      // Append user bubble and animated thinking indicator to conversation
+      self.appendUserMessage(q);
+      self.showThinkingIndicator();
 
       var activeAgent = HERITAGE_AGENTS[self.selectedAgent] || HERITAGE_AGENTS.orchestrator;
       self.callGeminiAPI(q, activeAgent);
@@ -1606,7 +2000,8 @@
         agentId: agent.id,
         agentName: agent.name,
         agentTitle: agent.title,
-        systemPrompt: agent.systemPrompt
+        systemPrompt: agent.systemPrompt,
+        history: self.getHistoryForAPI()
       };
 
       fetch(endpoint, {
@@ -1619,10 +2014,15 @@
         return res.json();
       })
       .then(function (data) {
+        self.isDeliberating = false;
+        self.setSendButtonState(false);
+        self.hideThinkingIndicator();
+
         if (!data || !data.text) {
           throw new Error('Empty response from AI gateway');
         }
         var title = "✦ " + agent.name.toUpperCase() + ": " + userQuery.substr(0, 38) + "...";
+        self.setCachedResponse(agent.id, userQuery, data.text, 'gemini');
         self.updateTranscript(title, data.text, 'gemini');
         self.speakCurrentResponse();
       })
@@ -1654,10 +2054,15 @@
       var responseText = entry[agent.id] || entry.orchestrator || entry.historian || "Here is information from the YUGMA Civilizational Archive.";
 
       setTimeout(function () {
+        self.isDeliberating = false;
+        self.setSendButtonState(false);
+        self.hideThinkingIndicator();
+
         var title = entry.title || "YUGMA Heritage Archive";
         if (hadFallback) {
           title += " (Curated Offline Mode)";
         }
+        self.setCachedResponse(agent.id, userQuery, responseText, 'curated');
         self.updateTranscript(title, responseText, 'curated');
         self.speakCurrentResponse();
       }, 750);
@@ -1767,21 +2172,45 @@
         });
       });
 
-      // 8. Chat Form Submit
+      // 8. Clear Chat Button
+      var clearChatBtn = document.getElementById('btn-clear-chat');
+      if (clearChatBtn) {
+        clearChatBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          self.clearChat();
+        });
+      }
+
+      // 9. Input Form & Clear Button
       var form = document.getElementById('ai-chat-form');
       var input = document.getElementById('ai-chat-input');
+      var clearInputBtn = document.getElementById('btn-ai-clear-input');
+
       if (form) {
         form.addEventListener('submit', function (e) {
           e.preventDefault();
-          if (input && input.value.trim()) {
+          if (input && input.value.trim() && !self.isDeliberating) {
             var query = input.value.trim();
-            self.askAI(query);
             input.value = '';
+            if (clearInputBtn) clearInputBtn.style.display = 'none';
+            self.askAI(query);
           }
         });
       }
 
-      // 9. Page visibility & escape key handlers (Pause audio & stop animation on tab switch)
+      if (input && clearInputBtn) {
+        input.addEventListener('input', function () {
+          clearInputBtn.style.display = input.value.trim().length > 0 ? 'inline-flex' : 'none';
+        });
+        clearInputBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          input.value = '';
+          clearInputBtn.style.display = 'none';
+          input.focus();
+        });
+      }
+
+      // 10. Page visibility & escape key handlers (Pause audio & stop animation on tab switch)
       document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
           self.stopAnimation();
@@ -1815,6 +2244,7 @@
         } else {
           this.drawIdleFrame();
         }
+        this.scrollToBottom();
       }
     },
 

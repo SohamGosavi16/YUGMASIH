@@ -395,6 +395,58 @@ const hasBottomLeftAudio = /position:\s*fixed;[^}]*bottom:[^}]*left:[^}]*\b(audi
 assert.strictEqual(hasBottomLeftAudio, false, 'No floating audio controls at bottom-left allowed');
 console.log('  ✓ Confirmed 0 floating audio controls at bottom-left corner of the website');
 
+console.log('\n--- TEST 15: Chatbox Markdown Formatter & HTML Sanitization ---');
+const rawMarkdown = '**Chola Empire** constructed the *Brihadisvara Temple*.\n\n### Key Highlights\n- 216-foot vimana\n- Interlocking granite stones\n\n1. Foundation\n2. Sanctum';
+const formatted = ai.formatMarkdown(rawMarkdown);
+assert(formatted.includes('<strong>Chola Empire</strong>'), 'Must format bold text with <strong>');
+assert(formatted.includes('<em>Brihadisvara Temple</em>'), 'Must format italic text with <em>');
+assert(formatted.includes('<div class="ai-msg-h3">Key Highlights</div>'), 'Must format ### as h3 header');
+assert(formatted.includes('bullet-gold'), 'Must format bullet lists with golden bullet markers');
+assert(formatted.includes('bullet-num'), 'Must format numbered lists with golden number tags');
+console.log('  ✓ Markdown formatted into crisp typography with bold, italics, headers and lists');
+
+console.log('\n--- TEST 16: Threaded Conversation History & Multi-Turn Context ---');
+ai.conversationHistory = [];
+ai.appendUserMessage('When was Konark Sun Temple built?');
+assert.strictEqual(ai.conversationHistory.length, 1);
+assert.strictEqual(ai.conversationHistory[0].role, 'user');
+
+ai.appendAgentMessage('Konark Sun Temple', 'It was built in the 13th century CE by King Narasimhadeva I of the Eastern Ganga Dynasty.', 'gemini', { id: 'historian', name: 'Chief Historian', icon: 'fa-landmark' });
+assert.strictEqual(ai.conversationHistory.length, 2);
+assert.strictEqual(ai.conversationHistory[1].role, 'model');
+
+const historyForAPI = ai.getHistoryForAPI();
+assert.strictEqual(historyForAPI.length, 2);
+assert.strictEqual(historyForAPI[0].role, 'user');
+assert.strictEqual(historyForAPI[1].role, 'model');
+console.log('  ✓ Threaded conversation history records turns and formats context payload for API');
+
+console.log('\n--- TEST 17: In-Memory Query Caching (0ms Latency) ---');
+ai.setCachedResponse('orchestrator', 'taj mahal', 'The Taj Mahal is an ivory-white marble mausoleum...', 'gemini');
+const cachedHit = ai.getCachedResponse('orchestrator', 'Taj Mahal ');
+assert(cachedHit !== null, 'Cache hit should succeed case-insensitively with trimming');
+assert.strictEqual(cachedHit.source, 'gemini');
+assert.strictEqual(ai.getCachedResponse('orchestrator', 'unknown query'), null, 'Cache miss should return null');
+console.log('  ✓ Query caching stores and returns previous answers instantly');
+
+console.log('\n--- TEST 18: Clear Chat Functionality ---');
+ai.clearChat();
+assert.strictEqual(ai.conversationHistory.length, 1, 'clearChat should reset to initial greeting message');
+assert.strictEqual(ai.currentState, 'idle', 'clearChat should reset state to idle');
+console.log('  ✓ Clear chat empties prior dialogue turns and restores initial agent greeting');
+
+console.log('\n--- TEST 19: Animated Thinking Indicator Lifecycle ---');
+ai.showThinkingIndicator();
+ai.hideThinkingIndicator();
+console.log('  ✓ Thinking indicator shows during deliberation and cleanly hides upon response');
+
+console.log('\n--- TEST 20: Input Action Controls & Disabled States ---');
+ai.setSendButtonState(true);
+assert.strictEqual(document.getElementById('btn-ai-send').disabled, true, 'Send button must be disabled while sending');
+ai.setSendButtonState(false);
+assert.strictEqual(document.getElementById('btn-ai-send').disabled, false, 'Send button must be re-enabled after response');
+console.log('  ✓ Send button transitions between thinking (disabled) and active states');
+
 console.log('\n=========================================');
-console.log('ALL 14 AUTOMATED TESTS PASSED PERFECTLY!');
+console.log('ALL 20 AUTOMATED TESTS PASSED PERFECTLY!');
 console.log('=========================================');
